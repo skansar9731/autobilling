@@ -1,7 +1,13 @@
 from django.urls import path
 from . import views
+from django.shortcuts import redirect
 
+def home(request):
+    return redirect('/login/')
 urlpatterns = [
+
+    # Render live domain
+    path('', home),
 
     # AUTH
     path("login/", views.login_view, name="login"),
