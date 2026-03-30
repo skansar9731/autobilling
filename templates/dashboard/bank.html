@@ -1,0 +1,51 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+
+<h2 class="text-xl font-bold mb-4">🏦 Bank Management</h2>
+
+<!-- ADD TRANSACTION -->
+
+<div class="bg-slate-800 p-4 rounded mb-6">
+
+<form method="post">
+{% csrf_token %}
+
+<select placeholder="Note" name="bank" class="w-full p-2 mb-3 text-black rounded">
+    {% for b in banks %}
+    <option value="{{ b.id }}">{{ b.name }}</option>
+    {% endfor %}
+</select>
+
+<input type="number" name="amount" placeholder="Amount"
+class="w-full p-2 mb-3 rounded text-black">
+
+<select name="type" class="w-full p-2 mb-3 text-black rounded">
+    <option value="credit">💰 Money Received</option>
+    <option value="debit">💸 Payment Done</option>
+</select>
+
+<input type="text" name="note" placeholder="Note"
+class="w-full p-2 mb-3 rounded text-black">
+
+<button class="bg-yellow-400 px-4 py-2 rounded text-black w-full">
+Save Transaction
+</button>
+
+</form>
+
+</div>
+
+<!-- BANK LIST -->
+
+<div class="space-y-3">
+
+{% for b in banks %}
+<div class="bg-slate-800 p-4 rounded flex justify-between">
+    <span>{{ b.name }}</span>
+    <span class="text-yellow-400">₹ {{ b.balance }}</span>
+</div>
+{% endfor %}
+
+</div>
+
+{% endblock %}

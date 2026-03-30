@@ -1,0 +1,210 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+
+<h2 class="text-xl md:text-2xl font-bold mb-4">📦 Stock Management</h2>
+
+<div class="mb-4 flex justify-between items-center">
+
+    <div class="w-full md:w-1/3 relative">
+
+        <input 
+            type="text" 
+            id="stockSearch"
+            placeholder="Search product / barcode..."
+            
+            class="w-full pl-11 pr-4 py-3 rounded-2xl
+            
+            bg-white/5 backdrop-blur-lg 
+            border border-white/10
+            
+            text-white placeholder-gray-400
+            
+            shadow-[0_8px_25px_rgba(0,0,0,0.6),inset_0_2px_6px_rgba(255,255,255,0.1)]
+            
+            focus:outline-none 
+            focus:ring-2 focus:ring-yellow-400
+            focus:shadow-[0_0_20px_rgba(250,204,21,0.4)]
+            
+            transition-all duration-200"
+        >
+
+        <!-- ICON -->
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+
+    </div>
+
+</div>
+<!-- SUMMARY CARDS -->
+
+<div id="summaryCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 transition-all duration-200">
+
+    <div class="bg-slate-800 p-4 rounded-xl">
+        <p class="text-xs text-gray-400">Total Products</p>
+        <h3 class="text-lg font-bold">{{ total_items }}</h3>
+    </div>
+
+    <div class="bg-slate-800 p-4 rounded-xl">
+        <p class="text-xs text-gray-400">Total Quantity</p>
+        <h3 class="text-lg font-bold">{{ total_qty }}</h3>
+    </div>
+
+    <div class="bg-slate-800 p-4 rounded-xl">
+        <p class="text-xs text-gray-400">Stock Value</p>
+        <h3 class="text-lg font-bold text-yellow-400">₹ {{ total_value }}</h3>
+    </div>
+
+</div>
+
+<!-- ================= MOBILE VIEW ================= -->
+<div class="block md:hidden space-y-3">
+
+    {% for p in products %}
+    <div class="stock-card bg-slate-800 p-4 rounded-xl shadow">
+
+        <div class="flex justify-between items-center">
+            <h3 class="font-semibold text-sm">{{ p.name }}</h3>
+            <span class="text-xs text-gray-400">{{ p.barcode }}</span>
+        </div>
+
+        <div class="mt-2 grid grid-cols-2 gap-2 text-xs">
+
+            <div>
+                <p class="text-gray-400">Price</p>
+                <p>₹ {{ p.price }}</p>
+            </div>
+
+            <div>
+                <p class="text-gray-400">Stock</p>
+                <p>
+                    {% if p.stock < 5 %}
+                        <span class="text-red-400 font-bold">{{ p.stock }}</span>
+                    {% else %}
+                        {{ p.stock }}
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="col-span-2">
+                <p class="text-gray-400">Value</p>
+                <p class="text-yellow-400 font-semibold">
+                    ₹ {{ p.stock|floatformat:0 }}
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+
+<!-- ================= DESKTOP TABLE ================= -->
+<div class="hidden md:block bg-slate-800 rounded-xl overflow-hidden">
+    <div class="max-h-[310px] overflow-y-auto overflow-x-auto">
+
+        <table class="min-w-[700px] w-full text-sm">
+
+            <!-- ✅ STICKY HEADER -->
+            <thead class="sticky top-0 bg-slate-700 z-10">
+                <tr class="text-left">
+                    <th class="p-3">Product</th>
+                    <th>Barcode</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+
+            <tbody id="stockTable">
+                {% for p in products %}
+                <tr class="border-b border-slate-700 hover:bg-slate-700">
+
+                    <td class="p-3 whitespace-nowrap">{{ p.name }}</td>
+                    <td>{{ p.barcode }}</td>
+                    <td>₹ {{ p.price }}</td>
+
+                    <td>
+                        {% if p.stock < 5 %}
+                            <span class="text-red-400 font-bold">{{ p.stock }}</span>
+                        {% else %}
+                            {{ p.stock }}
+                        {% endif %}
+                    </td>
+
+                    <td>₹ {{ p.stock|floatformat:0 }}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+<script>
+
+document.getElementById("stockSearch").addEventListener("keyup", function() {
+
+    let search = this.value.toLowerCase()
+
+    // Desktop rows
+    let rows = document.querySelectorAll("#stockTable tr")
+
+    rows.forEach(row => {
+        let text = row.innerText.toLowerCase()
+        row.style.display = text.includes(search) ? "" : "none"
+    })
+
+    // Mobile cards
+    let cards = document.querySelectorAll(".stock-card")
+
+    cards.forEach(card => {
+        let text = card.innerText.toLowerCase()
+        card.style.display = text.includes(search) ? "" : "none"
+    })
+
+})
+
+let searchInput = document.getElementById("stockSearch")
+let summary = document.getElementById("summaryCards")
+
+searchInput.addEventListener("keyup", function() {
+
+    let search = this.value.toLowerCase()
+
+    // 👉 HIDE / SHOW SUMMARY
+    if (search.length > 0) {
+        summary.style.display = "none"
+    } else {
+        summary.style.display = "grid"
+    }
+
+    // Desktop rows
+    let rows = document.querySelectorAll("#stockTable tr")
+
+    rows.forEach(row => {
+        let text = row.innerText.toLowerCase()
+        row.style.display = text.includes(search) ? "" : "none"
+    })
+
+    // Mobile cards
+    let cards = document.querySelectorAll(".stock-card")
+
+    cards.forEach(card => {
+        let text = card.innerText.toLowerCase()
+        card.style.display = text.includes(search) ? "" : "none"
+    })
+
+})
+
+// 👉 OPTIONAL: click pe bhi hide (instant feel)
+searchInput.addEventListener("focus", function(){
+    if(this.value.length > 0){
+        summary.style.display = "none"
+    }
+})
+
+</script>
+{% endblock %}

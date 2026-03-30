@@ -1,0 +1,12 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+
+<h2>Purchase Report</h2>
+
+{% for p in purchases %}
+<p>{{ p.invoice_number }} - ₹ {{ p.total }}</p>
+{% endfor %}
+
+<h3>Total: ₹ {{ total }}</h3>
+
+{% endblock %}

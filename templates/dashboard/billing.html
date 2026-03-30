@@ -1,0 +1,864 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4 text-white">Sales Billing</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+    <!-- LEFT SIDE -->
+    <!-- LEFT SIDE -->
+    <div class="md:col-span-2 
+backdrop-blur-xl bg-white/5 
+border border-white/10 
+rounded-3xl p-4 
+shadow-[0_10px_40px_rgba(0,0,0,0.8)] 
+transition hover:scale-[1.01]">
+
+        <!-- Header -->
+        <!-- CUSTOMER SELECT -->
+        <div class="mb-4">
+            <label class="text-sm text-gray-300">Sales-Customers</label>
+
+            <select id="customerSelect" class="w-full mt-1 p-3 rounded-xl bg-slate-700 text-white">
+
+                <option value="">Walk-in Customer</option>
+
+                {% for c in customers %}
+                <option value="{{ c.id }}">
+                    {{ c.name }}{% if c.phone %} ({{ c.phone }}){% endif %}
+                </option>
+                {% endfor %}
+
+            </select>
+            <div class="mt-2 text-sm text-yellow-400">
+                Previous Balance: ₹ <span id="customerBalance">0</span>
+            </div>
+        </div>
+        <div class="flex flex-col gap-4 mb-4">
+
+    <!-- TITLE -->
+    <h2 class="text-lg md:text-xl font-bold text-white">
+        Scan / Add Product
+    </h2>
+
+    <!-- BUTTONS -->
+    <div class="flex gap-3">
+
+        <button onclick="startScanner()"
+class="flex-1 relative overflow-hidden
+bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
+text-black font-bold
+
+shadow-[inset_3px_3px_8px_rgba(255,255,255,0.5),_6px_6px_18px_rgba(0,0,0,0.35)]
+shadow-yellow-500/40
+
+active:scale-95 active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.5)]
+py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-200
+
+before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/30 before:to-transparent before:opacity-60
+">
+
+<span class="relative z-10 flex items-center gap-2">
+    <i class="fa-solid fa-qrcode"></i>
+    SCAN
+</span>
+
+</button>
+
+       <button onclick="addToCart()"
+class="flex-1 relative overflow-hidden
+bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
+text-black font-bold
+
+shadow-[inset_3px_3px_8px_rgba(255,255,255,0.5),_6px_6px_18px_rgba(0,0,0,0.35)]
+shadow-yellow-500/40
+
+active:scale-95 active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.5)]
+py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-200
+
+before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/30 before:to-transparent before:opacity-60
+">
+
+<span class="relative z-10 flex items-center gap-2">
+    <i class="fa-solid fa-plus"></i>
+    ADD
+</span>
+
+</button>
+
+    </div>
+
+</div>
+
+        <!-- Product Add Row -->
+        <div class="flex flex-col md:flex-row gap-3 text-white items-stretch">
+
+    <!-- SEARCH INPUT -->
+    <div class="relative flex-1">
+
+        <input type="text" id="productSearch"
+            placeholder="Search product by name or barcode..."
+            autocomplete="off"
+            class="w-full h-12 px-4 rounded-xl bg-slate-700 text-white 
+            focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+        <!-- DROPDOWN -->
+        <div id="productList"
+            class="absolute z-50 w-full bg-slate-800 border border-gray-600 
+            rounded-xl mt-1 max-h-60 overflow-y-auto hidden shadow-2xl">
+        </div>
+    </div>
+
+    <!-- QTY -->
+    <div class="w-full md:w-24">
+        <input id="qty" type="number" min="1" value="1"
+            class="w-full h-12 px-3 rounded-xl bg-slate-700 text-white 
+            focus:outline-none focus:ring-2 focus:ring-green-500 text-left">
+    </div>
+
+</div>
+
+<!-- BELOW ROW (STOCK + CHECKLIST aligned properly) -->
+<div class="flex justify-between items-center mt-2 text-xs">
+
+    <!-- STOCK -->
+    <div>
+        <span class="text-gray-400">Available Stock:</span>
+        <span id="availableStock" class="ml-1 font-bold text-green-400">-</span>
+    </div>
+
+    <!-- CHECKLIST -->
+    <button onclick="openChecklist()"
+                    class="ml-auto text-yellow-400 hover:scale-110 transition text-sm sm:text-base">
+                    <!-- <i class="fas fa-expand"></i> --> 
+                    <i class="fa-solid fa-list-check"></i> <span class="font-bold">Checklist</span> 
+                </button>
+
+</div>
+
+        <!-- Cart Table -->
+        <div class="mt-6 overflow-x-auto">
+            <table class="w-full text-sm text-white">
+                <thead>
+                    <tr class="text-left border-b border-gray-600">
+                        <th class="py-2">SR #</th>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>₹</th>
+                        <th>₹ value</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="cart"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- RIGHT SIDE SUMMARY -->
+    <div class="
+backdrop-blur-xl bg-gradient-to-b from-white/10 to-white/5
+border border-white/10
+rounded-3xl p-5 
+shadow-[0_10px_50px_rgba(0,0,0,0.9)]
+sticky top-4
+text-white">
+
+        <h2 class="text-xl font-bold mb-3">Summary</h2>
+
+        <label class="flex items-center gap-2 mb-2">
+            <input type="checkbox" id="gstToggle" checked>
+            GST (18%)
+        </label>
+        <div class="space-y-2 text-sm">
+            <div>CGST (9%) : ₹ <span id="cgstAmount">0</span></div>
+            <div>SGST (9%) : ₹ <span id="sgstAmount">0</span></div>
+            <!-- <div>Discount: ₹ <span id="discountView">0</span></div> -->
+            <div>Round Off : ₹ <span id="roundOff">0</span></div>
+            <div>Previous Balance : ₹ <span id="customerBalance">0</span></div>
+            <label class="flex items-center gap-2 mb-2">
+                Discount ( - ) : ₹
+                <input id="discount" placeholder="Discount" class="w-20 p-3 rounded-xl bg-slate-700 text-white mb-3">
+            </label>
+            <div>Subtotal : ₹ <span id="subtotal">0</span></div>
+        </div>
+        <label class="flex items-center gap-2 mb-2">
+            Net Payable ( - ) : ₹
+            <input id="paidAmount" placeholder="Paid Amount" class="w-20 p-3 rounded-xl bg-slate-700 text-white mb-1">
+        </label>
+
+        <div class="mt-4 border-t border-gray-600 pt-3 text-2xl font-bold">
+            Total Balance : ₹ <span id="total">0</span>
+        </div>
+
+        <button onclick="saveBill()"
+class="mt-4 w-full relative overflow-hidden
+bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
+text-black font-bold tracking-wide
+
+shadow-[inset_3px_3px_10px_rgba(255,255,255,0.6),_8px_8px_22px_rgba(0,0,0,0.35)]
+shadow-yellow-500/40
+
+active:scale-95 active:shadow-[inset_3px_3px_8px_rgba(0,0,0,0.5)]
+p-4 rounded-2xl text-xl transition-all duration-200
+
+before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 before:to-transparent before:opacity-70
+">
+
+<span class="relative z-10 flex items-center justify-center gap-3">
+    <span><i class="fa-solid fa-floppy-disk"></i></span>
+    SAVE BILL
+</span>
+
+</button>
+
+    </div>
+</div>
+
+<!-- FULLSCREEN SCANNER (Google Pay Style) -->
+<div id="scannerModal" class="fixed inset-0 bg-black hidden z-[9999] flex flex-col">
+
+    <!-- Top Bar -->
+    <div class="flex justify-between items-center p-4 text-white">
+        <h2 class="font-bold text-lg">Scan Product</h2>
+        <button onclick="closeScanner()" class="bg-red-500 px-4 py-2 rounded-xl">
+            Close
+        </button>
+    </div>
+
+    <!-- Camera Area -->
+    <div class="flex-1 flex items-center justify-center">
+        <div id="reader" class="w-full max-w-md"></div>
+    </div>
+
+</div>
+
+<!-- STOCK MODAL -->
+<div id="stockModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+
+    <div class="bg-slate-800 p-6 rounded-2xl w-80 text-white shadow-2xl">
+        <h2 class="text-lg font-bold mb-3 text-red-400">
+            ⚠ Stock Alert
+        </h2>
+
+        <p id="stockMessage" class="mb-4 text-sm"></p>
+
+        <button onclick="closeStockModal()" class="w-full bg-red-500 py-2 rounded-xl font-bold">
+            OK
+        </button>
+    </div>
+</div>
+<div id="checklistModal"
+    class="fixed inset-0 bg-black bg-opacity-70 hidden z-[9999] flex items-end md:items-center justify-center">
+
+    <div class="bg-slate-900 w-full md:w-[400px] 
+    h-[100dvh] md:h-auto 
+    rounded-t-2xl md:rounded-2xl 
+    p-2 flex flex-col">
+
+            <!-- HEADER -->
+            <div class="flex justify-between items-center mb-3 
+        sticky top-0 z-20 
+        bg-slate-900 py-2">
+
+                <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-list-check"></i> Products Check List</h2>
+
+                <div class="flex gap-3">
+                    <button onclick="showSummary()" class="text-yellow-400 text-xl">➡️</button>
+                    <button onclick="goBackToChecklist()" class="text-yellow-400 text-xl">⬅️</button>
+                    <button onclick="closeChecklist()" class="text-red-400">✖</button>
+                </div>
+            </div>
+
+            <!-- SCROLL AREA -->
+            <div class="flex-1 overflow-y-auto pr-1">
+
+                <!-- STEP 1 -->
+                <div id="step1">
+                    <div id="checklistItems" class="space-y-2"></div>
+                </div>
+
+                <!-- STEP 2 -->
+                <div id="step2" class="hidden">
+
+                    <div class="flex justify-between items-center mb-3">
+                        <!-- <button onclick="goBackToChecklist()" class="text-yellow-400 text-xl">⬅️</button> -->
+                        <h3 class="text-lg font-bold text-white">🧾 Summary</h3>
+                        <div></div>
+                    </div>
+
+                    <div class="space-y-2 text-sm text-white">
+                        <div>CGST (9%) : ₹ <span id="s_cgst"></span></div>
+                        <div>SGST (9%) : ₹ <span id="s_sgst"></span></div>
+                        <div>Round Off : ₹ <span id="s_round"></span></div>
+                        <div>Subtotal : ₹ <span id="s_subtotal"></span></div>
+                        <div>Outstandings : ₹ <span id="s_outstanding"></span></div>
+
+                        <div class="font-bold text-lg mt-2">
+                            Total Balance : ₹ <span id="s_total"></span>
+                        </div>
+                    </div>
+
+                  <button onclick="savePurchase()"
+class="mt-4 w-full relative overflow-hidden
+bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
+text-black font-bold tracking-wide
+
+shadow-[inset_3px_3px_10px_rgba(255,255,255,0.6),_8px_8px_22px_rgba(0,0,0,0.35)]
+shadow-yellow-500/40
+
+active:scale-95 active:shadow-[inset_3px_3px_8px_rgba(0,0,0,0.5)]
+p-3 rounded-xl text-lg transition-all duration-200
+
+before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 before:to-transparent before:opacity-70
+">
+
+<span class="relative z-10 flex items-center justify-center gap-2">
+    <i class="fa-solid fa-floppy-disk"></i>
+    SAVE Bill
+</span>
+
+</button>
+
+                </div>
+
+            </div>
+
+        </div>
+</div>
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+{% if edit_bill %}
+<script type="application/json" id="edit-bill-data">
+{
+    "id": {{ edit_bill.id }},
+    "customer_id": {{ edit_bill.customer.id }},
+    "discount": {{ edit_bill.discount }},
+    "apply_gst": {{ edit_bill.cgst|yesno:"true,false" }},
+    "items": [
+        {% for item in edit_bill.items.all %}
+        {
+            "productId": {{ item.product.id }},
+            "name": "{{ item.product.name|escapejs }}",
+            "qty": {{ item.qty }},
+            "price": {{ item.price }},
+            "stock": {{ item.product.stock|add:item.qty }}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
+}
+</script>
+{% endif %}
+
+<script>
+
+    // ===== GLOBAL VARIABLES (FIXED SCOPE ISSUE) =====
+    let cart = [];
+    let selectedProduct = null;
+    let html5QrCode = null;
+
+    let cartEl;
+    let subtotalEl;
+    let totalEl;
+    let discountEl;
+    let discountView;
+    let gstToggle;
+    let searchInput;
+    let productList;
+    let paid = parseFloat(document.getElementById("paidAmount").value || 0);
+
+    // ================= DOM READY =================
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // CUSTOMER BALANCE LOAD
+        document.getElementById("customerSelect").addEventListener("change", function () {
+
+            let id = this.value;
+
+            if (!id || id === "undefined") {
+                document.getElementById("customerBalance").innerText = "0";
+                return;
+            }
+
+            fetch(`/customer-balance/?customer_id=${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("customerBalance").innerText = data.balance || 0;
+                });
+
+        })
+
+        cartEl = document.getElementById("cart");
+        subtotalEl = document.getElementById("subtotal");
+        totalEl = document.getElementById("total");
+        discountEl = document.getElementById("discount");
+        discountView = document.getElementById("discountView");
+        gstToggle = document.getElementById("gstToggle");
+        searchInput = document.getElementById("productSearch");
+        productList = document.getElementById("productList");
+        discountEl.addEventListener("input", render);
+        gstToggle.addEventListener("change", render);
+        document.getElementById("paidAmount").addEventListener("input", render);
+
+        // ================= EDIT MODE LOAD =================
+        const editDataEl = document.getElementById("edit-bill-data");
+        if (editDataEl) {
+            const EDIT_BILL = JSON.parse(editDataEl.textContent);
+
+            cart = EDIT_BILL.items.map(item => ({
+                productId: item.productId,
+                name: item.name,
+                qty: item.qty,
+                price: parseFloat(item.price)
+            }));
+
+            document.getElementById("customerSelect").value = EDIT_BILL.customer_id;
+            discountEl.value = EDIT_BILL.discount;
+            gstToggle.checked = EDIT_BILL.apply_gst;
+
+            render();
+        }
+
+        // ================= STOCK DISPLAY =================
+
+        function updateStockDisplay(stock) {
+            const stockEl = document.getElementById("availableStock");
+            if (!stockEl) return;
+
+            stockEl.innerText = stock ?? "-";
+
+            stockEl.classList.remove("text-green-400", "text-red-500", "text-yellow-400");
+
+            if (stock <= 0) {
+                stockEl.classList.add("text-red-500");
+            } else if (stock < 5) {
+                stockEl.classList.add("text-yellow-400");
+            } else {
+                stockEl.classList.add("text-green-400");
+            }
+        }
+
+
+        // ================= ADD TO CART =================
+
+        function addToCart() {
+
+            if (!selectedProduct) {
+                alert("Select product first");
+                return;
+            }
+
+            let qty = parseInt(document.getElementById("qty").value || 1);
+
+            let existingItem = cart.find(i => i.productId === selectedProduct.id);
+            let alreadyInCart = existingItem ? existingItem.qty : 0;
+
+            if (qty + alreadyInCart > selectedProduct.stock) {
+                alert("Only " + (selectedProduct.stock - alreadyInCart) + " available.");
+                return;
+            }
+
+            if (existingItem) {
+                existingItem.qty += qty;
+            } else {
+                cart.push({
+                    productId: selectedProduct.id,
+                    name: selectedProduct.name,
+                    qty: qty,
+                    price: parseFloat(selectedProduct.price)
+                });
+            }
+
+            updateStockDisplay(selectedProduct.stock - (alreadyInCart + qty));
+            render();
+        }
+
+
+        // ================= REMOVE ITEM =================
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            render();
+        }
+
+
+        // ================= RENDER SUMMARY =================
+
+        function render() {
+
+            cartEl.innerHTML = "";
+            let subtotal = 0;
+
+            cart.forEach((item, index) => {
+                let line = item.qty * item.price;
+                subtotal += line;
+
+                cartEl.innerHTML += `
+       <tr>
+    <td>${index + 1}</td>
+    <td>${item.name}</td>
+    <td>${item.qty}</td>
+    <td>₹ ${item.price}</td>
+    <td class="text-yellow-400 font-bold">₹ ${line.toFixed(2)}</td>
+    <td><button onclick="removeItem(${index})">❌</button></td>
+</tr>`;
+            });
+
+            let discount = parseFloat(discountEl.value) || 0;
+            let gst = gstToggle.checked ? subtotal * 0.18 : 0;
+            let totalBeforeRound = subtotal + gst - discount;
+
+            let rounded = Math.round(totalBeforeRound);
+            let roundOff = rounded - totalBeforeRound;
+
+            subtotalEl.innerText = subtotal.toFixed(2);
+            document.getElementById("cgstAmount").innerText = (gst / 2).toFixed(2);
+            document.getElementById("sgstAmount").innerText = (gst / 2).toFixed(2);
+            discountView.innerText = discount.toFixed(2);
+            document.getElementById("roundOff").innerText = roundOff.toFixed(2);
+            totalEl.innerText = rounded.toFixed(2);
+            let paid = parseFloat(document.getElementById("paidAmount").value || 0);
+            let remaining = rounded - paid;
+
+            if (remaining < 0) remaining = 0;
+
+            document.getElementById("customerBalance").innerText = remaining.toFixed(2);
+        }
+
+
+        // ================= SCANNER =================
+
+        window.startScanner = function () {
+
+            document.getElementById("scannerModal").classList.remove("hidden");
+
+            html5QrCode = new Html5Qrcode("reader");
+
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    html5QrCode.stop().then(() => {
+                        document.getElementById("scannerModal").classList.add("hidden");
+                        fetchProduct(decodedText);
+                    });
+                }
+            );
+        };
+
+        window.closeScanner = function () {
+            document.getElementById("scannerModal").classList.add("hidden");
+            if (html5QrCode) {
+                html5QrCode.stop();
+            }
+        };
+
+
+        // ================= FETCH PRODUCT =================
+
+        function fetchProduct(barcode) {
+
+            fetch(`/scan-product/?barcode=${encodeURIComponent(barcode)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        addScannedProduct(data);
+                    } else {
+                        alert("Product not found!");
+                    }
+                });
+        }
+
+
+        // ================= ADD SCANNED PRODUCT =================
+
+        function addScannedProduct(product) {
+
+            selectedProduct = {
+                id: product.id,
+                name: product.name,
+                price: parseFloat(product.price),
+                stock: parseInt(product.stock)
+            };
+
+            searchInput.value = product.name;
+            productList.classList.add("hidden");
+
+            let existingItem = cart.find(i => i.productId === product.id);
+            let alreadyInCart = existingItem ? existingItem.qty : 0;
+
+            if (alreadyInCart + 1 > selectedProduct.stock) {
+                alert("Only " + (selectedProduct.stock - alreadyInCart) + " available.");
+                return;
+            }
+
+            if (existingItem) {
+                existingItem.qty += 1;
+            } else {
+                cart.push({
+                    productId: product.id,
+                    name: product.name,
+                    qty: 1,
+                    price: parseFloat(product.price)
+                });
+            }
+
+            updateStockDisplay(selectedProduct.stock - (alreadyInCart + 1));
+            render();
+        }
+
+
+        // ================= SEARCH PRODUCTS =================
+
+        searchInput.addEventListener("keyup", function () {
+
+            let value = this.value.trim();
+
+            if (value.length < 2) {
+                productList.classList.add("hidden");
+                return;
+            }
+
+            fetch(`/search-products/?q=${encodeURIComponent(value)}`)
+                .then(res => res.json())
+                .then(products => {
+
+                    productList.innerHTML = "";
+
+                    if (products.length === 0) {
+                        productList.innerHTML = `<div class="p-3 text-gray-400">No products found</div>`;
+                        productList.classList.remove("hidden");
+                        return;
+                    }
+
+                    products.forEach(p => {
+                        let div = document.createElement("div");
+                        div.className = "p-3 hover:bg-slate-700 cursor-pointer border-b border-gray-700";
+                        div.innerHTML = `${p.name} <span class="text-gray-400">₹${p.price}</span>`;
+
+                        div.onclick = () => {
+                            selectedProduct = p;
+                            searchInput.value = p.name;
+                            productList.classList.add("hidden");
+                            updateStockDisplay(p.stock);
+                        };
+
+                        productList.appendChild(div);
+                    });
+
+                    productList.classList.remove("hidden");
+                });
+        });
+
+
+        // expose
+        window.addToCart = addToCart;
+        window.removeItem = removeItem;
+        window.render = render;
+
+    });
+
+
+    // ================= SAVE BILL =================
+
+    window.saveBill = function () {
+
+        if (cart.length === 0) {
+            alert("Cart is empty!");
+            return;
+        }
+
+        let customerId = document.getElementById("customerSelect").value;
+        let discount = parseFloat(discountEl.value) || 0;
+        let applyGst = gstToggle.checked;
+
+        let items = cart.map(item => ({
+            product_id: item.productId,
+            qty: item.qty
+        }));
+
+        let url = window.location.pathname.includes("edit")
+            ? window.location.pathname.replace("/edit/", "/update/")
+            : "/save-bill/";
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
+            },
+            body: JSON.stringify({
+                items: items,
+                discount: discount,
+                apply_gst: applyGst,
+                customer_id: customerId,
+                paid: parseFloat(document.getElementById("paidAmount").value || 0)
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.status === "success") {
+
+                    alert("Bill saved successfully ✅");
+                    window.open(`/bill/preview/${data.bill_id}/`, "_blank");
+
+                    cart = [];
+                    render();
+
+                } else {
+                    alert(data.message || "Error saving bill");
+                }
+            });
+    };
+
+
+    // ================= CSRF =================
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("/static/service-worker.js")
+      .then(function(registration) {
+        console.log("ServiceWorker registered");
+      })
+      .catch(function(err) {
+        console.log("ServiceWorker failed:", err);
+      });
+  });
+}
+   function openChecklist() {
+
+        document.getElementById("step1").classList.remove("hidden");
+        document.getElementById("step2").classList.add("hidden");
+
+        let container = document.getElementById("checklistItems");
+        container.innerHTML = "";
+
+        cart.forEach((item, index) => {
+
+            let line = item.qty * item.price; // ✅ VALUE CALC
+
+            let div = document.createElement("div");
+
+            div.className = "check-card flex justify-between items-center bg-slate-800 p-3 rounded-xl cursor-pointer transition";
+
+            div.innerHTML = `
+    <div>
+
+        <p class="text-sm font-semibold">
+            #${index + 1} ${item.name}
+        </p>
+
+        <p class="text-xs text-gray-400">
+            Qty: ${item.qty} × ₹ ${item.price} = <span class="text-sm text-yellow-400 font-bold">₹ ${line.toFixed(2)}</span>
+        </p>
+
+    </div>
+
+    <input type="checkbox" class="checkBox">
+`;
+
+            // 👉 FULL CARD CLICK
+            div.addEventListener("click", function (e) {
+
+                let checkbox = div.querySelector(".checkBox");
+
+                if (e.target.tagName !== "INPUT") {
+                    checkbox.checked = !checkbox.checked;
+                }
+
+                toggleCheckStyle(div, checkbox.checked);
+            });
+
+            // 👉 checkbox click
+            let checkbox = div.querySelector(".checkBox");
+            checkbox.addEventListener("click", function (e) {
+                e.stopPropagation();
+                toggleCheckStyle(div, checkbox.checked);
+            });
+
+            container.appendChild(div);
+        });
+
+        document.getElementById("checklistModal").classList.remove("hidden");
+    }
+    function toggleCheckStyle(card, checked) {
+
+        if (checked) {
+            card.classList.add("opacity-50", "line-through");
+        } else {
+            card.classList.remove("opacity-50", "line-through");
+        }
+
+    }
+
+    function closeChecklist() {
+        document.getElementById("checklistModal").classList.add("hidden");
+        document.getElementById("step1").classList.remove("hidden");
+        document.getElementById("step2").classList.add("hidden");
+    }
+    function markChecked(el) {
+
+        let parent = el.closest("div");
+
+        if (el.checked) {
+            parent.classList.add("opacity-50", "line-through");
+        } else {
+            parent.classList.remove("opacity-50", "line-through");
+        }
+    }
+  function showSummary() {
+
+    document.getElementById("step1").classList.add("hidden");
+    document.getElementById("step2").classList.remove("hidden");
+
+    // 👉 COPY FROM REAL SUMMARY (RIGHT SIDE)
+
+    document.getElementById("s_cgst").innerText =
+        document.getElementById("cgst").innerText;
+
+    document.getElementById("s_sgst").innerText =
+        document.getElementById("sgst").innerText;
+
+    document.getElementById("s_round").innerText =
+        document.getElementById("roundOff").innerText;
+
+    document.getElementById("s_subtotal").innerText =
+        document.getElementById("subtotal").innerText;
+
+    document.getElementById("s_outstanding").innerText =
+        document.getElementById("summaryOutstanding").innerText;
+
+    document.getElementById("s_total").innerText =
+        document.getElementById("total").innerText;
+}
+    function goBackToChecklist() {
+
+        let step1 = document.getElementById("step1");
+        let step2 = document.getElementById("step2");
+
+        step2.classList.add("hidden");
+        step1.classList.remove("hidden");
+
+        step1.scrollTop = 0; // scroll reset
+    }
+    
+</script>
+
+{% endblock %}

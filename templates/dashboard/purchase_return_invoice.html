@@ -1,0 +1,262 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+
+<div class="bg-white text-black p-4 print:p-0">
+
+<!-- 🔥 BUTTONS -->
+<div class="flex justify-between mb-4 print:hidden max-w-5xl mx-auto">
+    
+    <button onclick="window.print()" 
+    class="bg-gray-800 text-white px-4 py-2 rounded-lg">
+        🖨 Print
+    </button>
+
+    <button onclick="sendWhatsApp()" 
+    class="bg-green-500 text-white px-4 py-2 rounded-lg">
+        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+    </button>
+
+    <button onclick="closeWindow()" 
+    class="bg-red-500 text-white px-4 py-2 rounded-lg">
+        ❌ Close
+    </button>
+
+</div>
+
+<div id="invoice" class="max-w-5xl mx-auto border border-black text-sm">
+
+    <!-- HEADER -->
+    <div class="text-center border-b border-black py-2 font-bold text-lg">
+        Credit Note
+    </div>
+
+    <!-- TOP SECTION -->
+    <div class="grid grid-cols-2 border-b border-black">
+
+        <!-- LEFT -->
+        <div class="border-r border-black p-3 space-y-3">
+
+            <!-- ✅ COMPANY -->
+            <div>
+    <h2 class="font-bold text-lg">
+        {{ company.name|default:"MH AUTO BILLING" }}
+    </h2>
+
+    <p>GSTIN: {{ company.gst|default:"N/A" }}</p>
+
+    <p>{{ company.address|default:"Address not set" }}</p>
+
+    <p>
+        {{ company.state|default:"State" }}
+        ({{ company.state_code|default:"IN" }})
+    </p>
+
+    <p>Phone: 📞{{ company.mobile|default:"9823012992" }}</p>
+</div>
+
+            <div class="border-t pt-2">
+                <b>Consignee (Ship to)</b><br>
+                {{ purchase.supplier.name }}<br>
+            </div>
+
+            <div class="border-t pt-2">
+                <b>Buyer (Bill to)</b><br>
+                {{ purchase.supplier.name }}
+            </div>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="p-3 space-y-2">
+
+            <div class="flex justify-between border-b pb-1">
+                <span>Debit Note No.</span>
+                <span>{{ return.id }}</span>
+            </div>
+
+            <div class="flex justify-between border-b pb-1">
+                <span>Date</span>
+                <span>{{ return.date }}</span>
+            </div>
+
+            <div class="flex justify-between border-b pb-1">
+                <span>Invoice No.</span>
+                <span>{{ purchase.invoice_number }}</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <table class="w-full border-collapse text-sm">
+
+        <thead>
+            <tr class="border-b border-black">
+                <th class="border-r border-black p-2">Sl</th>
+                <th class="border-r border-black p-2 text-left">Description</th>
+                <th class="border-r border-black p-2">Qty</th>
+                <th class="border-r border-black p-2">Rate</th>
+                <th class="border-r border-black p-2">Per</th>
+                <th class="p-2">Amount</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for item in return.items.all %}
+            <tr class="border-b border-black">
+
+                <td class="border-r border-black p-2 text-center">
+                    {{ forloop.counter }}
+                </td>
+
+                <td class="border-r border-black p-2">
+                    {{ item.product.name }}
+                </td>
+
+                <td class="border-r border-black p-2 text-center">
+                    {{ item.qty }}
+                </td>
+
+                <td class="border-r border-black p-2 text-right">
+                    ₹ {{ item.price }}
+                </td>
+
+                <td class="border-r border-black p-2 text-center">
+                    Nos
+                </td>
+
+                <!-- ✅ FIXED AMOUNT -->
+                <td class="p-2 text-right">
+                   ₹ {{ item.amount }}
+                </td>
+
+            </tr>
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <!-- TOTAL -->
+   <div class="border-t border-black p-3">
+
+    <div class="flex justify-between">
+        <span>Subtotal</span>
+        <span>₹ {{ return.subtotal }}</span>
+    </div>
+
+    <div class="flex justify-between">
+        <span>CGST (9%)</span>
+        <span>₹ {{ return.cgst }}</span>
+    </div>
+
+    <div class="flex justify-between">
+        <span>SGST (9%)</span>
+        <span>₹ {{ return.sgst }}</span>
+    </div>
+
+    <div class="flex justify-between font-bold border-t mt-2 pt-2">
+        <span>Total</span>
+        <span>₹ {{ return.total }}</span>
+    </div>
+
+    <div class="mt-2 text-xs">
+        Amount in Words: ₹ {{ amount_words }} Only
+    </div>
+
+</div>
+
+    <!-- SIGN -->
+    <div class="flex justify-between border-t border-black p-3 mt-10">
+
+        <span>Receiver Signature</span>
+        <span>Authorized Signature</span>
+
+    </div>
+
+</div>
+
+</div>
+
+<!-- 🔥 WHATSAPP SCRIPT -->
+<script>
+
+let name = "{{ purchase.supplier.name }}";
+let amount = "{{ return.total }}";
+
+function sendWhatsApp() {
+
+    let message = `📄 *Debit Note*
+
+👤 Party: ${name}
+🧾 Invoice: {{ purchase.invoice_number }}
+💰 Amount: ₹${amount}
+
+🏢 {{ company.name }}
+GST: {{ company.gst }}
+📍 {{ company.address }}
+📞 {{ company.mobile }}
+
+🙏 Thank you for your business`;
+
+    let url = "https://wa.me/?text=" + encodeURIComponent(message);
+
+    window.open(url, "_blank");
+}
+
+// ✅ CLOSE FIX
+function closeWindow() {
+    window.open('', '_self');
+    window.close();
+}
+
+</script>
+
+<!-- AUTO PRINT -->
+<!-- <script>
+window.onload = function(){
+    window.print();
+}
+</script> -->
+
+<style>
+@media print {
+    body {
+        background: white;
+    }
+}
+@media print {
+
+    /* ❌ hide everything */
+    body * {
+        visibility: hidden !important;
+    }
+
+    /* ✅ show only invoice */
+    #invoice, #invoice * {
+        visibility: visible !important;
+    }
+
+    #invoice {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+
+    /* ❌ hide nav, sidebar, header */
+    header, aside, nav, footer {
+        display: none !important;
+    }
+
+    /* ❌ hide buttons */
+    .print\:hidden {
+        display: none !important;
+    }
+
+}
+</style>
+
+{% endblock %}

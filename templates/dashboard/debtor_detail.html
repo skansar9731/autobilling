@@ -1,0 +1,27 @@
+<h1 class="text-2xl font-bold mb-4">
+{{ customer.name }}
+</h1>
+
+<table class="w-full text-sm">
+
+<tr>
+<th>Bill</th>
+<th>Total</th>
+<th>Paid</th>
+<th>Balance</th>
+</tr>
+
+{% for s in sales %}
+
+<tr>
+
+<td>{{ s.id }}</td>
+<td>{{ s.total }}</td>
+<td>{{ s.paid }}</td>
+<td>{{ s.balance }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>

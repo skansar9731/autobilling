@@ -1,0 +1,593 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+
+<div class="max-w-7xl mx-auto text-white">
+
+    <!-- TOAST -->
+    {% if messages %}
+    <div id="toastMessage" class="mb-4 space-y-2">
+        {% for message in messages %}
+        <div class="px-4 py-3 rounded-xl
+
+    bg-gradient-to-br from-green-500 to-emerald-600
+
+    shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.6)]
+
+    flex items-center gap-2 animate-slideIn">
+
+            <i class="fa-solid fa-circle-check"></i>
+            {{ message }}
+
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- TITLE -->
+    <h1 class="text-2xl font-bold mb-6 flex items-center gap-2
+
+drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
+
+        <i class="fa-solid fa-rotate-left text-red-400"></i>
+        Purchase Return (Debit Note)
+
+    </h1>
+
+    <!-- ================= SUPPLIER SELECT ================= -->
+
+    <div class="relative p-4 sm:p-5 md:p-6 rounded-3xl mb-6
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_12px_12px_30px_rgba(0,0,0,0.8)]
+
+border border-white/10">
+
+        <!-- SHINE -->
+        <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-white/10 to-transparent pointer-events-none">
+        </div>
+
+        <form method="POST" class="relative z-10">
+            {% csrf_token %}
+
+            <div class="space-y-5">
+
+                <!-- TITLE -->
+                <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-left text-yellow-400"></i>
+                    Return Form
+                </h2>
+
+                <!-- SUPPLIER -->
+                <select id="supplier" class="w-full p-3 sm:p-4 rounded-xl
+
+            bg-slate-700 text-white
+
+            shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+            border border-white/5 outline-none
+
+            transition-all duration-300
+
+            focus:shadow-[0_0_10px_rgba(255,215,0,0.5)]">
+
+                    <option value="">Select Supplier</option>
+
+                    {% for s in suppliers %}
+                    <option value="{{ s.id }}">{{ s.name }}</option>
+                    {% endfor %}
+
+                </select>
+
+                <!-- PURCHASE -->
+                <select id="purchase" class="w-full p-3 sm:p-4 rounded-xl
+
+            bg-slate-700 text-white
+
+            shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+            border border-white/5 outline-none
+
+            focus:shadow-[0_0_10px_rgba(59,130,246,0.5)]
+
+            transition-all duration-300">
+
+                    <option value="">Select PUR</option>
+
+                </select>
+
+                <!-- PRODUCT DROPDOWN -->
+                <div class="relative">
+
+                    <!-- ICON -->
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2
+
+    text-yellow-400
+
+    drop-shadow-[0_0_6px_rgba(255,215,0,0.7)]"></i>
+
+                    <!-- INPUT -->
+                    <input type="text" id="productDropdownInput" placeholder="Select / Search Product..." class="w-full pl-12 pr-4 py-3 sm:py-4 rounded-xl
+
+    bg-slate-700 text-white cursor-pointer
+
+    shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+    border border-white/5 outline-none
+
+    focus:shadow-[0_0_10px_rgba(255,215,0,0.5)]
+
+    transition-all duration-300" onclick="toggleDropdown()">
+
+                    <!-- DROPDOWN -->
+                    <div id="productDropdownList" class="hidden absolute w-full mt-2
+
+    bg-gradient-to-br from-slate-800 to-slate-900
+
+    rounded-xl max-h-60 overflow-y-auto z-50
+
+    shadow-[0_8px_20px_rgba(0,0,0,0.6)]
+
+    border border-white/10">
+
+                    </div>
+
+                </div>
+
+                <!-- SELECTED ITEMS -->
+                <div>
+                    <h3 class="text-white font-semibold mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-yellow-400"></i>
+                        Selected Items
+                    </h3>
+
+                    <div id="selectedItems" class="space-y-3
+
+max-h-[40vh] overflow-y-auto pr-2
+
+scroll-smooth
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+p-3 rounded-2xl
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_8px_8px_20px_rgba(0,0,0,0.8)]
+
+border border-white/10
+
+[&::-webkit-scrollbar]:w-1.5
+[&::-webkit-scrollbar-track]:bg-transparent
+[&::-webkit-scrollbar-thumb]:bg-gradient-to-b
+[&::-webkit-scrollbar-thumb]:from-yellow-300
+[&::-webkit-scrollbar-thumb]:to-amber-500
+[&::-webkit-scrollbar-thumb]:rounded-full
+
+">
+                    </div>
+                </div>
+
+                <!-- TOTAL -->
+                <div class="text-right space-y-1 text-sm sm:text-base">
+
+                    <div class="flex justify-between">
+                        <span>Subtotal</span>
+                        <span>₹ <span id="subtotalAmount">0</span></span>
+                    </div>
+
+                    <div class="flex justify-between text-gray-300">
+                        <span>CGST (9%)</span>
+                        <span>₹ <span id="cgstAmount">0</span></span>
+                    </div>
+
+                    <div class="flex justify-between text-gray-300">
+                        <span>SGST (9%)</span>
+                        <span>₹ <span id="sgstAmount">0</span></span>
+                    </div>
+
+                    <div class="border-t border-white/20 pt-2 text-lg font-bold text-yellow-400 flex justify-between">
+                        <span>Total Return</span>
+                        <span>₹ <span id="totalAmount">0</span></span>
+                    </div>
+
+                </div>
+
+                <!-- HIDDEN -->
+                <input type="hidden" name="purchase_id" id="purchase_id">
+                <input type="hidden" name="items_data" id="items_data">
+
+                <!-- SAVE BUTTON -->
+                <button type="submit" class="w-full relative overflow-hidden
+
+            bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
+
+            text-black font-bold tracking-wide
+
+            shadow-[inset_3px_3px_10px_rgba(255,255,255,0.6),_8px_8px_22px_rgba(0,0,0,0.4)]
+
+            p-3 sm:p-4 rounded-2xl
+
+            transition-all duration-200
+
+            hover:scale-[1.02]
+            hover:shadow-[0_0_12px_rgba(255,215,0,0.5)]
+
+            active:scale-95
+
+            disabled:opacity-40 disabled:cursor-not-allowed">
+
+                    <span class="flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        SAVE TO RETURN
+                    </span>
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+    <script>
+
+        let allItems = [];
+        let selected = {};
+
+        // ================= SUPPLIER → PURCHASE =================
+        document.getElementById("supplier").addEventListener("change", function () {
+
+            fetch(`/get-purchases/?supplier_id=${this.value}`)
+                .then(res => res.json())
+                .then(data => {
+
+                    let purchase = document.getElementById("purchase");
+                    purchase.innerHTML = '<option value="">Select PUR</option>';
+
+                    data.forEach(p => {
+                        purchase.innerHTML += `<option value="${p.id}">${p.invoice_number} — ₹${p.total}</option>`;
+                    });
+
+                });
+
+        });
+
+
+        // ================= PURCHASE → ITEMS =================
+        document.getElementById("purchase").addEventListener("change", function () {
+
+            let purchase_id = this.value;
+            document.getElementById("purchase_id").value = purchase_id;
+
+            // 🔥 RESET EVERYTHING
+            selected = {};  // clear selected items
+            document.getElementById("selectedItems").innerHTML = "";
+            document.getElementById("totalAmount").innerText = 0;
+
+            // disable button
+            let btn = document.querySelector("button[type='submit']");
+            if (btn) btn.disabled = true;
+
+            fetch(`/get-items/?purchase_id=${purchase_id}`)
+                .then(res => res.json())
+                .then(data => {
+
+                    allItems = data;
+                    renderDropdown(data);
+
+                });
+
+        });
+
+
+        // ================= TOGGLE DROPDOWN =================
+        function toggleDropdown() {
+
+            let list = document.getElementById("productDropdownList");
+            list.classList.toggle("hidden");
+
+        }
+
+
+        // ================= RENDER DROPDOWN =================
+        function renderDropdown(data) {
+
+            let html = "";
+
+            if (data.length === 0) {
+                html = `<div class="p-3 text-gray-400 text-center">No items found</div>`;
+            }
+
+            data.forEach(i => {
+
+                let checked = selected[i.id] ? "checked" : "";
+
+                html += `
+<div onclick="toggleItem(${i.id})"
+
+class="flex items-center justify-between gap-3
+w-full max-w-full overflow-hidden
+px-4 py-3 rounded-xl cursor-pointer
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_6px_6px_16px_rgba(0,0,0,0.7)]
+
+hover:scale-[1.01] hover:bg-slate-700
+transition-all duration-200">
+
+    <!-- LEFT -->
+    <div class="flex-1 min-w-0 overflow-hidden">
+        <div class="font-semibold truncate">
+            ${i.name}
+        </div>
+        <div class="text-xs text-gray-400 truncate">
+            ₹${i.price} | Qty: ${i.qty}
+        </div>
+    </div>
+
+    <!-- CHECKBOX -->
+    <label class="shrink-0 cursor-pointer"
+        onclick="event.stopPropagation()">  <!-- 🔥 IMPORTANT -->
+
+        <input type="checkbox" ${checked}
+        onchange="toggleItem(${i.id})"
+        class="hidden peer">
+
+        <div class="w-5 h-5 rounded-md flex items-center justify-center
+
+        bg-gradient-to-br from-slate-700 to-slate-900
+
+        shadow-[inset_2px_2px_5px_rgba(255,255,255,0.08),_4px_4px_10px_rgba(0,0,0,0.7)]
+
+        peer-checked:bg-gradient-to-br peer-checked:from-yellow-300 peer-checked:to-amber-500
+
+        transition">
+
+            <i class="fa-solid fa-check text-black text-xs opacity-0 peer-checked:opacity-100"></i>
+
+        </div>
+    </label>
+
+</div>
+`;
+            });
+
+            document.getElementById("productDropdownList").innerHTML = html;
+        }
+
+
+        // ================= SELECT ITEM =================
+        function toggleItem(id) {
+
+            let item = allItems.find(i => i.id == id);
+
+            if (!item) return;
+
+            if (selected[id]) {
+                delete selected[id];
+            } else {
+                selected[id] = {
+                    ...item,
+                    return_qty: 1
+                };
+            }
+
+            renderSelected();
+            renderDropdown(allItems);
+        }
+
+
+        // ================= RENDER SELECTED =================
+        function renderSelected() {
+
+            let html = "";
+            let total = 0;
+
+            Object.values(selected).forEach(i => {
+
+                let itemTotal = i.return_qty * i.price;
+                total += itemTotal;
+
+                html += `
+<div class="w-full max-w-full overflow-hidden
+
+flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3
+
+p-4 rounded-2xl
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_10px_10px_25px_rgba(0,0,0,0.8)]
+
+border border-white/5
+
+transition-all duration-200 hover:scale-[1.01]">
+
+    <!-- LEFT -->
+    <div class="flex-1 min-w-0 overflow-hidden">
+
+        <div class="font-semibold text-white truncate">
+            ${i.name}
+        </div>
+
+        <div class="text-xs text-gray-400 truncate">
+            ₹${i.price} × ${i.qty} =
+            <span class="text-yellow-400 font-semibold">
+                ₹${i.price * i.qty}
+            </span>
+        </div>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+
+        <!-- QTY -->
+        <input type="number"
+        min="1"
+        max="${i.qty}"
+        value="${i.return_qty}"
+        onchange="updateQty(${i.id}, this.value)"
+
+        class="w-16 shrink-0 text-center
+
+        bg-slate-700 text-white
+
+        rounded-xl p-2
+
+        shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_10px_rgba(0,0,0,0.7)]
+
+        focus:shadow-[0_0_8px_rgba(255,215,0,0.5)]
+
+        outline-none transition">
+
+        <!-- AMOUNT -->
+        <div class="text-green-400 font-bold whitespace-nowrap shrink-0">
+            ₹${i.return_qty * i.price}
+        </div>
+
+        <!-- DELETE -->
+        <button onclick="removeItem(${i.id})"
+
+        class="shrink-0 w-9 h-9 flex items-center justify-center
+
+        rounded-xl
+
+        bg-gradient-to-br from-red-500 to-red-600
+
+        text-white
+
+        shadow-[inset_2px_2px_5px_rgba(255,255,255,0.2),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+        hover:scale-110
+
+        active:scale-90
+
+        transition-all duration-200">
+
+            <i class="fa-solid fa-xmark"></i>
+
+        </button>
+
+    </div>
+
+</div>
+`;
+            });
+            // 🔥 CALCULATE GST
+            let subtotal = total;
+            let cgst = subtotal * 0.09;
+            let sgst = subtotal * 0.09;
+            let grand = subtotal + cgst + sgst;
+
+            document.getElementById("selectedItems").innerHTML = html;
+            document.getElementById("subtotalAmount").innerText = subtotal.toFixed(2);
+            document.getElementById("cgstAmount").innerText = cgst.toFixed(2);
+            document.getElementById("sgstAmount").innerText = sgst.toFixed(2);
+            document.getElementById("totalAmount").innerText = grand.toFixed(2);
+            let btn = document.querySelector("button[type='submit']");
+            if (btn) {
+                btn.disabled = Object.keys(selected).length === 0;
+            }
+
+        }
+
+
+        // ================= UPDATE QTY =================
+        function updateQty(id, qty) {
+
+            qty = parseInt(qty);
+
+            if (qty <= 0 || isNaN(qty)) qty = 1;
+
+            selected[id].return_qty = qty;
+
+            renderSelected();
+        }
+
+
+        // ================= SEARCH =================
+        document.getElementById("productDropdownInput").addEventListener("input", function () {
+            if (allItems.length > 0) {
+                document.getElementById("productDropdownList").classList.remove("hidden");
+            }
+
+            let val = this.value.trim().toLowerCase();
+
+            // 🔥 agar empty hai to full list dikhao
+            if (val === "") {
+                renderDropdown(allItems);
+                return;
+            }
+
+            let filtered = allItems.filter(i =>
+                i.name.toLowerCase().includes(val)
+            );
+
+            renderDropdown(filtered);
+
+            // 🔥 dropdown open rakho
+            document.getElementById("productDropdownList").classList.remove("hidden");
+
+        });
+
+
+        // ================= CLOSE ON OUTSIDE CLICK =================
+        document.addEventListener("click", function (e) {
+
+            let input = document.getElementById("productDropdownInput");
+            let list = document.getElementById("productDropdownList");
+
+            if (!input.contains(e.target) && !list.contains(e.target)) {
+                list.classList.add("hidden");
+            }
+
+        });
+
+
+        // ================= SUBMIT =================
+        document.querySelector("form").addEventListener("submit", function (e) {
+
+            let data = [];
+
+            Object.values(selected).forEach(i => {
+                data.push({
+                    product_id: i.id,
+                    qty: i.return_qty
+                });
+            });
+
+            // ❌ STOP if no items
+            if (data.length === 0) {
+                e.preventDefault();
+                alert("Please select at least one item ❌");
+                return;
+            }
+
+            document.getElementById("items_data").value = JSON.stringify(data);
+        });
+        function removeItem(id) {
+
+            delete selected[id];
+
+            renderSelected();
+            renderDropdown(allItems);
+
+
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelector("button[type='submit']").disabled = true;
+        });
+        setTimeout(() => {
+            let toast = document.getElementById("toastMessage");
+            if (toast) {
+                toast.style.transition = "opacity 0.5s ease";
+                toast.style.opacity = "0";
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 500);
+            }
+        }, 3000); // 3 seconds
+    </script>
+
+    {% endblock %}

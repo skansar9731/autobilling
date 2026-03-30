@@ -1,0 +1,27 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+
+<h2 class="text-xl font-bold mb-4">🧾 GST Report</h2>
+
+<div class="bg-slate-800 p-6 rounded space-y-3">
+
+    <div class="flex justify-between">
+        <span>CGST</span>
+        <span>₹ {{ cgst }}</span>
+    </div>
+
+    <div class="flex justify-between">
+        <span>SGST</span>
+        <span>₹ {{ sgst }}</span>
+    </div>
+
+    <hr class="border-slate-600">
+
+    <div class="flex justify-between font-bold text-yellow-400">
+        <span>Total GST</span>
+        <span>₹ {{ total_gst }}</span>
+    </div>
+
+</div>
+
+{% endblock %}

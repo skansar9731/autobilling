@@ -1,0 +1,86 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+
+<div class="max-w-6xl mx-auto">
+
+<h1 class="text-2xl font-bold mb-6 text-white">
+Expense History
+</h1>
+
+
+<!-- DESKTOP TABLE -->
+
+<div class="hidden md:block bg-slate-800 rounded-2xl p-4 overflow-x-auto">
+
+<table class="w-full text-white text-sm">
+
+<thead class="border-b border-gray-600">
+
+<tr>
+<th>Date</th>
+<th>Category</th>
+<th>Amount</th>
+<th>Note</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for e in expenses %}
+
+<tr class="border-b border-gray-700">
+
+<td>{{ e.date }}</td>
+<td>{{ e.category.name }}</td>
+<td class="text-red-400">₹ {{ e.amount }}</td>
+<td>{{ e.note }}</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<!-- MOBILE CARD -->
+
+<div class="md:hidden space-y-4">
+
+{% for e in expenses %}
+
+<div class="bg-slate-800 p-4 rounded-2xl">
+
+<div class="flex justify-between">
+
+<span class="font-bold">
+{{ e.category.name }}
+</span>
+
+<span class="text-red-400">
+₹ {{ e.amount }}
+</span>
+
+</div>
+
+<p class="text-gray-400 text-sm mt-1">
+{{ e.date }}
+</p>
+
+<p class="text-gray-300 text-sm mt-2">
+{{ e.note }}
+</p>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,405 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+
+<div class="max-w-7xl mx-auto">
+
+    <h1 class="text-2xl font-bold mb-6 text-white tracking-wide
+drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
+        📄 Purchase Invoices
+    </h1>
+
+    <!-- DESKTOP TABLE -->
+
+    <div class="hidden md:block
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+rounded-3xl p-5
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_10px_10px_30px_rgba(0,0,0,0.8)]
+
+border border-white/10
+
+overflow-x-auto 
+overflow-y-auto
+max-h-[450px]     
+">
+
+        <table class="w-full text-sm text-white">
+
+            <thead class="text-left
+
+bg-black/20 
+
+rounded-xl
+
+shadow-[inset_0_-2px_6px_rgba(255,255,255,0.05)] sticky top-0 z-10 bg-slate-900">
+
+                <tr>
+                    <th class="py-3 px-2">Invoice</th>
+                    <th>Date</th>
+                    <th>Supplier</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+
+            </thead>
+
+            <tbody class="divide-y divide-white/5">
+
+                {% for p in purchases %}
+
+                <tr class="transition-all duration-200
+
+hover:bg-white/5 hover:scale-[1.01]">
+
+                    <td class="font-bold text-white">
+                        <a href="/purchase/preview/{{ p.id }}/" target="_blank">
+                            {{ p.invoice_number }}
+                        </a>
+                    </td>
+
+
+                    <td class="text-gray-300">
+                        {{ p.date|date:"d M Y" }}
+                    </td>
+
+                    <td class="text-gray-300">
+                        {{ p.supplier.name }}
+                    </td>
+
+                    <td class="font-bold text-blue-400
+drop-shadow-[0_0_6px_rgba(59,130,246,0.6)]">
+                        ₹ {{ p.total }}
+                    </td>
+
+                    <td class="flex gap-2">
+
+                        <!-- VIEW -->
+                        <a href="/purchase/preview/{{ p.id }}/"
+   data-id="{{ p.id }}"
+   onclick="event.preventDefault(); openLedger(this.dataset.id)"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg
+bg-gradient-to-br from-blue-500 to-blue-600
+shadow-[inset_2px_2px_5px_rgba(255,255,255,0.3),_4px_4px_10px_rgba(0,0,0,0.6)]
+hover:scale-[1.1]
+hover:shadow-[0_0_10px_rgba(59,130,246,0.6)]
+transition-all duration-200">
+
+                            <i class="fa-solid fa-eye text-white text-xs"></i>
+                        </a>
+
+                        <!-- EDIT -->
+                        {% if p.payment_mode == "credit" and p.paid_amount == 0 %}
+                        <!-- EDIT -->
+                        <a href="/purchase/edit/{{ p.id }}/" class="w-8 h-8 flex items-center justify-center rounded-lg
+    bg-gradient-to-br from-yellow-400 to-amber-500
+    shadow-[inset_2px_2px_5px_rgba(255,255,255,0.4),_4px_4px_10px_rgba(0,0,0,0.6)]
+    hover:scale-[1.1]
+    hover:shadow-[0_0_10px_rgba(255,215,0,0.6)]
+    transition-all duration-200">
+
+                            <i class="fa-solid fa-pen text-black text-xs"></i>
+                        </a>
+                        {% else %}
+                        <!-- LOCK -->
+                        <div class="w-8 h-8 flex items-center justify-center rounded-lg
+    bg-gray-600 cursor-not-allowed opacity-60" title="Locked">
+
+                            <i class="fa-solid fa-lock text-white text-xs"></i>
+                        </div>
+                        {% endif %}
+
+
+                        <!-- DELETE -->
+                        {% if p.payment_mode == "credit" and p.paid_amount == 0 %}
+                        <!-- DELETE -->
+                        <a href="/purchase/delete/{{ p.id }}/" class="w-8 h-8 flex items-center justify-center rounded-lg
+    bg-gradient-to-br from-red-500 to-red-600
+    shadow-[inset_2px_2px_5px_rgba(255,255,255,0.3),_4px_4px_10px_rgba(0,0,0,0.6)]
+    hover:scale-[1.1]
+    hover:shadow-[0_0_10px_rgba(255,0,0,0.6)]
+    transition-all duration-200">
+
+                            <i class="fa-solid fa-trash text-white text-xs"></i>
+                        </a>
+                        {% else %}
+                        <!-- LOCK -->
+                        <div class="w-8 h-8 flex items-center justify-center rounded-lg
+    bg-gray-600 cursor-not-allowed opacity-60" title="Locked">
+
+                            <i class="fa-solid fa-lock text-white text-xs"></i>
+                        </div>
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- MOBILE CARD VIEW -->
+
+    <div class="md:hidden space-y-4">
+
+        {% for p in purchases %}
+
+        <div class="p-5 rounded-3xl
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_8px_8px_20px_rgba(0,0,0,0.8)]
+
+border border-white/10">
+
+            <a href="/purchase/preview/{{ p.id }}/" target="_blank" class="block">
+
+                <div class="flex justify-between items-start
+
+cursor-pointer
+
+p-3 rounded-xl
+
+transition-all duration-200
+
+hover:bg-white/5 hover:scale-[1.01]">
+
+                    <div>
+
+                        <h2 class="text-lg font-bold text-white tracking-wide">
+                            {{ p.invoice_number }}
+                        </h2>
+
+                        <p class="text-gray-400 text-sm">
+                            {{ p.date|date:"d M Y" }}
+                        </p>
+
+                        <p class="text-gray-300 mt-1">
+                            {{ p.supplier.name }}
+                        </p>
+
+                    </div>
+
+                    <div class="text-blue-400 text-lg font-bold
+    drop-shadow-[0_0_6px_rgba(59,130,246,0.6)]">
+                        ₹ {{ p.total }}
+                    </div>
+
+                </div>
+
+            </a>
+
+            <!-- ACTION BUTTONS -->
+            <div class="flex gap-2 mt-4">
+
+                <!-- VIEW -->
+                <a href="/purchase/preview/{{ p.id }}/"
+   data-id="{{ p.id }}"
+   onclick="event.preventDefault(); openLedger(this.dataset.id)"
+   class="flex-1 text-center py-2 rounded-xl
+   bg-gradient-to-br from-blue-500 to-blue-600 text-white
+   shadow-[inset_2px_2px_5px_rgba(255,255,255,0.3),_4px_4px_12px_rgba(0,0,0,0.6)]
+   text-sm font-semibold">
+
+                    <i class="fa-solid fa-eye"></i> View
+                </a>
+
+                <!-- EDIT -->
+                {% if p.payment_mode == "credit" and p.paid_amount == 0 %}
+                <a href="/purchase/edit/{{ p.id }}/" class="flex-1 text-center py-2 rounded-xl
+bg-gradient-to-br from-yellow-400 to-amber-500 text-black
+shadow-[inset_2px_2px_5px_rgba(255,255,255,0.4),_4px_4px_12px_rgba(0,0,0,0.6)]
+text-sm font-semibold">
+
+                    <i class="fa-solid fa-pen"></i> Edit
+                </a>
+                {% else %}
+                <div class="flex-1 text-center py-2 rounded-xl
+bg-gray-600 text-white opacity-60 cursor-not-allowed
+text-sm font-semibold" title="Payment Done - Locked">
+
+                    <i class="fa-solid fa-lock"></i> Locked
+                </div>
+                {% endif %}
+
+                {% if p.payment_mode == "credit" and p.paid_amount == 0 %}
+                <a href="/purchase/delete/{{ p.id }}/" class="flex-1 text-center py-2 rounded-xl
+bg-gradient-to-br from-red-500 to-red-600 text-white">
+
+                    <i class="fa-solid fa-trash"></i> Delete
+                </a>
+                {% else %}
+                <div class="flex-1 text-center py-2 rounded-xl
+bg-gray-600 text-white opacity-60 cursor-not-allowed" title="Payment Done - Locked">
+
+                    <i class="fa-solid fa-lock"></i> Locked
+                </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+    <div id="ledgerModal"
+        class="fixed inset-0 bg-black/70 backdrop-blur-md hidden flex items-center justify-center z-50">
+
+        <!-- CARD -->
+        <div class="relative
+
+    bg-gradient-to-br from-slate-800 to-slate-900
+
+    p-6 rounded-3xl w-96 text-white
+
+    shadow-[inset_2px_2px_8px_rgba(255,255,255,0.05),_12px_12px_30px_rgba(0,0,0,0.8)]
+
+    border border-white/10">
+
+            <!-- SHINE -->
+            <div
+                class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-white/10 to-transparent pointer-events-none">
+            </div>
+
+            <!-- TITLE -->
+            <h2 id="ledgerTitle" class="text-lg font-bold mb-3 tracking-wide flex items-center gap-2 relative z-10">
+
+                <i class="fa-solid fa-book text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+                Ledger Details
+
+            </h2>
+
+            <!-- SUMMARY -->
+            <div class="text-sm mb-4 space-y-1 relative z-10">
+
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Total</span>
+                    <span id="ledgerTotal" class="text-blue-400 font-bold">₹ 0</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Paid</span>
+                    <span id="ledgerPaid" class="text-green-400 font-bold">₹ 0</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Balance</span>
+                    <span id="ledgerBalance" class="text-red-400 font-bold
+
+                drop-shadow-[0_0_6px_rgba(255,0,0,0.6)]">
+                        ₹ 0
+                    </span>
+                </div>
+                  <div class="flex justify-between">
+        <span class="text-gray-400">Payment Mode</span>
+        <span id="ledgerMode" class="text-yellow-400 font-bold">
+            -
+        </span>
+    </div>
+            </div>
+
+            <!-- HISTORY -->
+            <h3 class="font-semibold mb-2 relative z-10 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-yellow-400"></i>
+                Payment History
+            </h3>
+
+            <div id="ledgerPayments" class="space-y-2 text-sm max-h-40 overflow-y-auto pr-1 relative z-10">
+
+                <!-- dynamic items -->
+
+            </div>
+
+            <!-- CLOSE BUTTON -->
+            <button onclick="closeLedger()" class="mt-5 w-full relative overflow-hidden
+
+        bg-gradient-to-br from-red-500 to-red-600
+
+        text-white font-bold tracking-wide
+
+        shadow-[inset_2px_2px_6px_rgba(255,255,255,0.2),_6px_6px_16px_rgba(0,0,0,0.6)]
+
+        py-2.5 rounded-xl
+
+        transition-all duration-200
+
+        hover:scale-[1.03]
+        hover:shadow-[0_0_12px_rgba(255,0,0,0.5)]
+
+        active:scale-95
+        active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]">
+
+                <span class="flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-xmark"></i>
+                    Close
+                </span>
+
+            </button>
+
+        </div>
+
+    </div>
+</div>
+<script>
+    function openLedger(id) {
+
+        fetch(`/api/purchase-ledger/${id}/`)
+            .then(res => res.json())
+            .then(data => {
+
+                document.getElementById("ledgerTitle").innerText = data.invoice;
+                document.getElementById("ledgerTotal").innerText = data.total;
+                document.getElementById("ledgerPaid").innerText = data.paid;
+                document.getElementById("ledgerBalance").innerText = data.balance;
+
+                let html = '';
+
+                if (data.payments.length === 0) {
+                    html = `<p class="text-gray-400">No payments yet</p>`;
+                } else {
+                    data.payments.forEach(p => {
+                    html += `
+<div class="flex justify-between items-center bg-black/20 px-2 py-1 rounded-lg">
+
+    <div>
+        <div>${p.date}</div>
+        <div class="text-green-400 font-bold">₹ ${p.amount}</div>
+    </div>
+
+    <!-- 👁️ VIEW PRINT -->
+    <button onclick="openPaymentVoucher(${p.id})"
+    class="w-8 h-8 flex items-center justify-center rounded-lg
+    bg-gradient-to-br from-blue-500 to-blue-600
+    shadow-[inset_2px_2px_5px_rgba(255,255,255,0.3),_4px_4px_10px_rgba(0,0,0,0.6)]
+    hover:scale-[1.1] transition-all">
+
+        <i class="fa-solid fa-eye text-white text-xs"></i>
+    </button>
+
+</div>
+`;
+                    });
+                }
+
+                document.getElementById("ledgerPayments").innerHTML = html;
+
+                document.getElementById("ledgerModal").classList.remove("hidden");
+                document.getElementById("ledgerMode").innerText = data.payment_mode.toUpperCase();
+                
+            });
+    }
+
+    function closeLedger() {
+        document.getElementById("ledgerModal").classList.add("hidden");
+    }
+    function openPaymentVoucher(id) {
+    window.open(`/payment-voucher/${id}/`, "_blank");
+}
+</script>
+{% endblock %}

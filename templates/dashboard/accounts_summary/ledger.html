@@ -1,0 +1,20 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+
+<h2 class="text-xl font-bold mb-4">Ledger</h2>
+
+<h3>Customers</h3>
+<ul>
+{% for c in customers %}
+<li>{{ c.name }} - ₹ {{ c.balance }}</li>
+{% endfor %}
+</ul>
+
+<h3 class="mt-4">Suppliers</h3>
+<ul>
+{% for s in suppliers %}
+<li>{{ s.name }} - ₹ {{ s.balance }}</li>
+{% endfor %}
+</ul>
+
+{% endblock %}

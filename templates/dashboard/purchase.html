@@ -1,0 +1,1637 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4 text-white tracking-wide
+
+flex items-center gap-2
+
+drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
+
+<i class="fa-solid fa-cart-shopping text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+Purchase Billing
+
+</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+
+    <!-- LEFT SIDE -->
+    <!-- LEFT SIDE -->
+     <div class="md:col-span-2
+
+    bg-gradient-to-br from-slate-800 to-slate-900
+
+    rounded-3xl p-5
+
+    shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_10px_10px_30px_rgba(0,0,0,0.8)]
+
+    border border-white/10
+
+    transition-all duration-300">
+
+        <!-- Header -->
+        <!-- CUSTOMER SELECT -->
+       <div class="mb-4">
+
+    <label class="text-sm text-gray-300 tracking-wide">
+        Purchase-Suppliers
+    </label>
+
+    <select id="supplierSelect"
+    class="w-full mt-1 p-3 rounded-xl bg-slate-700 text-white
+
+    outline-none
+
+    shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_6px_6px_18px_rgba(0,0,0,0.7)]
+
+    border border-white/5
+
+    transition-all duration-300
+
+    focus:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.15),_0_0_12px_rgba(255,215,0,0.3)]
+    focus:ring-0
+    ">
+
+        <option value="">Select Supplier</option>
+
+        {% for s in suppliers %}
+        <option value="{{ s.id }}">
+            {{ s.name }}{% if s.phone %} ({{ s.phone }}){% endif %}
+        </option>
+        {% endfor %}
+
+    </select>
+
+    <!-- OUTSTANDING -->
+    <div class="mt-2 text-sm text-yellow-400 font-medium tracking-wide
+
+    drop-shadow-[0_0_6px_rgba(255,215,0,0.5)]">
+
+        Outstandings: ₹ 
+        <span id="supplierOutstanding" class="font-bold text-yellow-300">
+            0
+        </span>
+
+    </div>
+
+</div>
+        <div class="mb-4">
+
+            <!-- HEADER -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+                <h2 class="text-lg sm:text-xl font-bold text-white">
+                    Scan / Add Product
+                </h2>
+
+                <!-- ACTION BUTTONS -->
+                <div class="flex flex-wrap gap-2">
+
+                    <input type="file" id="bulkFile" accept=".csv,.xlsx" class="hidden"
+                        onchange="uploadBulkFile(event)">
+             <button onclick="document.getElementById('bulkFile').click()" 
+class="flex-1 relative overflow-hidden 
+bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
+text-black font-semibold whitespace-nowrap md:w-56
+
+shadow-[inset_3px_3px_8px_rgba(255,255,255,0.5),_6px_6px_18px_rgba(0,0,0,0.3)]
+shadow-yello-400/15
+
+active:scale-95 active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.4)]
+py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-200
+
+before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/30 before:to-transparent before:opacity-60
+">
+    <i class="fa-solid fa-layer-group relative z-10"></i>
+    <span class="relative z-10">Bulk Upload</span>
+</button>
+
+                    <button onclick="startScanner()" class="flex-1 relative overflow-hidden
+bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
+text-black font-semibold
+
+shadow-[inset_3px_3px_8px_rgba(255,255,255,0.5),_6px_6px_18px_rgba(0,0,0,0.3)]
+shadow-yello-400/15
+
+active:scale-95 active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.4)]
+py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-200
+
+before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/30 before:to-transparent before:opacity-60
+">
+                        <i class="fa-solid fa-qrcode relative z-10"></i>
+                        <span class="relative z-10">Scan</span>
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- ADD BUTTON (FULL WIDTH MOBILE) -->
+            <button onclick="addToCart()" class="w-full mt-4 relative overflow-hidden
+bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
+text-black font-bold tracking-wide
+
+shadow-[inset_3px_3px_10px_rgba(255,255,255,0.6),_8px_8px_22px_rgba(0,0,0,0.35)]
+shadow-yellow-400/15
+
+active:scale-95 active:shadow-[inset_3px_3px_8px_rgba(0,0,0,0.5)]
+p-4 rounded-2xl text-xl transition-all duration-200
+
+before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 before:to-transparent before:opacity-70
+">
+                <span class="relative z-10 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i> ADD
+                </span>
+            </button>
+
+        </div>
+
+
+        <!-- Product Add Row -->
+        <div class="flex flex-col gap-3 text-white">
+
+          <!-- TOP ROW (SEARCH + QTY) -->
+<div class="flex flex-col md:flex-row gap-3 items-start">
+
+    <!-- SEARCH INPUT -->
+    <div class="relative flex-1 w-full">
+
+        <input type="text" id="productSearch"
+        placeholder="Search product by name or barcode..."
+        autocomplete="off"
+
+        class="w-full p-3 rounded-xl bg-slate-700 text-white
+
+        outline-none
+
+        shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_6px_6px_18px_rgba(0,0,0,0.7)]
+
+        border border-white/5
+
+        transition-all duration-300
+
+        focus:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.15),_0_0_10px_rgba(59,130,246,0.4)]
+        ">
+
+        <!-- DROPDOWN -->
+        <div id="productList"
+        class="absolute z-50 w-full bg-slate-800 border border-gray-600 rounded-xl mt-1 max-h-60 overflow-y-auto
+
+        shadow-[6px_6px_20px_rgba(0,0,0,0.8)] hidden">
+        </div>
+
+    </div>
+
+    <!-- QTY -->
+    <input id="qty" type="number" min="1" value="1"
+
+    class="w-full md:w-24 p-3 rounded-xl bg-slate-700 text-white
+
+    outline-none
+
+    shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_6px_6px_18px_rgba(0,0,0,0.7)]
+
+    border border-white/5
+
+    transition-all duration-300
+
+    focus:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.15),_0_0_10px_rgba(34,197,94,0.4)]
+    ">
+
+    <!-- RATE -->
+    <input id="rate" type="number" placeholder="Rate"
+
+    class="w-full md:w-28 p-3 rounded-xl bg-slate-700 text-white
+
+    outline-none
+
+    shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_6px_6px_18px_rgba(0,0,0,0.7)]
+
+    border border-white/5
+
+    transition-all duration-300
+
+    focus:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.15),_0_0_10px_rgba(234,179,8,0.4)]
+    ">
+
+</div>
+
+           <!-- ✅ STOCK ROW (SEPARATE FIXED) -->
+<div class="flex items-center w-full px-3 py-2 rounded-xl
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.06),_6px_6px_18px_rgba(0,0,0,0.7)]
+
+border border-white/5
+
+transition-all duration-300">
+
+    <!-- LEFT -->
+    <div class="flex items-center gap-1 text-gray-400 text-xs sm:text-sm tracking-wide">
+
+        <span>Available Stock:</span>
+
+        <span id="availableStock"
+        class="font-bold text-green-400
+
+        drop-shadow-[0_0_6px_rgba(34,197,94,0.6)]">
+            -
+        </span>
+
+    </div>
+
+    <!-- RIGHT -->
+    <button onclick="openChecklist()"
+    class="ml-auto flex items-center gap-1 px-3 py-1.5 rounded-lg
+
+    text-yellow-400 font-semibold
+
+    bg-black/20
+
+    shadow-[inset_1px_1px_4px_rgba(255,255,255,0.1),_3px_3px_8px_rgba(0,0,0,0.6)]
+
+    transition-all duration-300
+
+    hover:scale-[1.05]
+    hover:shadow-[inset_1px_1px_4px_rgba(255,255,255,0.2),_5px_5px_12px_rgba(0,0,0,0.8),_0_0_10px_rgba(255,215,0,0.4)]
+
+    active:scale-95
+    active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
+    ">
+
+        <i class="fa-solid fa-list-check text-sm"></i>
+        <span class="font-bold text-xs sm:text-sm">Checklist</span>
+
+    </button>
+
+</div>
+
+        </div>
+
+        <!-- Cart Table -->
+        <div class="mt-6 overflow-x-auto hidden md:block">
+            <table class="w-full text-sm text-white">
+                <thead>
+                    <tr class="text-left border-b border-gray-600">
+                        <th class="py-2">SR #</th>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>₹</th>
+                        <th>Value</th>
+                        <th>Action</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="purchaseTable"></tbody>
+            </table>
+        </div>
+        <!-- MOBILE VIEW -->
+        <div id="mobileCart" class="md:hidden mt-4 space-y-3"></div>
+    </div>
+
+    <!-- RIGHT SIDE SUMMARY -->
+    <div class="relative
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+rounded-3xl p-5 text-white
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_10px_10px_28px_rgba(0,0,0,0.8)]
+
+border border-white/10
+
+transition-all duration-300
+
+hover:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.08),_12px_12px_32px_rgba(0,0,0,0.9)]
+hover:scale-[1.01]">
+
+        <h2 class="text-xl font-bold mb-3">Summary</h2>
+       <!-- PAYMENT MODE -->
+<label class="text-sm text-gray-300 tracking-wide">
+    Payment Mode
+</label>
+
+<select id="paymentMode"
+class="w-full p-3 rounded-xl bg-slate-700 text-white mb-3
+
+outline-none
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_6px_6px_18px_rgba(0,0,0,0.7)]
+
+border border-white/5
+
+transition-all duration-300
+
+focus:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.15),_0_0_12px_rgba(255,215,0,0.3)]
+">
+
+    <option value="cash" class="bg-green-500 text-white font-semibold">
+        💵 Cash
+    </option>
+
+    <option value="bank" class="bg-blue-500 text-white font-semibold">
+        🏦 Bank / UPI
+    </option>
+
+    <option value="credit" class="bg-red-500 text-white font-semibold">
+        📒 Credit
+    </option>
+
+</select>
+        <label class="flex items-center gap-3 mb-3 cursor-pointer select-none">
+
+    <!-- HIDDEN INPUT -->
+    <input type="checkbox" id="gstToggle" checked class="hidden peer">
+
+    <!-- CUSTOM BOX -->
+    <span class="w-5 h-5 flex items-center justify-center rounded-md
+
+    bg-gradient-to-br from-slate-800 to-slate-900
+
+    shadow-[inset_2px_2px_5px_rgba(255,255,255,0.08),_4px_4px_10px_rgba(0,0,0,0.7)]
+
+    border border-white/5
+
+    transition-all duration-200
+
+    peer-checked:bg-gradient-to-br peer-checked:from-yellow-300 peer-checked:to-amber-500
+    peer-checked:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.4),_4px_4px_12px_rgba(0,0,0,0.7)]
+    ">
+
+        <!-- CHECK ICON -->
+        <i class="fa-solid fa-check text-black text-xs
+
+        opacity-0
+
+        drop-shadow-[0_0_4px_rgba(255,215,0,0.8)]
+
+        transition-all duration-200
+
+        peer-checked:opacity-100
+        peer-checked:scale-110
+        "></i>
+
+    </span>
+
+    <!-- LABEL TEXT -->
+    <span class="text-white font-medium tracking-wide
+
+    drop-shadow-[0_0_4px_rgba(255,255,255,0.2)]">
+        GST (18%)
+    </span>
+
+</label>
+        <div class="space-y-2 text-sm">
+            <div>CGST (9%) : ₹ <span id="cgst">0</span></div>
+            <div>SGST (9%) : ₹ <span id="sgst">0</span></div>
+            <!-- <div>Discount: ₹ <span id="discountView">0</span></div> -->
+            <div>Round Off : ₹ <span id="roundOff">0</span></div>
+            <div>Subtotal : ₹ <span id="subtotal">0</span></div>
+            <label class="flex items-center gap-2 mb-2">
+                Discount ( - ) : ₹
+                <input id="discount" placeholder="Discount" class="w-20 p-3 rounded-xl bg-slate-700 text-white mb-3">
+            </label>
+        </div>
+        <div class="mt-4 border-t border-gray-600 pt-3 text-2xl font-bold">
+            Total : ₹ <span id="total">0</span>
+        </div>
+        <button onclick="savePurchase()" class="mt-4 w-full relative overflow-hidden
+bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
+text-black font-bold tracking-wide
+
+shadow-[inset_3px_3px_10px_rgba(255,255,255,0.6),_8px_8px_22px_rgba(0,0,0,0.35)]
+shadow-yellow-500/40
+
+active:scale-95 active:shadow-[inset_3px_3px_8px_rgba(0,0,0,0.5)]
+p-4 rounded-2xl text-xl transition-all duration-200
+
+before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 before:to-transparent before:opacity-70
+">
+
+            <span class="relative z-10 flex items-center justify-center gap-2">
+                <span><i class="fa-solid fa-floppy-disk"></i></span>
+                SAVE BILL
+            </span>
+
+        </button>
+
+    </div>
+</div>
+
+<!-- FULLSCREEN SCANNER (Google Pay Style) -->
+<div id="scannerModal" class="fixed inset-0 bg-black hidden z-[9999] flex flex-col">
+
+    <!-- Top Bar -->
+    <div class="flex justify-between items-center p-4 text-white">
+        <h2 class="font-bold text-lg">Scan Product</h2>
+        <button onclick="closeScanner()" class="bg-red-500 px-4 py-2 rounded-xl">
+            Close
+        </button>
+    </div>
+
+    <!-- Camera Area -->
+    <div class="flex-1 flex items-center justify-center">
+        <div id="reader" class="w-full max-w-md"></div>
+    </div>
+
+</div>
+<!-- SCAN RESULT MODAL -->
+<div id="scanProductModal"
+class="fixed inset-0 bg-black/70 backdrop-blur-md hidden flex items-center justify-center z-[9999]">
+
+    <!-- CARD -->
+    <div class="relative
+
+    bg-gradient-to-br from-slate-800 to-slate-900
+
+    p-6 rounded-3xl w-[90%] max-w-md text-white
+
+    shadow-[inset_2px_2px_8px_rgba(255,255,255,0.05),_12px_12px_30px_rgba(0,0,0,0.8)]
+
+    border border-white/10">
+
+        <!-- SHINE -->
+        <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
+
+        <!-- TITLE -->
+        <h2 class="flex items-center gap-2 text-lg font-bold mb-4 tracking-wide relative z-10">
+            <i class="fa-solid fa-box-open text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+            Add Product
+        </h2>
+
+        <!-- NAME -->
+        <div class="mb-3 relative z-10">
+            <label class="text-sm text-gray-400">Product</label>
+            <input id="scanName" readonly
+
+            class="w-full p-3 rounded-xl bg-slate-700 text-white
+
+            shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+            border border-white/5">
+        </div>
+
+        <!-- QTY -->
+        <div class="mb-3 relative z-10">
+            <label class="text-sm text-gray-400">Qty</label>
+            <input id="scanQty" type="number" value="1" min="1"
+
+            class="w-full p-3 rounded-xl bg-slate-700 text-white
+
+            shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+            border border-white/5
+
+            focus:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.15),_0_0_10px_rgba(34,197,94,0.4)]
+            outline-none">
+        </div>
+
+        <!-- RATE -->
+        <div class="mb-4 relative z-10">
+            <label class="text-sm text-gray-400">Rate</label>
+            <input id="scanPrice" type="number"
+
+            class="w-full p-3 rounded-xl bg-slate-700 text-white
+
+            shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+            border border-white/5
+
+            focus:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.15),_0_0_10px_rgba(234,179,8,0.4)]
+            outline-none">
+        </div>
+
+        <!-- BUTTONS -->
+        <div class="flex gap-2 relative z-10">
+
+            <!-- ADD -->
+            <button onclick="confirmScanAdd()"
+
+            class="flex-1 relative overflow-hidden
+
+            bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
+            text-black font-bold tracking-wide
+
+            shadow-[inset_3px_3px_10px_rgba(255,255,255,0.6),_8px_8px_22px_rgba(0,0,0,0.4)]
+
+            py-2.5 rounded-xl transition-all duration-200
+
+            hover:scale-[1.03]
+            hover:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.5),_10px_10px_24px_rgba(0,0,0,0.5),_0_0_12px_rgba(255,215,0,0.5)]
+
+            active:scale-95
+            active:shadow-[inset_3px_3px_8px_rgba(0,0,0,0.6)]
+
+            before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 before:to-transparent before:opacity-70
+            ">
+
+                <span class="relative z-10 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i>
+                    ADD
+                </span>
+
+            </button>
+
+            <!-- CANCEL -->
+            <button onclick="closeScanModal()"
+
+            class="flex-1 relative overflow-hidden
+
+            bg-gradient-to-br from-red-500 to-red-600
+            text-white font-bold tracking-wide
+
+            shadow-[inset_2px_2px_6px_rgba(255,255,255,0.2),_6px_6px_16px_rgba(0,0,0,0.6)]
+
+            py-2.5 rounded-xl transition-all duration-200
+
+            hover:scale-[1.03]
+            hover:shadow-[inset_1px_1px_4px_rgba(255,255,255,0.3),_8px_8px_18px_rgba(0,0,0,0.7),_0_0_10px_rgba(255,0,0,0.5)]
+
+            active:scale-95
+            active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
+            ">
+
+                <span class="flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-xmark"></i>
+                    Cancel
+                </span>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- STOCK MODAL -->
+<div id="stockModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+
+    <div class="bg-slate-800 p-6 rounded-2xl w-80 text-white shadow-2xl">
+        <h2 class="text-lg font-bold mb-3 text-red-400">
+            ⚠ Stock Alert
+        </h2>
+
+        <p id="stockMessage" class="mb-4 text-sm"></p>
+
+        <button onclick="closeStockModal()" class="w-full bg-red-500 py-2 rounded-xl font-bold">
+            OK
+        </button>
+    </div>
+</div>
+<div id="checklistModal"
+    class="fixed inset-0 bg-black bg-opacity-70 hidden z-[9999] flex items-end md:items-center justify-center">
+
+    <div class="bg-slate-900 w-full md:w-[400px] max-h-[100vh] rounded-t-2xl md:rounded-2xl p-2 overflow-y-auto">
+
+        <!-- HEADER -->
+        <div class="bg-slate-900 w-full md:w-[400px] 
+    h-[100dvh] md:h-auto 
+    rounded-t-2xl md:rounded-2xl 
+    p-2 flex flex-col">
+
+            <!-- HEADER -->
+          <div class="flex items-center justify-between mb-3
+
+px-3 py-2 rounded-xl
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.06),_6px_6px_18px_rgba(0,0,0,0.7)]
+
+border border-white/5">
+
+    <!-- TITLE -->
+    <h2 class="flex items-center gap-2 text-lg font-bold text-white tracking-wide">
+
+        <span class="w-8 h-8 flex items-center justify-center rounded-lg
+
+        bg-black/20
+
+        shadow-[inset_1px_1px_4px_rgba(255,255,255,0.2),_2px_2px_6px_rgba(0,0,0,0.6)]">
+
+            <i class="fa-solid fa-list-check text-yellow-400"></i>
+
+        </span>
+
+        Products Check List
+
+    </h2>
+
+    <!-- ACTION BUTTONS -->
+    <div class="flex gap-2">
+
+        <!-- NEXT -->
+        <button onclick="showSummary()"
+        class="w-9 h-9 flex items-center justify-center rounded-lg
+
+        text-yellow-400 text-lg
+
+        bg-black/20
+
+        shadow-[inset_1px_1px_4px_rgba(255,255,255,0.1),_3px_3px_8px_rgba(0,0,0,0.6)]
+
+        transition-all duration-200
+
+        hover:scale-[1.08]
+        hover:shadow-[inset_1px_1px_4px_rgba(255,255,255,0.2),_5px_5px_12px_rgba(0,0,0,0.8),_0_0_10px_rgba(255,215,0,0.5)]
+
+        active:scale-95
+        active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
+        ">
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+        <!-- BACK -->
+        <button onclick="goBackToChecklist()"
+        class="w-9 h-9 flex items-center justify-center rounded-lg
+
+        text-yellow-400 text-lg
+
+        bg-black/20
+
+        shadow-[inset_1px_1px_4px_rgba(255,255,255,0.1),_3px_3px_8px_rgba(0,0,0,0.6)]
+
+        transition-all duration-200
+
+        hover:scale-[1.08]
+        hover:shadow-[inset_1px_1px_4px_rgba(255,255,255,0.2),_5px_5px_12px_rgba(0,0,0,0.8),_0_0_10px_rgba(255,215,0,0.5)]
+
+        active:scale-95
+        active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
+        ">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+
+        <!-- CLOSE -->
+        <button onclick="closeChecklist()"
+        class="w-9 h-9 flex items-center justify-center rounded-lg
+
+        text-red-400 text-lg
+
+        bg-black/20
+
+        shadow-[inset_1px_1px_4px_rgba(255,255,255,0.1),_3px_3px_8px_rgba(0,0,0,0.6)]
+
+        transition-all duration-200
+
+        hover:scale-[1.08]
+        hover:shadow-[inset_1px_1px_4px_rgba(255,255,255,0.2),_5px_5px_12px_rgba(0,0,0,0.8),_0_0_10px_rgba(255,0,0,0.5)]
+
+        active:scale-95
+        active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
+        ">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+    </div>
+
+</div>
+
+           <!-- SCROLL AREA -->
+<div class="flex-1 overflow-y-auto pr-1
+
+rounded-xl
+
+bg-gradient-to-br from-slate-800/60 to-slate-900/70
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_6px_6px_18px_rgba(0,0,0,0.7)]
+
+border border-white/5
+
+p-3">
+
+    <!-- STEP 1 -->
+    <div id="step1">
+        <div id="checklistItems" class="space-y-2"></div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step2" class="hidden">
+
+        <!-- HEADER -->
+        <div class="flex justify-between items-center mb-3
+
+        px-3 py-2 rounded-xl
+
+        bg-black/20
+
+        shadow-[inset_1px_1px_4px_rgba(255,255,255,0.1),_3px_3px_8px_rgba(0,0,0,0.6)]">
+
+            <h3 class="flex items-center gap-2 text-lg font-bold text-white tracking-wide">
+
+                <i class="fa-solid fa-file-invoice text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+                Summary
+
+            </h3>
+
+            <div></div>
+        </div>
+
+        <!-- SUMMARY BOX -->
+        <div class="space-y-2 text-sm text-white
+
+        p-3 rounded-xl
+
+        bg-gradient-to-br from-slate-800 to-slate-900
+
+        shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_5px_5px_14px_rgba(0,0,0,0.7)]
+
+        border border-white/5">
+
+            <div class="flex justify-between">
+                <span class="text-gray-400">CGST (9%)</span>
+                <span>₹ <span id="s_cgst"></span></span>
+            </div>
+
+            <div class="flex justify-between">
+                <span class="text-gray-400">SGST (9%)</span>
+                <span>₹ <span id="s_sgst"></span></span>
+            </div>
+
+            <div class="flex justify-between">
+                <span class="text-gray-400">Round Off</span>
+                <span>₹ <span id="s_round"></span></span>
+            </div>
+
+            <div class="flex justify-between">
+                <span class="text-gray-400">Subtotal</span>
+                <span>₹ <span id="s_subtotal"></span></span>
+            </div>
+
+            <div class="flex justify-between">
+                <span class="text-gray-400">Outstandings</span>
+                <span class="text-yellow-400 font-semibold">
+                    ₹ <span id="s_outstanding"></span>
+                </span>
+            </div>
+
+            <!-- TOTAL -->
+            <div class="flex justify-between mt-3 pt-2
+
+            border-t border-white/10
+
+            font-bold text-lg">
+
+                <span>Total Balance</span>
+
+                <span class="text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]">
+                    ₹ <span id="s_total"></span>
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- SAVE BUTTON (already gold 3D) -->
+        <button onclick="savePurchase()" class="mt-4 w-full relative overflow-hidden
+
+        bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
+        text-black font-bold tracking-wide
+
+        shadow-[inset_3px_3px_10px_rgba(255,255,255,0.6),_8px_8px_22px_rgba(0,0,0,0.35)]
+        shadow-yellow-500/40
+
+        active:scale-95 active:shadow-[inset_3px_3px_8px_rgba(0,0,0,0.5)]
+
+        p-3 rounded-xl text-lg transition-all duration-200
+
+        hover:scale-[1.02]
+        hover:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.5),_10px_10px_24px_rgba(0,0,0,0.5),_0_0_12px_rgba(255,215,0,0.5)]
+
+        before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 before:to-transparent before:opacity-70
+        ">
+
+            <span class="relative z-10 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i>
+                SAVE Bill
+            </span>
+
+        </button>
+
+    </div>
+
+</div>
+
+        </div>
+
+        <!-- STEP 1 -->
+        <div id="step1">
+            <div id="checklistItems" class="space-y-2"></div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div id="step2" class="hidden">
+
+            <!-- HEADER -->
+            <div class="flex justify-between items-center mb-3">
+                <button onclick="goBackToChecklist()" class="text-yellow-400 text-xl">⬅️</button>
+                <h3 class="text-lg font-bold">🧾 Summary</h3>
+                <div></div>
+            </div>
+
+            <!-- REAL SUMMARY -->
+            <div class="space-y-2 text-sm">
+
+                <div>CGST (9%) : ₹ <span id="s_cgst"></span></div>
+                <div>SGST (9%) : ₹ <span id="s_sgst"></span></div>
+                <div>Round Off : ₹ <span id="s_round"></span></div>
+                <div>Subtotal : ₹ <span id="s_subtotal"></span></div>
+                <div>Outstandings : ₹ <span id="s_outstanding"></span></div>
+
+                <div class="font-bold text-lg mt-2">
+                    Total Balance : ₹ <span id="s_total"></span>
+                </div>
+
+            </div>
+
+            <button onclick="savePurchase()" class="mt-4 w-full bg-green-500 p-3 rounded-xl font-bold">
+                ✅ SAVE PURCHASE
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+{% if edit_bill %}
+<script type="application/json" id="edit-bill-data">
+{
+    "id": {{ edit_bill.id }},
+    "supplier_id": {{ edit_bill.customer.id }},
+    "discount": {{ edit_bill.discount }},
+    "apply_gst": {{ edit_bill.cgst|yesno:"true,false" }},
+    "items": [
+        {% for item in edit_bill.items.all %}
+        {
+            "productId": {{ item.product.id }},
+            "name": "{{ item.product.name|escapejs }}",
+            "qty": {{ item.qty }},
+            "price": {{ item.price }},
+            "stock": {{ item.product.stock|add:item.qty }}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
+}
+</script>
+{% endif %}
+
+<script>
+
+    // ===== GLOBAL VARIABLES (FIXED SCOPE ISSUE) =====
+    let cart = [];
+    let selectedProduct = null;
+    let html5QrCode = null;
+
+    let cartEl;
+    let subtotalEl;
+    let totalEl;
+    let discountEl;
+    let discountView;
+    let gstToggle;
+    let searchInput;
+    let productList;
+
+    // ================= RENDER SUMMARY =================
+
+    function render() {
+
+        cartEl.innerHTML = "";
+        let mobileEl = document.getElementById("mobileCart");
+
+        mobileEl.innerHTML = "";
+
+        let subtotal = 0;
+
+        cart.forEach((item, index) => {
+
+            let line = item.qty * item.price;
+            subtotal += line;
+
+            cartEl.innerHTML += `
+<tr>
+    <td>${index + 1}</td>
+    <td>${item.name.length > 25
+                    ? item.name.substring(0, 25) + "..."
+                    : item.name}</td>
+    <td>${item.qty}</td>
+    <td>₹ ${item.price}</td>         <!-- MRP -->
+    <td class="text-yellow-400 font-bold">₹ ${line.toFixed(2)}</td>   <!-- VALUE -->
+    <td class="flex gap-2">
+    <button onclick="editItem(${index})">✏️</button>
+    <button onclick="removeItem(${index})">❌</button>
+</td>
+</tr>
+        `;
+
+            // ✅ MOBILE CARD
+            mobileEl.innerHTML += `
+<div class="bg-slate-800 p-3 rounded-xl shadow">
+
+    <!-- TOP -->
+    <div class="flex justify-between items-center">
+        <span class="font-semibold text-white text-sm">
+            #${index + 1} ${item.name}
+        </span>
+
+       
+    </div>
+
+    <!-- BOTTOM (SINGLE LINE) -->
+  <div class="flex justify-between items-center text-xs text-gray-300 mt-1">
+
+    <!-- LEFT TEXT -->
+    <div>
+        Qty: ${item.qty} × ₹ ${item.price} = 
+        <span class="text-yellow-400 font-bold">
+            ₹ ${line.toFixed(2)}
+        </span>
+    </div>
+
+   <!-- RIGHT ICONS -->
+<div class="flex gap-3 text-base">
+
+    <!-- EDIT -->
+    <button onclick="editItem(${index})"
+    class="w-9 h-9 flex items-center justify-center rounded-lg
+
+    text-yellow-400 text-lg
+
+    bg-gradient-to-br from-slate-800 to-slate-900
+
+    shadow-[inset_2px_2px_5px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+    border border-white/5
+
+    transition-all duration-200
+
+    hover:scale-[1.08]
+    hover:shadow-[inset_1px_1px_4px_rgba(255,255,255,0.2),_6px_6px_16px_rgba(0,0,0,0.9),_0_0_10px_rgba(255,215,0,0.5)]
+
+    active:scale-90
+    active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
+    ">
+
+        <i class="fa-solid fa-pen-to-square drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+
+    </button>
+
+    <!-- DELETE -->
+    <button onclick="removeItem(${index})"
+    class="w-9 h-9 flex items-center justify-center rounded-lg
+
+    text-red-500 text-lg
+
+    bg-gradient-to-br from-slate-800 to-slate-900
+
+    shadow-[inset_2px_2px_5px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+    border border-white/5
+
+    transition-all duration-200
+
+    hover:scale-[1.08]
+    hover:shadow-[inset_1px_1px_4px_rgba(255,255,255,0.2),_6px_6px_16px_rgba(0,0,0,0.9),_0_0_10px_rgba(255,0,0,0.5)]
+
+    active:scale-90
+    active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
+    ">
+
+        <i class="fa-solid fa-trash-can drop-shadow-[0_0_6px_rgba(255,0,0,0.6)]"></i>
+
+    </button>
+
+</div>
+
+</div>
+
+</div>
+`;
+        });
+
+        let discount = parseFloat(discountEl.value) || 0;
+        let gst = gstToggle.checked ? subtotal * 0.18 : 0;
+
+        let cgst = gst / 2;
+        let sgst = gst / 2;
+
+        let totalBeforeRound = subtotal + gst - discount;
+
+        let rounded = Math.round(totalBeforeRound);
+        let roundOff = rounded - totalBeforeRound;
+
+        subtotalEl.innerText = subtotal.toFixed(2);
+        document.getElementById("cgst").innerText = cgst.toFixed(2);
+        document.getElementById("sgst").innerText = sgst.toFixed(2);
+        document.getElementById("roundOff").innerText = roundOff.toFixed(2);
+
+        totalEl.innerText = rounded.toFixed(2);
+
+
+
+
+    }
+
+    // ================= DOM READY =================
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // CUSTOMER BALANCE LOAD
+        document.getElementById("supplierSelect").addEventListener("change", function () {
+
+            let id = this.value;
+
+            if (!id) {
+                document.getElementById("supplierOutstanding").innerText = "0";
+                document.getElementById("summaryOutstanding").innerText = "0";
+                return;
+            }
+            fetch(`/supplier-balance/?supplier_id=${id}`)
+                .then(res => res.json())
+                .then(data => {
+
+                    let balance = parseFloat(data.balance) || 0;
+
+                    document.getElementById("supplierOutstanding").innerText = balance.toFixed(2);
+                    document.getElementById("summaryOutstanding").innerText = balance.toFixed(2);
+
+                });
+
+        })
+
+        cartEl = document.getElementById("purchaseTable");
+        subtotalEl = document.getElementById("subtotal");
+        totalEl = document.getElementById("total");
+        discountEl = document.getElementById("discount");
+        discountView = document.getElementById("discountView");
+        gstToggle = document.getElementById("gstToggle");
+        searchInput = document.getElementById("productSearch");
+        productList = document.getElementById("productList");
+        discountEl.addEventListener("input", render);
+        gstToggle.addEventListener("change", render);
+
+        // ================= EDIT MODE LOAD =================
+        const editDataEl = document.getElementById("edit-bill-data");
+        if (editDataEl) {
+            const EDIT_BILL = JSON.parse(editDataEl.textContent);
+
+            cart = EDIT_BILL.items.map(item => ({
+                productId: item.productId,
+                name: item.name,
+                qty: item.qty,
+                price: parseFloat(item.price)
+            }));
+
+            document.getElementById("supplierSelect").value = EDIT_BILL.supplier_id;
+            discountEl.value = EDIT_BILL.discount;
+            gstToggle.checked = EDIT_BILL.apply_gst;
+
+            render();
+        }
+
+        // ================= STOCK DISPLAY =================
+
+        function updateStockDisplay(stock) {
+            const stockEl = document.getElementById("availableStock");
+            if (!stockEl) return;
+
+            stockEl.innerText = stock ?? "-";
+
+            stockEl.classList.remove("text-green-400", "text-red-500", "text-yellow-400");
+
+            if (stock <= 0) {
+                stockEl.classList.add("text-red-500");
+            } else if (stock < 5) {
+                stockEl.classList.add("text-yellow-400");
+            } else {
+                stockEl.classList.add("text-green-400");
+            }
+        }
+
+        let editingIndex = null;
+        window.editItem = function (index) {
+
+            let item = cart[index];
+            editingIndex = index;
+            selectedProduct = {
+                id: item.productId,
+                name: item.name,
+                price: item.price,
+                stock: 999999 // purchase mein limit nahi chahiye
+            };
+
+            // fill modal
+            document.getElementById("scanName").value = item.name;
+            document.getElementById("scanQty").value = item.qty;
+            document.getElementById("scanPrice").value = item.price;
+
+
+
+            // open modal
+            document.getElementById("scanProductModal").classList.remove("hidden");
+        };
+
+        // ================= ADD TO CART =================
+
+        function addToCart() {
+
+            if (!selectedProduct) {
+                alert("Select product first");
+                return;
+            }
+
+            let qty = parseInt(document.getElementById("qty").value || 1);
+            let price = parseFloat(document.getElementById("rate").value || selectedProduct.price);
+
+            let existingItem = cart.find(i => i.productId === selectedProduct.id);
+            let alreadyInCart = existingItem ? existingItem.qty : 0;
+
+            if (qty + alreadyInCart > selectedProduct.stock) {
+                alert("Only " + (selectedProduct.stock - alreadyInCart) + " available.");
+                return;
+            }
+
+            if (existingItem) {
+                existingItem.qty += qty;
+                existingItem.price = price;
+            } else {
+                cart.push({
+                    productId: selectedProduct.id,
+                    name: selectedProduct.name,
+                    qty: qty,
+                    price: parseFloat(selectedProduct.price)
+                });
+            }
+
+            updateStockDisplay(selectedProduct.stock + (alreadyInCart + qty));
+            render();
+
+            // 🔥🔥 IMPORTANT RESET
+            document.getElementById("productSearch").value = "";
+            document.getElementById("qty").value = 1;
+            document.getElementById("rate").value = "";
+
+            selectedProduct = null; // clear selection
+
+        }
+
+
+        // ================= REMOVE ITEM =================
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            render();
+        }
+
+
+
+
+
+        // ================= SCANNER =================
+
+        window.startScanner = function () {
+
+            document.getElementById("scannerModal").classList.remove("hidden");
+
+            html5QrCode = new Html5Qrcode("reader");
+
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    html5QrCode.stop().then(() => {
+                        document.getElementById("scannerModal").classList.add("hidden");
+                        fetchProduct(decodedText);
+                    });
+                }
+            );
+        };
+
+        window.closeScanner = function () {
+            document.getElementById("scannerModal").classList.add("hidden");
+            if (html5QrCode) {
+                html5QrCode.stop();
+            }
+        };
+
+
+        // ================= FETCH PRODUCT =================
+
+        function fetchProduct(barcode) {
+
+            fetch(`/scan-product/?barcode=${encodeURIComponent(barcode)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        addScannedProduct(data);
+                    } else {
+                        alert("Product not found!");
+                    }
+                });
+        }
+
+
+        // ================= ADD SCANNED PRODUCT =================
+
+        function addScannedProduct(product) {
+
+            selectedProduct = {
+                id: product.id,
+                name: product.name,
+                price: parseFloat(product.price),
+                stock: parseInt(product.stock)
+            };
+            // fill modal
+            document.getElementById("scanName").value = product.name;
+            document.getElementById("scanQty").value = 1;
+            document.getElementById("scanPrice").value = product.price;
+
+            // ONLY SHOW MODAL (❗ NO CART ADD HERE)
+            document.getElementById("scanProductModal").classList.remove("hidden");
+
+        }
+
+
+        window.confirmScanAdd = function () {
+
+            if (!selectedProduct) return;
+
+            let qty = parseInt(document.getElementById("scanQty").value || 1);
+            let price = parseFloat(document.getElementById("scanPrice").value || 0);
+
+            if (editingIndex !== null) {
+                // ✅ UPDATE EXISTING ITEM
+                cart[editingIndex].qty = qty;
+                cart[editingIndex].price = price;
+
+                editingIndex = null; // reset
+            } else {
+                // ✅ NORMAL ADD
+                let existingItem = cart.find(i => i.productId === selectedProduct.id);
+
+                if (existingItem) {
+                    existingItem.qty += qty;
+                } else {
+                    cart.push({
+                        productId: selectedProduct.id,
+                        name: selectedProduct.name,
+                        qty: qty,
+                        price: price
+                    });
+                }
+            }
+
+            render();
+            closeScanModal();
+        };
+        window.closeScanModal = function () {
+            document.getElementById("scanProductModal").classList.add("hidden");
+            selectedProduct = null; // clean
+            editingIndex = null;
+        }
+        // ================= SEARCH PRODUCTS =================
+
+        searchInput.addEventListener("keyup", function () {
+
+            let value = this.value.trim();
+
+            if (value.length < 2) {
+                productList.classList.add("hidden");
+                return;
+            }
+
+            fetch(`/search-products/?q=${encodeURIComponent(value)}`)
+                .then(res => res.json())
+                .then(products => {
+
+                    productList.innerHTML = "";
+
+                    if (products.length === 0) {
+                        productList.innerHTML = `<div class="p-3 text-gray-400">No products found</div>`;
+                        productList.classList.remove("hidden");
+                        return;
+                    }
+
+                    products.forEach(p => {
+                        let div = document.createElement("div");
+                        div.className = "p-3 hover:bg-slate-700 cursor-pointer border-b border-gray-700";
+                        div.innerHTML = `${p.name} <span class="text-gray-400">₹${p.price}</span>`;
+
+                        div.onclick = () => {
+                            selectedProduct = p;
+                            searchInput.value = p.name;
+                            productList.classList.add("hidden");
+                            updateStockDisplay(p.stock);
+                            document.getElementById("rate").value = p.price;
+
+                        };
+
+                        productList.appendChild(div);
+                    });
+
+                    productList.classList.remove("hidden");
+                });
+        });
+
+
+        // expose
+        window.addToCart = addToCart;
+        window.removeItem = removeItem;
+
+    });
+
+
+    // ================= SAVE BILL =================
+
+    window.savePurchase = function () {
+
+        console.log("Cart:", cart)
+
+        if (cart.length === 0) {
+            alert("Cart is empty!");
+            return;
+        }
+
+        let paymentMode = document.getElementById("paymentMode").value;
+        let supplierId = document.getElementById("supplierSelect").value;
+
+        if (!supplierId) {
+            alert("Select supplier");
+            return;
+        }
+
+        let items = cart.map(item => ({
+            product_id: item.productId,   // ✅ FIXED
+            qty: item.qty
+        }));
+
+        fetch("/save-purchase/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
+            },
+
+            body: JSON.stringify({
+                supplier_id: supplierId,
+                items: items,
+                payment_mode: paymentMode   // 🔥 MUST
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.status === "success") {
+
+                    alert("Purchase saved");
+
+                    window.open(`/purchase/preview/${data.purchase_id}/`, "_blank");
+
+                    cart = [];
+                    render();
+
+                    document.getElementById("productSearch").value = "";
+                    document.getElementById("qty").value = 1;
+                    document.getElementById("discount").value = "";
+
+                    fetch(`/supplier-balance/?supplier_id=${supplierId}`)
+                        .then(res => res.json())
+                        .then(data => {
+
+                            let balance = parseFloat(data.balance) || 0;
+
+                            document.getElementById("supplierOutstanding").innerText = balance.toFixed(2);
+                            document.getElementById("summaryOutstanding").innerText = balance.toFixed(2);
+
+                        });
+
+                }
+
+            });
+
+    };
+    // ================= CSRF =================
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+            navigator.serviceWorker.register("/static/service-worker.js")
+                .then(function (registration) {
+                    console.log("ServiceWorker registered");
+                })
+                .catch(function (err) {
+                    console.log("ServiceWorker failed:", err);
+                });
+        });
+    }
+
+    function uploadBulkFile(event) {
+
+        let file = event.target.files[0];
+        if (!file) return;
+
+        let formData = new FormData();
+        formData.append("file", file);
+
+        fetch("/bulk-purchase-upload/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken")
+            },
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.status === "success") {
+
+                    cart = [];
+
+                    data.items.forEach(item => {
+                        cart.push({
+                            productId: item.product_id,   // 🔥 MATCH EXISTING SYSTEM
+                            name: item.name,
+                            qty: item.qty,
+                            price: item.price
+                        });
+                    });
+
+                    render();   // ✅ THIS IS KEY
+
+                    alert("Items loaded in list ✅");
+
+                } else {
+                    alert(data.message);
+                }
+
+            });
+    }
+    function openChecklist() {
+
+        document.getElementById("step1").classList.remove("hidden");
+        document.getElementById("step2").classList.add("hidden");
+
+        let container = document.getElementById("checklistItems");
+        container.innerHTML = "";
+
+        cart.forEach((item, index) => {
+
+            let line = item.qty * item.price; // ✅ VALUE CALC
+
+            let div = document.createElement("div");
+
+            div.className = "check-card flex justify-between items-center bg-slate-800 p-3 rounded-xl cursor-pointer transition";
+
+            div.innerHTML = `
+    <div>
+
+        <p class="text-sm font-semibold">
+            #${index + 1} ${item.name}
+        </p>
+
+        <p class="text-xs text-gray-400">
+            Qty: ${item.qty} × ₹ ${item.price} = <span class="text-sm text-yellow-400 font-bold">₹ ${line.toFixed(2)}</span>
+        </p>
+
+    </div>
+
+    <label class="inline-flex items-center cursor-pointer">
+    
+    <input type="checkbox" class="checkBox hidden peer">
+
+    <span class="w-5 h-5 flex items-center justify-center rounded-md
+
+    bg-gradient-to-br from-slate-800 to-slate-900
+
+    shadow-[inset_2px_2px_5px_rgba(255,255,255,0.08),_4px_4px_10px_rgba(0,0,0,0.7)]
+
+    border border-white/5
+
+    transition-all duration-200
+
+    peer-checked:bg-gradient-to-br peer-checked:from-yellow-300 peer-checked:to-amber-500
+    peer-checked:shadow-[inset_2px_2px_5px_rgba(255,255,255,0.4),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+    ">
+
+        <i class="fa-solid fa-check text-black text-xs
+
+        opacity-0
+
+        drop-shadow-[0_0_4px_rgba(255,215,0,0.7)]
+
+        transition-all duration-200
+
+        peer-checked:opacity-100
+        peer-checked:scale-110
+        "></i>
+
+    </span>
+
+</label>
+`;
+
+            // 👉 FULL CARD CLICK
+            div.addEventListener("click", function (e) {
+
+                let checkbox = div.querySelector(".checkBox");
+
+                if (e.target.tagName !== "INPUT") {
+                    checkbox.checked = !checkbox.checked;
+                }
+
+                toggleCheckStyle(div, checkbox.checked);
+            });
+
+            // 👉 checkbox click
+            let checkbox = div.querySelector(".checkBox");
+            checkbox.addEventListener("click", function (e) {
+                e.stopPropagation();
+                toggleCheckStyle(div, checkbox.checked);
+            });
+
+            container.appendChild(div);
+        });
+
+        document.getElementById("checklistModal").classList.remove("hidden");
+    }
+
+    function toggleCheckStyle(card, checked) {
+
+        if (checked) {
+            card.classList.add("opacity-50", "line-through");
+        } else {
+            card.classList.remove("opacity-50", "line-through");
+        }
+
+    }
+
+    function closeChecklist() {
+        document.getElementById("checklistModal").classList.add("hidden");
+        document.getElementById("step1").classList.remove("hidden");
+        document.getElementById("step2").classList.add("hidden");
+    }
+    function markChecked(el) {
+
+        let parent = el.closest("div");
+
+        if (el.checked) {
+            parent.classList.add("opacity-50", "line-through");
+        } else {
+            parent.classList.remove("opacity-50", "line-through");
+        }
+    }
+    function showSummary() {
+
+        document.getElementById("step1").classList.add("hidden");
+        document.getElementById("step2").classList.remove("hidden");
+
+        // 👉 COPY FROM REAL SUMMARY (RIGHT SIDE)
+
+        document.getElementById("s_cgst").innerText =
+            document.getElementById("cgst").innerText;
+
+        document.getElementById("s_sgst").innerText =
+            document.getElementById("sgst").innerText;
+
+        document.getElementById("s_round").innerText =
+            document.getElementById("roundOff").innerText;
+
+        document.getElementById("s_subtotal").innerText =
+            document.getElementById("subtotal").innerText;
+
+        document.getElementById("s_outstanding").innerText =
+            document.getElementById("summaryOutstanding").innerText;
+
+        document.getElementById("s_total").innerText =
+            document.getElementById("total").innerText;
+    }
+    function goBackToChecklist() {
+
+        let step1 = document.getElementById("step1");
+        let step2 = document.getElementById("step2");
+
+        step2.classList.add("hidden");
+        step1.classList.remove("hidden");
+
+        step1.scrollTop = 0; // scroll reset
+    }
+
+</script>
+
+{% endblock %}

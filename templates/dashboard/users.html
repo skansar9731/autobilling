@@ -1,0 +1,49 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4">Users</h1>
+
+<div class="bg-slate-800 p-4 rounded-2xl mb-6">
+<form method="POST" class="grid md:grid-cols-3 gap-3">
+    {% csrf_token %}
+    <input name="username" placeholder="Username"
+    class="p-2 rounded bg-slate-700">
+
+    <input name="password" placeholder="Password"
+    class="p-2 rounded bg-slate-700">
+
+    <select name="role" class="p-2 rounded bg-slate-700">
+        <option value="manager">Manager</option>
+        <option value="admin">Admin</option>
+    </select>
+
+    <button class="bg-green-500 p-2 rounded font-bold md:col-span-3">
+        ADD USER
+    </button>
+</form>
+</div>
+
+<div class="bg-slate-800 p-4 rounded-2xl">
+<table class="w-full text-sm">
+<tr>
+<th>Username</th>
+<th>Role</th>
+</tr>
+
+{% for u in users %}
+<tr class="border-t border-gray-600">
+<td>{{ u.username }}</td>
+<td>
+    {% if u.is_superuser %}
+        Admin
+    {% else %}
+        Manager
+    {% endif %}
+</td>
+</tr>
+{% endfor %}
+</table>    
+</div>
+
+{% endblock %}

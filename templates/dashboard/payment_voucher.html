@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Payment Voucher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<style>
+    @media print {
+
+        body {
+            margin: 0;
+        }
+
+        body * {
+            visibility: hidden;
+        }
+
+        .print-area {
+            visibility: visible !important;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            background: white;
+            padding: 20px;
+        }
+
+        .print-area * {
+            visibility: visible !important;
+        }
+
+        .print\:hidden {
+            display: none !important;
+        }
+
+    }
+
+    @page {
+        margin: 10mm;
+    }
+</style>
+
+<body class="bg-white text-black">
+    <div class="print-area max-w-3xl mx-auto border-2 border-black p-4 mt-6">
+        <div class="flex justify-between mb-6 print:hidden">
+
+            <!-- PRINT -->
+            <button onclick="window.print()" class="bg-gray-800 text-white px-4 py-2 rounded-lg">
+                🖨 Print
+            </button>
+
+            <!-- WHATSAPP -->
+            <button onclick="sendWhatsApp()" class="bg-green-500 text-white px-4 py-2 rounded-lg">
+                <i class="fa-brands fa-whatsapp"></i> WhatsApp
+            </button>
+
+            <!-- CLOSE -->
+            <button onclick="window.close()" class="bg-red-500 text-white px-4 py-2 rounded-lg">
+                <i class="fa-solid fa-xmark"></i> Close
+            </button>
+
+        </div>
+
+        <!-- COMPANY -->
+        <div class="mb-4 text-center">
+            <h2 class="font-bold text-lg">
+                {{ company.name }}
+            </h2>
+
+            <p>GSTIN: {{ company.gst }}</p>
+            <p>{{ company.address }}</p>
+            <p>Phone: 9823012992 {{ company.phone }}</p>
+        </div>
+
+        <!-- TITLE -->
+        <h2 class="text-center text-lg font-bold text-black-600 mb-3">
+            Payment Voucher
+        </h2>
+
+        <!-- TOP -->
+        <div class="flex justify-between mb-3 gap-2">
+            <div class="border border-black p-2 w-1/2 text-sm">
+                Ref No: {{ purchase.invoice_number }}
+            </div>
+            <div class="border border-black p-2 w-1/2 text-sm text-right">
+                Date: {{ payment.date|date:"d-m-Y" }}
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <table class="w-full border border-black text-sm">
+<tr>
+    <td class="border border-black p-2">Current Outstanding</td>
+    <td class="border border-black p-2">
+        ₹ {{ purchase.balance }}
+    </td>
+</tr>
+
+<tr>
+    <td class="border border-black p-2">Payment Mode</td>
+    <td class="border border-black p-2">
+        {{ purchase.payment_mode|title }}
+    </td>
+</tr>
+            <tr>
+                <td class="border border-black p-2 w-1/3">Amount Paid</td>
+                <td class="border border-black p-2">₹ {{ amount }}</td>
+            </tr>
+
+            <tr>
+                <td class="border border-black p-2">Mode of Payment</td>
+                <td class="border border-black p-2">{{ purchase.payment_mode|title }}</td>
+            </tr>
+
+            <tr>
+                <td class="border border-black p-2">Cash/Bank/UPI</td>
+                <td class="border border-black p-2">{{ purchase.payment_mode|title }}</td>
+            </tr>
+
+            <tr>
+                <td class="border border-black p-2">To whom</td>
+                <td class="border border-black p-2">{{ supplier.name }}</td>
+            </tr>
+
+            <tr>
+                <td class="border border-black p-2">Amount in words</td>
+                <td class="border border-black p-2">
+                    {{ amount_words }} Rupees Only
+                </td>
+            </tr>
+
+            <tr>
+                <td class="border border-black p-2">Being</td>
+                <td class="border border-black p-2">
+                    {{ payment.note|default:"Being payment against invoice " }} {{ purchase.invoice_number }}
+                </td>
+            </tr>
+
+        </table>
+
+        <!-- SIGN -->
+        <div class="grid grid-cols-3 mt-8 border border-black text-sm">
+
+            <div class="border-r border-black h-20 flex items-end justify-center pb-2">
+                Approved By
+            </div>
+
+            <div class="border-r border-black h-20 flex items-end justify-center pb-2">
+                Paid By
+            </div>
+
+            <div class="h-20 flex items-end justify-center pb-2">
+                Signature
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let name = "{{ supplier.name }}";
+        let amount = "{{ amount }}";
+        let ref = "{{ purchase.invoice_number }}";
+
+        function sendWhatsApp() {
+
+            let message = `Hi 👋 ${name},
+
+Payment done successfully.
+
+Voucher Ref: ${ref}
+Amount: ₹${amount}
+
+Thank you for doing business with us.
+
+Regards,
+Maharashtra Automobiles
+📞 9823012992`;
+
+            let url = "https://wa.me/?text=" + encodeURIComponent(message);
+            window.open(url, "_blank");
+        }
+    </script>
+</body>
+
+</html>

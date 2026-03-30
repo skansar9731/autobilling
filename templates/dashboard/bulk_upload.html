@@ -1,0 +1,32 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+
+<div class="p-6 bg-gray-800 rounded-xl">
+
+    <h2 class="text-xl text-white mb-4">Bulk Product Upload</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <input type="file" name="file"
+               class="bg-gray-700 text-white p-3 rounded-lg"
+               accept=".csv" required>
+
+        <button type="submit"
+                class="bg-green-600 text-white px-4 py-2 rounded-lg ml-4">
+            Upload
+        </button>
+    </form>
+
+    <div class="mt-6 text-gray-300">
+        <p>Download CSV Template Format:</p>
+        <pre class="bg-gray-900 p-3 rounded-lg mt-2">
+name,barcode,hsn,price,gst,stock
+WIND SCREEN S/ASSY,6410AKWA830S,87089900,281,18,10
+        </pre>
+    </div>
+
+</div>
+
+{% endblock %}

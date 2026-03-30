@@ -1,0 +1,48 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+
+<div class="max-w-4xl mx-auto">
+
+<h1 class="text-2xl font-bold mb-6 text-white">
+Add Expense
+</h1>
+
+<div class="bg-slate-800 p-6 rounded-2xl">
+
+<form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+{% csrf_token %}
+
+<select name="category"
+class="p-3 rounded bg-slate-700 text-white">
+
+<option value="">Select Category</option>
+
+{% for c in categories %}
+<option value="{{ c.id }}">{{ c.name }}</option>
+{% endfor %}
+
+</select>
+
+<input type="number" name="amount"
+placeholder="Amount"
+class="p-3 rounded bg-slate-700 text-white">
+
+<input type="date" name="date"
+class="p-3 rounded bg-slate-700 text-white">
+
+<input name="note"
+placeholder="Note (optional)"
+class="p-3 rounded bg-slate-700 text-white md:col-span-2">
+
+<button class="bg-green-500 p-3 rounded font-bold md:col-span-2">
+Save Expense
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+{% if messages %}
+<div id="toastContainer" class="fixed top-5 right-5 space-y-3 z-50">
+
+    {% for message in messages %}
+    
+    <div class="flex items-center gap-3 px-5 py-3 rounded-2xl text-black font-semibold
+
+    bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500
+
+    shadow-[inset_2px_2px_6px_rgba(255,255,255,0.6),_8px_8px_20px_rgba(0,0,0,0.5)]
+
+    animate-slideIn transition-all duration-300">
+
+        <!-- ICON (MANAGER STYLE) -->
+        <div class="w-8 h-8 flex items-center justify-center rounded-full
+
+        bg-black/20
+
+        shadow-[inset_1px_1px_4px_rgba(255,255,255,0.4),_2px_2px_6px_rgba(0,0,0,0.5)]">
+
+            <i class="fa-solid fa-user-tie text-black"></i>
+
+        </div>
+
+        <!-- TEXT -->
+        <span class="tracking-wide">
+            {{ message }}
+        </span>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+{% endif %}
+<h2 class="text-2xl font-bold mb-6">🏢 Company Info</h2>
+
+{% if company %}
+
+<!-- COMPANY CARD -->
+<div class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-2xl mb-6
+shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.05),_6px_6px_18px_rgba(0,0,0,0.7)]
+border border-white/10">
+
+    <h3 class="text-lg font-semibold mb-3">🏢 Company Details</h3>
+
+    <div class="space-y-1 text-sm">
+        <p><span class="text-gray-400">Name:</span> {{ company.name }}</p>
+        <p><span class="text-gray-400">Owner:</span> {{ company.owner }}</p>
+        <p><span class="text-gray-400">GST:</span> {{ company.gst }}</p>
+        <p><span class="text-gray-400">Address:</span> {{ company.address }}</p>
+        <p><span class="text-gray-400">State:</span> {{ company.state }}</p>
+        <p><span class="text-gray-400">Country:</span> {{ company.country }}</p>
+    </div>
+
+</div>
+
+<!-- FINANCIAL YEAR -->
+<div class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-2xl mb-6
+shadow-lg border border-white/10">
+
+    <h3 class="text-lg font-semibold mb-2">📅 Financial Year</h3>
+
+    <p class="text-yellow-400 font-semibold text-lg">
+        {{ company.financial_year_from }} → {{ company.financial_year_to }}
+    </p>
+</div>
+
+{% else %}
+
+<div class="bg-red-500/10 border border-red-400 p-4 rounded-xl text-center">
+    ⚠️ No Company Found — Please Add from Admin
+</div>
+
+{% endif %}
+
+<!-- SUMMARY CARDS -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+    <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900
+    shadow-lg border border-white/10 hover:scale-[1.02] transition">
+
+        <p class="text-gray-400 text-sm">Bank Balance</p>
+        <h3 class="text-xl font-bold text-yellow-400">₹ {{ bank_total }}</h3>
+
+    </div>
+
+    <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900
+    shadow-lg border border-white/10 hover:scale-[1.02] transition">
+
+        <p class="text-gray-400 text-sm">Status</p>
+        <h3 class="text-green-400 font-bold">Active</h3>
+
+    </div>
+
+    <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900
+    shadow-lg border border-white/10 hover:scale-[1.02] transition">
+
+        <p class="text-gray-400 text-sm">System</p>
+        <h3 class="font-bold">AutoBilling POS</h3>
+
+    </div>
+
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const toast = document.getElementById("toastContainer");
+
+    if (toast) {
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateX(100%)";
+
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+
+        }, 3000);
+    }
+
+});
+</script>
+{% endblock %}

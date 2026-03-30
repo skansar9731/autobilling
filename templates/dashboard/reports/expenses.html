@@ -1,0 +1,12 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+
+<h2>Expense Report</h2>
+
+{% for e in expenses %}
+<p>{{ e.category }} - ₹ {{ e.amount }}</p>
+{% endfor %}
+
+<h3>Total: ₹ {{ total }}</h3>
+
+{% endblock %}

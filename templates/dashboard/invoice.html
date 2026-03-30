@@ -1,0 +1,28 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4">Invoice #{{ bill.id }}</h1>
+
+<p><strong>Customer:</strong> {{ bill.customer.name }}</p>
+<p><strong>Date:</strong> {{ bill.created_at }}</p>
+
+<table class="w-full mt-4 border">
+<tr>
+    <th>Product</th>
+    <th>Qty</th>
+    <th>Price</th>
+</tr>
+
+{% for item in bill.billitem_set.all %}
+<tr>
+    <td>{{ item.product.name }}</td>
+    <td>{{ item.qty }}</td>
+    <td>{{ item.price }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2 class="mt-4 text-xl font-bold">Total: ₹ {{ bill.total }}</h2>
+
+{% endblock %}
