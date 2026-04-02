@@ -2,16 +2,32 @@
 
 {% block content %}
 
-<h1 class="text-2xl font-bold mb-4 text-white tracking-wide
+<div class="sticky top-[1px] z-40
+bg-slate-900/95 backdrop-blur-md
+py-3
+mt-2
+shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
 
-flex items-center gap-2
+    <h1 class="text-2xl font-bold tracking-wide
+    flex items-center gap-3 text-white
+    drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
 
-drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
+        <i class="fa-solid fa-cart-shopping
 
-<i class="fa-solid fa-cart-shopping text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
-Purchase Billing
+        text-yellow-400
 
-</h1>
+        drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]
+
+        [text-shadow:0_0_2px_rgba(250,204,21,0.8),
+                     0_0_4px_rgba(250,204,21,0.6),
+                     0_2px_3px_rgba(0,0,0,0.9)]">
+        </i>
+
+        Purchase Billing
+
+    </h1>
+
+</div>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
