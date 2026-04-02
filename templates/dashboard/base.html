@@ -1264,84 +1264,64 @@ body{
 
 </style>
 <script>
-    // pwa mobile rotate off
+// ✅ PWA detect
 function isPWA(){
     return window.matchMedia('(display-mode: standalone)').matches
         || window.navigator.standalone === true;
 }
 
+// ✅ Orientation control (FINAL)
 function checkOrientation(){
 
-    if(!isPWA()) return; // ❗ only for PWA
-
-    if(window.innerWidth > window.innerHeight){
-        document.getElementById("rotateBlock").classList.remove("hidden");
-    } else {
+    // only PWA
+    if(!isPWA()){
         document.getElementById("rotateBlock").classList.add("hidden");
-    }
-}
-
-window.addEventListener("load", checkOrientation);
-window.addEventListener("resize", checkOrientation);
-
-
-function toggleSidebar(){
-
-let sidebar=document.getElementById("sidebar")
-
-sidebar.classList.toggle("-translate-x-full")
-
-}
-
-
-function toggleMenu(menu){
-
-const menus=[
-"salesMenu",
-"purchaseMenu",
-"inventoryMenu",
-"expenseMenu",
-"accountsMenu",
-"reportsMenu"
-]
-
-menus.forEach(id=>{
-
-let el=document.getElementById(id)
-
-if(id===menu){
-
-el.classList.toggle("hidden")
-
-}else{
-
-if(el) el.classList.add("hidden")
-
-}
-
-})
-
-}
-function isPWA(){
-    return window.matchMedia('(display-mode: standalone)').matches
-        || window.navigator.standalone === true;
-}
-
-function checkOrientation(){
-
-    if(!isPWA()) return; // only PWA
-
-    if(window.innerWidth > window.innerHeight){
-        document.body.style.overflow = "hidden";
-        document.getElementById("rotateBlock").classList.remove("hidden");
-    } else {
         document.body.style.overflow = "auto";
+        return;
+    }
+
+    // landscape detect
+    if(window.innerWidth > window.innerHeight){
+        document.getElementById("rotateBlock").classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+    } else {
         document.getElementById("rotateBlock").classList.add("hidden");
+        document.body.style.overflow = "auto";
     }
 }
 
+// events
 window.addEventListener("load", checkOrientation);
 window.addEventListener("resize", checkOrientation);
+window.addEventListener("orientationchange", checkOrientation);
+
+
+// sidebar
+function toggleSidebar(){
+    let sidebar=document.getElementById("sidebar")
+    sidebar.classList.toggle("-translate-x-full")
+}
+
+// menu toggle
+function toggleMenu(menu){
+    const menus=[
+        "salesMenu",
+        "purchaseMenu",
+        "inventoryMenu",
+        "expenseMenu",
+        "accountsMenu",
+        "reportsMenu"
+    ]
+
+    menus.forEach(id=>{
+        let el=document.getElementById(id)
+        if(id===menu){
+            el.classList.toggle("hidden")
+        }else{
+            if(el) el.classList.add("hidden")
+        }
+    })
+}
 </script>
 
 
