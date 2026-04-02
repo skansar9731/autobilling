@@ -1,48 +1,40 @@
 {% extends "dashboard/base.html" %}
 {% block content %}
 
-<div class="max-w-7xl mx-auto px-3">
+<div class="max-w-7xl mx-auto px-3 mt-2">
 
     <!-- TITLE -->
     <h1 class="text-2xl font-bold mb-6 text-white tracking-wide
     drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
         <i class="fa-solid fa-truck text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
-         Supplier Summary
+        Supplier Summary
     </h1>
 
     <!-- DESKTOP TABLE -->
     <div class="hidden md:block
-
     bg-gradient-to-br from-slate-800 to-slate-900
-
     rounded-3xl p-5
-
     shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_10px_10px_30px_rgba(0,0,0,0.8)]
-
     border border-white/10
-
     overflow-auto max-h-[500px]">
 
         <table class="w-full text-sm text-white">
 
             <thead class="sticky top-0 bg-slate-900 z-10
             shadow-[inset_0_-2px_6px_rgba(255,255,255,0.05)]">
-
                 <tr>
                     <th class="py-3 px-2">Supplier</th>
                     <th>Total Purchase</th>
                     <th>Outstanding</th>
                 </tr>
-
             </thead>
 
             <tbody class="divide-y divide-white/5">
 
                 {% for s in suppliers %}
 
-                <tr onclick="openSupplier({{ s.id }})"
+                <tr onclick="openSupplier('{{ s.id }}')"
                     class="cursor-pointer transition-all duration-200
-
                     hover:bg-white/5 hover:scale-[1.01]">
 
                     <td class="py-3 font-bold">
@@ -65,6 +57,14 @@
 
                 </tr>
 
+                {% empty %}
+
+                <tr>
+                    <td colspan="3" class="text-center py-6 text-gray-400">
+                        No suppliers found
+                    </td>
+                </tr>
+
                 {% endfor %}
 
             </tbody>
@@ -78,18 +78,13 @@
 
         {% for s in suppliers %}
 
-        <div onclick="openSupplier({{ s.id }})"
+        <div onclick="openSupplier('{{ s.id }}')"
 
         class="p-5 rounded-3xl cursor-pointer
-
         bg-gradient-to-br from-slate-800 to-slate-900
-
         shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_8px_8px_20px_rgba(0,0,0,0.8)]
-
         border border-white/10
-
         transition-all duration-200
-
         hover:scale-[1.02] hover:bg-white/5">
 
             <div class="flex justify-between items-center">
@@ -121,6 +116,12 @@
 
             </div>
 
+        </div>
+
+        {% empty %}
+
+        <div class="text-center text-gray-400 mt-10">
+            No suppliers found
         </div>
 
         {% endfor %}

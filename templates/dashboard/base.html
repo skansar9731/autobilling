@@ -3,76 +3,66 @@
 
 <head>
 
-    <title>MH Auto Billing </title>
+<title>MH Auto Billing </title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-    <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#0f172a">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        .perspective {
-            perspective: 1000px
-        }
-
-        .transform-style-3d {
-            transform-style: preserve-3d
-        }
-
-        .rotate-y-180 {
-            transform: rotateY(180deg)
-        }
-
-        .backface-hidden {
-            backface-visibility: hidden
-        }
-    </style>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#0f172a">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+.perspective{perspective:1000px}
+.transform-style-3d{transform-style:preserve-3d}
+.rotate-y-180{transform:rotateY(180deg)}
+.backface-hidden{backface-visibility:hidden}
+</style>
 </head>
 
 
 <body class="bg-gradient-to-br from-[#0f172a] via-[#020617] to-black min-h-screen text-white">
 
-    <!-- MOBILE HEADER -->
+<!-- MOBILE HEADER -->
 
-    <header
-        class="md:hidden fixed top-0 left-0 w-full z-50 flex items-center justify-between bg-slate-800 px-4 py-3 shadow-lg">
+<header class="md:hidden fixed top-0 left-0 w-full z-50 flex items-center justify-between bg-slate-800 px-4 py-3 shadow-lg">
 
-        <h1 class="font-bold text-lg text-white">MH Auto Billing</h1>
+    <h1 class="font-bold text-lg text-white">MH Auto Billing</h1>
 
-        <button onclick="toggleSidebar()" class="text-2xl text-white">
-            ☰
-        </button>
+    <button onclick="toggleSidebar()" class="text-2xl text-white">
+        ☰
+    </button>
 
-    </header>
+</header>
 
 
-    <div class="flex">
+<div class="flex">
 
-        <!-- SIDEBAR -->
+<!-- SIDEBAR -->
 
-        <aside id="sidebar" class="fixed md:static left-0 top-0 h-screen w-[315px] bg-slate-800 shadow-xl overflow-y-auto
+<aside id="sidebar"
+class="fixed md:static left-0 top-0 h-screen w-[315px] bg-slate-800 shadow-xl overflow-y-auto
 transform -translate-x-full md:translate-x-0 transition duration-300 z-50">
 
-            <div class="p-5">
+<div class="p-5">
 
-                <div class="flex items-center justify-between bg-slate-800 px-4 py-3 shadow-lg">
+<div class="flex items-center justify-between bg-slate-800 px-4 py-3 shadow-lg">
 
-                    <h1 class="font-bold text-lg">MH Auto Billing</h1>
+<h1 class="font-bold text-lg">MH Auto Billing</h1>
 
-                    <button onclick="toggleSidebar()" class="text-2xl md:hidden">
-                        ☰
-                    </button>
+<button onclick="toggleSidebar()" class="text-2xl md:hidden">
+☰
+</button>
 
-                </div>
+</div>
 
-                <ul class="space-y-2 text-sm">
+<ul class="space-y-2 text-sm">
 
-                    <!-- DASHBOARD -->
+<!-- DASHBOARD -->
 
-                    <li>
-                        <a href="/dashboard/" class="block px-3 py-2 rounded-xl transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/dashboard/"
+class="block px-3 py-2 rounded-xl transition-all duration-300 relative overflow-hidden
 
 {% if '/dashboard' in request.path %}
 
@@ -97,17 +87,18 @@ hover:scale-[1.02]
 {% endif %}
 ">
 
-                            <span class="relative z-10 flex items-center gap-2">
+<span class="relative z-10 flex items-center gap-2">
+    
+    🏢 <span class="tracking-wide">Company Info</span>
+</span>
 
-                                🏢 <span class="tracking-wide">Company Info</span>
-                            </span>
+</a>
+</li>
 
-                        </a>
-                    </li>
-
-                    <!-- SALES -->
-                    <li>
-                        <button onclick="toggleMenu('salesMenu','salesArrow')" class="flex justify-between items-center w-full px-3 py-2 rounded-xl
+<!-- SALES -->
+<li>
+<button onclick="toggleMenu('salesMenu','salesArrow')"
+class="flex justify-between items-center w-full px-3 py-2 rounded-xl
 transition-all duration-300 ease-in-out relative overflow-hidden
 
 {% if request.path == '/billing/' or request.path == '/sales-invoices/' or request.path == '/customers/' or request.path == '/receipt/' or request.path == '/sales-return/' %}
@@ -134,28 +125,28 @@ hover:scale-[1.03]
 {% endif %}
 ">
 
-                            <span class="flex items-center gap-2 relative z-10">
-                                🧾 <span class="tracking-wide">Sales</span>
-                            </span>
+<span class="flex items-center gap-2 relative z-10">
+    🧾 <span class="tracking-wide">Sales</span>
+</span>
 
-                            <span id="salesArrow" class="transition-transform duration-300 relative z-10">
-                                {% if request.path == '/billing/' or request.path == '/customers/' or request.path ==
-                                '/receipt/' or request.path == '/sales-return/' or request.GET.tab == 'sales' %}
-                                ▲
-                                {% else %}
-                                ▼
-                                {% endif %}
-                            </span>
+<span id="salesArrow" class="transition-transform duration-300 relative z-10">
+{% if request.path == '/billing/' or request.path == '/customers/' or request.path == '/receipt/' or request.path == '/sales-return/' or request.GET.tab == 'sales' %}
+▲
+{% else %}
+▼
+{% endif %}
+</span>
 
-                        </button>
+</button>
 
-                        <ul id="salesMenu"
-                            class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
+<ul id="salesMenu"
+class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
 {% if '/billing' in request.path or '/sales' in request.path or '/customers' in request.path or '/receipt' in request.path %}block{% else %}hidden{% endif %}">
 
 
-                            <li>
-                                <a href="/billing/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/billing/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/billing' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -169,12 +160,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    New Sale
-                                </a>
-                            </li>
+New Sale
+</a>
+</li>
 
-                            <li>
-                                <a href="/sales-invoices/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/sales-invoices/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if request.path == '/sales-invoices/' %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -188,12 +180,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Sales Invoices
-                                </a>
-                            </li>
+Sales Invoices
+</a>
+</li>
 
-                            <li>
-                                <a href="/customers/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/customers/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/customers' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -207,12 +200,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Customers (Debtors)
-                                </a>
-                            </li>
+Customers (Debtors)
+</a>
+</li>
 
-                            <li>
-                                <a href="/receipt/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/receipt/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/receipt' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -226,12 +220,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Balance Received (Receipt Voucher)
-                                </a>
-                            </li>
+Balance Received (Receipt Voucher)
+</a>
+</li>
 
-                            <li>
-                                <a href="/sales-return/" class="block px-3 py-2 rounded-lg whitespace-nowrap transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/sales-return/"
+class="block px-3 py-2 rounded-lg whitespace-nowrap transition-all duration-300 relative overflow-hidden
 
 {% if '/sales-return' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -245,21 +240,22 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Sales Returns (Debit Note)
-                                </a>
-                            </li>
+Sales Returns (Debit Note)
+</a>
+</li>
 
-                        </ul>
+</ul>
 
-                    </li>
+</li>
 
 
 
-                    <!-- PURCHASE -->
+<!-- PURCHASE -->
 
-                    <li>
+<li>
 
-                        <button onclick="toggleMenu('purchaseMenu','purchaseArrow')" class="flex justify-between items-center w-full px-3 py-2 rounded-xl
+<button onclick="toggleMenu('purchaseMenu','purchaseArrow')"
+class="flex justify-between items-center w-full px-3 py-2 rounded-xl
 transition-all duration-300 ease-in-out relative overflow-hidden
 
 {% if '/purchase' in request.path or '/purchase-invoices' in request.path or '/supplier-summary' in request.path or '/creditors' in request.path or '/payment' in request.path or '/debit-note' in request.path %}
@@ -286,29 +282,29 @@ hover:scale-[1.03]
 {% endif %}
 ">
 
-                            <span class="flex items-center gap-2 relative z-10">
-                                🛒 <span class="tracking-wide">Purchases</span>
-                            </span>
+<span class="flex items-center gap-2 relative z-10">
+    🛒 <span class="tracking-wide">Purchases</span>
+</span>
 
-                            <span id="purchaseArrow" class="transition-transform duration-300 relative z-10">
-                                {% if request.path == '/purchase/' or request.path == '/creditors/' or request.path ==
-                                '/payment/' or request.path == '/purchase-invoices/' or request.path ==
-                                '/supplier-summary/' %}
-                                ▲
-                                {% else %}
-                                ▼
-                                {% endif %}
-                            </span>
+<span id="purchaseArrow" class="transition-transform duration-300 relative z-10">
+{% if request.path == '/purchase/' or request.path == '/creditors/' or request.path == '/payment/' or request.path == '/purchase-invoices/' or request.path == '/supplier-summary/' %}
+▲
+{% else %}
+▼
+{% endif %}
+</span>
 
-                        </button>
+</button>
 
 
-                        <ul id="purchaseMenu" class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
+<ul id="purchaseMenu"
+class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
 {% if '/purchase' in request.path or '/creditors' in request.path or '/payment' in request.path or '/purchase-invoices' in request.path or '/supplier-summary' in request.path %}block{% else %}hidden{% endif %}
 ">
 
-                            <li>
-                                <a href="/purchase/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/purchase/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/purchase/' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -322,12 +318,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    New Purchase
-                                </a>
-                            </li>
+New Purchase
+</a>
+</li>
 
-                            <li>
-                                <a href="/supplier-summary/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/supplier-summary/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if request.path == '/supplier-summary/' %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -341,12 +338,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Purchase Invoices
-                                </a>
-                            </li>
+Purchase Invoices
+</a>
+</li>
 
-                            <li>
-                                <a href="/creditors/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/creditors/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/creditors' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -360,12 +358,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Suppliers (Creditors)
-                                </a>
-                            </li>
+Suppliers (Creditors)
+</a>
+</li>
 
-                            <li>
-                                <a href="/payment/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/payment/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if request.path == '/payment/' %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -379,12 +378,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Supplier Payments (Payment Voucher)
-                                </a>
-                            </li>
+Supplier Payments (Payment Voucher)
+</a>
+</li>
 
-                            <li>
-                                <a href="/debit-note/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/debit-note/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if request.path == '/debit-note/' %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -398,21 +398,22 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Purchase Returns (Credit Note)
-                                </a>
-                            </li>
+Purchase Returns (Credit Note)
+</a>
+</li>
 
-                        </ul>
+</ul>
 
-                    </li>
+</li>
 
 
 
-                    <!-- INVENTORY -->
+<!-- INVENTORY -->
 
-                    <li>
+<li>
 
-                        <button onclick="toggleMenu('inventoryMenu','inventoryArrow')" class="flex justify-between items-center w-full px-3 py-2 rounded-xl
+<button onclick="toggleMenu('inventoryMenu','inventoryArrow')"
+class="flex justify-between items-center w-full px-3 py-2 rounded-xl
 transition-all duration-300 ease-in-out relative overflow-hidden
 
 {% if '/products' in request.path or '/stocks' in request.path %}
@@ -439,27 +440,29 @@ hover:scale-[1.03]
 {% endif %}
 ">
 
-                            <span class="flex items-center gap-2 relative z-10">
-                                📦 <span class="tracking-wide">Inventory</span>
-                            </span>
+<span class="flex items-center gap-2 relative z-10">
+    📦 <span class="tracking-wide">Inventory</span>
+</span>
 
-                            <span id="inventoryArrow" class="transition-transform duration-300 relative z-10">
-                                {% if '/products' in request.path or '/stocks' in request.path %}
-                                ▲
-                                {% else %}
-                                ▼
-                                {% endif %}
-                            </span>
+<span id="inventoryArrow" class="transition-transform duration-300 relative z-10">
+{% if '/products' in request.path or '/stocks' in request.path %}
+▲
+{% else %}
+▼
+{% endif %}
+</span>
 
-                        </button>
+</button>
 
 
-                        <ul id="inventoryMenu" class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
+<ul id="inventoryMenu"
+class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
 {% if '/products' in request.path or '/stocks' in request.path %}block{% else %}hidden{% endif %}
 ">
 
-                            <li>
-                                <a href="/products/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/products/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/products' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -473,12 +476,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Products
-                                </a>
-                            </li>
+Products
+</a>
+</li>
 
-                            <li>
-                                <a href="/stocks/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/stocks/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/stocks' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -492,19 +496,20 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Stock
-                                </a>
-                            </li>
+Stock
+</a>
+</li>
 
-                        </ul>
+</ul>
 
-                    </li>
+</li>
 
-                    <!-- Expenses -->
+<!-- Expenses -->
 
-                    <li>
+<li>
 
-                        <button onclick="toggleMenu('expenseMenu','expenseArrow')" class="flex justify-between items-center w-full px-3 py-2 rounded-xl
+<button onclick="toggleMenu('expenseMenu','expenseArrow')"
+class="flex justify-between items-center w-full px-3 py-2 rounded-xl
 transition-all duration-300 ease-in-out relative overflow-hidden
 
 {% if '/expense' in request.path %}
@@ -531,27 +536,29 @@ hover:scale-[1.03]
 {% endif %}
 ">
 
-                            <span class="flex items-center gap-2 relative z-10">
-                                💰 <span class="tracking-wide">Expenses</span>
-                            </span>
+<span class="flex items-center gap-2 relative z-10">
+    💰 <span class="tracking-wide">Expenses</span>
+</span>
 
-                            <span id="expenseArrow" class="transition-transform duration-300 relative z-10">
-                                {% if '/expense' in request.path %}
-                                ▲
-                                {% else %}
-                                ▼
-                                {% endif %}
-                            </span>
+<span id="expenseArrow" class="transition-transform duration-300 relative z-10">
+{% if '/expense' in request.path %}
+▲
+{% else %}
+▼
+{% endif %}
+</span>
 
-                        </button>
+</button>
 
 
-                        <ul id="expenseMenu" class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
+<ul id="expenseMenu"
+class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
 {% if '/expense' in request.path %}block{% else %}hidden{% endif %}
 ">
 
-                            <li>
-                                <a href="/expenses/add/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/expenses/add/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/expenses/add' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -565,12 +572,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Add Expense
-                                </a>
-                            </li>
+Add Expense
+</a>
+</li>
 
-                            <li>
-                                <a href="/expenses/categories/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/expenses/categories/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/expenses/categories' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -584,12 +592,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Expense Categories
-                                </a>
-                            </li>
+Expense Categories
+</a>
+</li>
 
-                            <li>
-                                <a href="/expenses/history/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/expenses/history/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/expenses/history' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -603,19 +612,20 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Expense History
-                                </a>
-                            </li>
+Expense History
+</a>
+</li>
 
-                        </ul>
+</ul>
 
-                    </li>
+</li>
 
-                    <!-- Accounts Summary -->
+<!-- Accounts Summary -->
 
-                    <li>
+<li>
 
-                        <button onclick="toggleMenu('accountsMenu','accountsArrow')" class="flex justify-between items-center w-full px-3 py-2 rounded-xl
+<button onclick="toggleMenu('accountsMenu','accountsArrow')"
+class="flex justify-between items-center w-full px-3 py-2 rounded-xl
 transition-all duration-300 ease-in-out relative overflow-hidden
 
 {% if '/accounts' in request.path or '/bank' in request.path %}
@@ -642,27 +652,29 @@ hover:scale-[1.03]
 {% endif %}
 ">
 
-                            <span class="flex items-center gap-2 relative z-10">
-                                📒 <span class="tracking-wide">Accounts Summary</span>
-                            </span>
+<span class="flex items-center gap-2 relative z-10">
+    📒 <span class="tracking-wide">Accounts Summary</span>
+</span>
 
-                            <span id="accountsArrow" class="transition-transform duration-300 relative z-10">
-                                {% if '/accounts' in request.path or '/bank' in request.path %}
-                                ▲
-                                {% else %}
-                                ▼
-                                {% endif %}
-                            </span>
+<span id="accountsArrow" class="transition-transform duration-300 relative z-10">
+{% if '/accounts' in request.path or '/bank' in request.path %}
+▲
+{% else %}
+▼
+{% endif %}
+</span>
 
-                        </button>
+</button>
 
 
-                        <ul id="accountsMenu" class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
+<ul id="accountsMenu"
+class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
 {% if '/accounts' in request.path or '/bank' in request.path %}block{% else %}hidden{% endif %}
 ">
 
-                            <li>
-                                <a href="/accounts/ledger/" class="block px-3 py-2 rounded-lg whitespace-nowrap transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/accounts/ledger/" 
+class="block px-3 py-2 rounded-lg whitespace-nowrap transition-all duration-300 relative overflow-hidden
 
 {% if '/accounts/ledger' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -676,12 +688,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Ledger
-                                </a>
-                            </li>
+Ledger
+</a>
+</li>
 
-                            <li>
-                                <a href="/accounts/trial/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/accounts/trial/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/accounts/trial' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -695,12 +708,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Trial Balance
-                                </a>
-                            </li>
+Trial Balance
+</a>
+</li>
 
-                            <li>
-                                <a href="/accounts/pl/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/accounts/pl/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/accounts/pl' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -714,12 +728,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Profit & Loss
-                                </a>
-                            </li>
+Profit & Loss
+</a>
+</li>
 
-                            <li>
-                                <a href="/accounts/balance/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/accounts/balance/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/accounts/balance' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -733,12 +748,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Balance Sheet
-                                </a>
-                            </li>
+Balance Sheet
+</a>
+</li>
 
-                            <li>
-                                <a href="/bank/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/bank/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/bank' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -752,20 +768,21 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Bank Accounts
-                                </a>
-                            </li>
+Bank Accounts
+</a>
+</li>
 
-                        </ul>
+</ul>
 
-                    </li>
+</li>
 
 
-                    <!-- REPORTS -->
+<!-- REPORTS -->
 
-                    <li>
+<li>
 
-                        <button onclick="toggleMenu('reportsMenu','reportsArrow')" class="flex justify-between items-center w-full px-3 py-2 rounded-xl
+<button onclick="toggleMenu('reportsMenu','reportsArrow')"
+class="flex justify-between items-center w-full px-3 py-2 rounded-xl
 transition-all duration-300 ease-in-out relative overflow-hidden
 
 {% if '/reports' in request.path %}
@@ -792,27 +809,29 @@ hover:scale-[1.03]
 {% endif %}
 ">
 
-                            <span class="flex items-center gap-2 relative z-10">
-                                📈 <span class="tracking-wide">Reports</span>
-                            </span>
+<span class="flex items-center gap-2 relative z-10">
+    📈 <span class="tracking-wide">Reports</span>
+</span>
 
-                            <span id="reportsArrow" class="transition-transform duration-300 relative z-10">
-                                {% if '/reports' in request.path %}
-                                ▲
-                                {% else %}
-                                ▼
-                                {% endif %}
-                            </span>
+<span id="reportsArrow" class="transition-transform duration-300 relative z-10">
+{% if '/reports' in request.path %}
+▲
+{% else %}
+▼
+{% endif %}
+</span>
 
-                        </button>
+</button>
 
 
-                        <ul id="reportsMenu" class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
+<ul id="reportsMenu"
+class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
 {% if '/reports' in request.path %}block{% else %}hidden{% endif %}
 ">
 
-                            <li>
-                                <a href="/reports/sales/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/reports/sales/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/reports/sales' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -826,12 +845,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Sales Report
-                                </a>
-                            </li>
+Sales Report
+</a>
+</li>
 
-                            <li>
-                                <a href="/reports/purchase/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/reports/purchase/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/reports/purchase' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -845,12 +865,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Purchase Report
-                                </a>
-                            </li>
+Purchase Report
+</a>
+</li>
 
-                            <li>
-                                <a href="/reports/expenses/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/reports/expenses/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/reports/expense' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -864,12 +885,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Expense Report
-                                </a>
-                            </li>
+Expense Report
+</a>
+</li>
 
-                            <li>
-                                <a href="/reports/profit/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/reports/profit/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/reports/profit' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -883,12 +905,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    Profit Report
-                                </a>
-                            </li>
+Profit Report
+</a>
+</li>
 
-                            <li>
-                                <a href="/reports/gst/" class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+<li>
+<a href="/reports/gst/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/reports/gst' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -902,18 +925,19 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-                                    GST Report
-                                </a>
-                            </li>
+GST Report
+</a>
+</li>
 
-                        </ul>
+</ul>
 
-                    </li>
+</li>
 
 
 
-                    <li class="pt-6">
-                        <a href="/logout/" class="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300
+<li class="pt-6">
+<a href="/logout/"
+class="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300
 
 text-red-400 font-semibold tracking-wide
 
@@ -935,377 +959,340 @@ active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
 
 ">
 
-                            <!-- ICON -->
-                            <i
-                                class="fa-solid fa-right-from-bracket text-lg drop-shadow-[0_0_6px_rgba(255,0,0,0.6)]"></i>
+    <!-- ICON -->
+    <i class="fa-solid fa-right-from-bracket text-lg drop-shadow-[0_0_6px_rgba(255,0,0,0.6)]"></i>
 
-                            <!-- TEXT -->
-                            <span>Logout</span>
+    <!-- TEXT -->
+    <span>Logout</span>
 
-                        </a>
-                    </li>
+</a>
+</li>
 
-                </ul>
+</ul>
 
-            </div>
+</div>
 
-        </aside>
-
-
-        <!-- MAIN CONTENT -->
-
-        <main class="flex-1 p-4 md:p-6 pb-24 pt-20 md:pt-6">
-
-            {% block content %}
-            {% endblock %}
-
-        </main>
-
-    </div>
+</aside>
 
 
+<!-- MAIN CONTENT -->
 
-    <!-- MOBILE NAV -->
-    <div class="md:hidden fixed bottom-0 left-0 right-0 z-50 px-0 pb-0">
+<main class="flex-1 p-4 md:p-6 pb-24 pt-20 md:pt-6">
 
-        <!-- GLASS NAV -->
-        <div class="relative flex justify-around items-center 
+{% block content %}
+{% endblock %}
+
+</main>
+
+</div>
+
+
+
+<!-- MOBILE NAV -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 z-50 px-0 pb-0">
+
+    <!-- GLASS NAV -->
+    <div class="relative flex justify-around items-center 
         bg-gradient-to-br from-white/10 to-white/5 
         backdrop-blur-2xl py-3 
         shadow-[0_15px_50px_rgba(0,0,0,0.9)]">
 
-            <!-- SALE -->
-            <a href="/billing/" class="nav-item
+        <!-- SALE -->
+        <a href="/billing/" 
+        class="nav-item
         {% if '/billing' in request.path %}
         active-nav
         {% endif %}">
-                <i class="fa fa-file-text"></i>
-                <span>Sales</span>
-            </a>
+            <i class="fa fa-file-text"></i>
+            <span>Sales</span>
+        </a>
 
-            <!-- INVOICE -->
-            <a href="/sales-invoices/" class="nav-item
+        <!-- INVOICE -->
+        <a href="/sales-invoices/" 
+        class="nav-item
         {% if '/sales-invoices' in request.path %}
         active-nav
         {% endif %}">
-                <i class="fa-solid fa-receipt"></i>
-                <span>Invoices</span>
-            </a>
+            <i class="fa-solid fa-receipt"></i>
+            <span>Invoices</span>
+        </a>
 
-            <!-- CENTER BUTTON -->
-            <div class="absolute -top-12 left-1/2 -translate-x-1/2">
+        <!-- CENTER BUTTON -->
+        <div class="absolute -top-12 left-1/2 -translate-x-1/2">
 
-                <button onclick="startScanner()" class="scan-btn bottom-2">
+            <button onclick="startScanner()" class="scan-btn bottom-2">
 
-                    <!-- GLOW -->
-                    <span class="scan-glow"></span>
+                <!-- GLOW -->
+                <span class="scan-glow"></span>
 
-                    <!-- RIPPLE -->
-                    <span class="scan-ripple"></span>
+                <!-- RIPPLE -->
+                <span class="scan-ripple"></span>
 
-                    <!-- CONTENT -->
-                    <div class="scan-inner">
+                <!-- CONTENT -->
+                <div class="scan-inner">
 
-                        <div class="flip-box">
+                    <div class="flip-box">
 
-                            <!-- TEXT -->
-                            <div class="flip-front text-black font-bold">
-                                Scan
-                            </div>
+                        <!-- TEXT -->
+                        <div class="flip-front text-black font-bold">
+                            Scan
+                        </div>
 
-                            <!-- ICON -->
-                            <div class="flip-back text-black font-bold">
-                                <i class="fa-solid fa-qrcode"></i>
-                            </div>
-
+                        <!-- ICON -->
+                        <div class="flip-back text-black font-bold">
+                            <i class="fa-solid fa-qrcode"></i>
                         </div>
 
                     </div>
 
-                </button>
-            </div>
+                </div>
 
-            <!-- PURCHASE -->
-            <a href="/purchase/" class="nav-item
+            </button>
+        </div>
+
+        <!-- PURCHASE -->
+        <a href="/purchase/" 
+        class="nav-item
         {% if '/purchase' in request.path %}
         active-nav
         {% endif %}">
-                <i class="fa-solid fa-cart-plus"></i>
-                <span>Purchase</span>
-            </a>
+            <i class="fa-solid fa-cart-plus"></i>
+            <span>Purchase</span>
+        </a>
 
-            <!-- STOCK -->
-            <a href="/stocks/" class="nav-item
+        <!-- STOCK -->
+        <a href="/stocks/" 
+        class="nav-item
         {% if '/stocks' in request.path %}
         active-nav
         {% endif %}">
-                <i class="fa-solid fa-box"></i>
-                <span>Stock</span>
-            </a>
+            <i class="fa-solid fa-box"></i>
+            <span>Stock</span>
+        </a>
 
-        </div>
     </div>
+</div>
 
-    <style>
-        /* mobile rotate off  */
-        @media screen and (orientation: landscape) {
-            body {
-                transform: rotate(-90deg);
-                transform-origin: left top;
-                width: 100vh;
-                height: 100vw;
-                overflow-x: hidden;
-                position: absolute;
-                top: 100%;
-                left: 0;
-            }
-        }
+<style>
 
-        /* NAV ITEMS */
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            color: #9ca3af;
-            font-size: 14px;
-            transition: all .3s ease;
-            font-weight: bold;
-        }
+/* NAV ITEMS */
+.nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    color:#9ca3af;
+    font-size:14px;
+    transition: all .3s ease;
+    font-weight: bold;
+}
 
-        .nav-item i {
-            font-size: 20px;
-            transition: .3s;
-        }
+.nav-item i{
+    font-size:20px;
+    transition:.3s;
+}
 
-        /* HOVER */
-        .nav-item:hover {
-            color: #facc15;
-            transform: translateY(-2px) scale(1.05);
-        }
+/* HOVER */
+.nav-item:hover{
+    color:#facc15;
+    transform:translateY(-2px) scale(1.05);
+}
 
-        /* ACTIVE */
-        .active-nav {
-            color: #facc15;
-            transform: scale(1.15);
-        }
+/* ACTIVE */
+.active-nav{
+    color:#facc15;
+    transform:scale(1.15);
+}
 
-        .active-nav i {
-            text-shadow: 0 0 10px rgba(250, 204, 21, 0.8);
-        }
+.active-nav i{
+    text-shadow:0 0 10px rgba(250,204,21,0.8);
+}
 
-        /* ===== SCAN BUTTON ===== */
+/* ===== SCAN BUTTON ===== */
 
-        .scan-btn {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
+.scan-btn{
+    position:relative;
+    width:80px;
+    height:80px;
+    border-radius:50%;
 
-            /* 🔥 MULTI COLOR (GOLD + YELLOW + ORANGE) */
-            background: linear-gradient(145deg,
-                    #fff7ae,
-                    #fde047,
-                    #facc15,
-                    #f59e0b,
-                    #d97706);
+    /* 🔥 MULTI COLOR (GOLD + YELLOW + ORANGE) */
+    background:linear-gradient(145deg,
+        #fff7ae,
+        #fde047,
+        #facc15,
+        #f59e0b,
+        #d97706
+    );
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-            /* 🔥 3D DEPTH + COLORED GLOW */
-            box-shadow:
-                0 15px 40px rgba(0, 0, 0, 0.9),
-                0 0 25px rgba(250, 204, 21, 0.7),
-                0 0 45px rgba(245, 158, 11, 0.4),
+    /* 🔥 3D DEPTH + COLORED GLOW */
+    box-shadow:
+        0 15px 40px rgba(0,0,0,0.9),
+        0 0 25px rgba(250,204,21,0.7),
+        0 0 45px rgba(245,158,11,0.4),
 
-                inset 0 3px 10px rgba(255, 255, 255, 0.6),
-                inset 0 -6px 14px rgba(0, 0, 0, 0.7);
+        inset 0 3px 10px rgba(255,255,255,0.6),
+        inset 0 -6px 14px rgba(0,0,0,0.7);
 
-            border: 2px solid rgba(255, 255, 255, 0.8);
+    border:2px solid rgba(255,255,255,0.8);
 
-            transition: all 0.25s ease;
-            overflow: hidden;
-        }
+    transition:all 0.25s ease;
+    overflow:hidden;
+}
 
-        /* ✨ SHINE EFFECT */
-        .scan-btn::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -120%;
-            width: 120%;
-            height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.7), transparent);
-            transition: 0.7s;
-        }
+/* ✨ SHINE EFFECT */
+.scan-btn::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-120%;
+    width:120%;
+    height:100%;
+    background:linear-gradient(120deg,transparent,rgba(255,255,255,0.7),transparent);
+    transition:0.7s;
+}
 
-        .scan-btn:hover::before {
-            left: 120%;
-        }
+.scan-btn:hover::before{
+    left:120%;
+}
 
-        /* 🚀 HOVER FLOAT + GLOW BOOST */
-        .scan-btn:hover {
-            transform: translateY(-6px) scale(1.08);
+/* 🚀 HOVER FLOAT + GLOW BOOST */
+.scan-btn:hover{
+    transform:translateY(-6px) scale(1.08);
 
-            box-shadow:
-                0 25px 55px rgba(0, 0, 0, 1),
-                0 0 40px rgba(250, 204, 21, 0.9),
-                0 0 60px rgba(245, 158, 11, 0.6),
+    box-shadow:
+        0 25px 55px rgba(0,0,0,1),
+        0 0 40px rgba(250,204,21,0.9),
+        0 0 60px rgba(245,158,11,0.6),
 
-                inset 0 4px 12px rgba(255, 255, 255, 0.7),
-                inset 0 -8px 16px rgba(0, 0, 0, 0.8);
-        }
+        inset 0 4px 12px rgba(255,255,255,0.7),
+        inset 0 -8px 16px rgba(0,0,0,0.8);
+}
 
-        /* 👇 PRESS EFFECT */
-        .scan-btn:active {
-            transform: scale(0.88);
+/* 👇 PRESS EFFECT */
+.scan-btn:active{
+    transform:scale(0.88);
 
-            box-shadow:
-                inset 0 8px 20px rgba(0, 0, 0, 0.9),
-                inset 0 -4px 10px rgba(255, 255, 255, 0.3);
-        }
+    box-shadow:
+        inset 0 8px 20px rgba(0,0,0,0.9),
+        inset 0 -4px 10px rgba(255,255,255,0.3);
+}
 
-        /* PRESS EFFECT */
-        .scan-btn:active {
-            transform: scale(0.9);
-        }
+/* PRESS EFFECT */
+.scan-btn:active{
+    transform:scale(0.9);
+}
 
-        /* GLOW */
-        .scan-glow {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(250, 204, 21, 0.4), transparent);
-            filter: blur(15px);
-        }
+/* GLOW */
+.scan-glow{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(250,204,21,0.4),transparent);
+    filter:blur(15px);
+}
 
-        /* RIPPLE */
-        .scan-ripple {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: #facc15;
-            opacity: .2;
-            /* animation:ripple 2s infinite; */
-        }
+/* RIPPLE */
+.scan-ripple{
+    position:absolute;
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    background:#facc15;
+    opacity:.2;
+    /* animation:ripple 2s infinite; */
+}
 
-        @keyframes ripple {
-            0% {
-                transform: scale(1);
-                opacity: .3
-            }
+@keyframes ripple{
+    0%{transform:scale(1);opacity:.3}
+    100%{transform:scale(1.6);opacity:0}
+}
 
-            100% {
-                transform: scale(1.6);
-                opacity: 0
-            }
-        }
+/* INNER */
+.scan-inner{
+    position:relative;
+    perspective:1000px;
+}
 
-        /* INNER */
-        .scan-inner {
-            position: relative;
-            perspective: 1000px;
-        }
+/* FLIP */
+.flip-box{
+    position:relative;
+    width:40px;
+    height:40px;
+    transform-style:preserve-3d;
+    animation:flip 4s infinite;
+}
 
-        /* FLIP */
-        .flip-box {
-            position: relative;
-            width: 40px;
-            height: 40px;
-            transform-style: preserve-3d;
-            animation: flip 4s infinite;
-        }
+.flip-front, .flip-back{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    backface-visibility:hidden;
+}
 
-        .flip-front,
-        .flip-back {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            backface-visibility: hidden;
-        }
+.flip-back{
+    transform:rotateY(180deg);
+    font-size:22px;
+}
 
-        .flip-back {
-            transform: rotateY(180deg);
-            font-size: 22px;
-        }
+@keyframes flip{
+   0%,20% { transform: rotateY(0deg); } 40% { transform: rotateY(180deg); } 55% { transform: rotateY(180deg) scale(1.2); } 70% { transform: rotateY(180deg) scale(1); } 100% { transform: rotateY(0deg); }
+}
 
-        @keyframes flip {
+/* SAFE AREA MOBILE */
+body{
+    padding-bottom:100px;
+}
 
-            0%,
-            20% {
-                transform: rotateY(0deg);
-            }
+</style>
+<script>
 
-            40% {
-                transform: rotateY(180deg);
-            }
+function toggleSidebar(){
 
-            55% {
-                transform: rotateY(180deg) scale(1.2);
-            }
+let sidebar=document.getElementById("sidebar")
 
-            70% {
-                transform: rotateY(180deg) scale(1);
-            }
+sidebar.classList.toggle("-translate-x-full")
 
-            100% {
-                transform: rotateY(0deg);
-            }
-        }
-
-        /* SAFE AREA MOBILE */
-        body {
-            padding-bottom: 100px;
-        }
-    </style>
-    <script>
-
-        function toggleSidebar() {
-
-            let sidebar = document.getElementById("sidebar")
-
-            sidebar.classList.toggle("-translate-x-full")
-
-        }
+}
 
 
-        function toggleMenu(menu) {
+function toggleMenu(menu){
 
-            const menus = [
-                "salesMenu",
-                "purchaseMenu",
-                "inventoryMenu",
-                "expenseMenu",
-                "accountsMenu",
-                "reportsMenu"
-            ]
+const menus=[
+"salesMenu",
+"purchaseMenu",
+"inventoryMenu",
+"expenseMenu",
+"accountsMenu",
+"reportsMenu"
+]
 
-            menus.forEach(id => {
+menus.forEach(id=>{
 
-                let el = document.getElementById(id)
+let el=document.getElementById(id)
 
-                if (id === menu) {
+if(id===menu){
 
-                    el.classList.toggle("hidden")
+el.classList.toggle("hidden")
 
-                } else {
+}else{
 
-                    if (el) el.classList.add("hidden")
+if(el) el.classList.add("hidden")
 
-                }
+}
 
-            })
+})
 
-        }
-    </script>
+}
+</script>
 
 
 </body>
-
 </html>
