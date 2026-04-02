@@ -1071,6 +1071,18 @@ active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
         </a>
 
     </div>
+    <div id="rotateBlock"
+class="fixed inset-0 z-[9999] hidden
+flex items-center justify-center text-center
+bg-black text-white px-6">
+
+    <div>
+        <i class="fa-solid fa-rotate text-4xl mb-4 text-yellow-400"></i>
+        <h2 class="text-xl font-bold mb-2">Please rotate your device</h2>
+        <p class="text-gray-400">Use portrait mode</p>
+    </div>
+
+</div>
 </div>
 
 <style>
@@ -1253,6 +1265,26 @@ body{
 
 </style>
 <script>
+    // pwa mobile rotate off
+function isPWA(){
+    return window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true;
+}
+
+function checkOrientation(){
+
+    if(!isPWA()) return; // ❗ only for PWA
+
+    if(window.innerWidth > window.innerHeight){
+        document.getElementById("rotateBlock").classList.remove("hidden");
+    } else {
+        document.getElementById("rotateBlock").classList.add("hidden");
+    }
+}
+
+window.addEventListener("load", checkOrientation);
+window.addEventListener("resize", checkOrientation);
+
 
 function toggleSidebar(){
 
