@@ -2,11 +2,9 @@
 
 {% block content %}
 
-<div class="sticky top-[1px] z-40
-bg-slate-900/95 backdrop-blur-md
-py-3
-mt-2
-shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
+<div class="sticky top-[50px] md:top-[10px] z-40
+bg-slate-900/95 backdrop-blur-sm
+py-3 rounded-3xl">
 
     <h1 class="text-2xl font-bold tracking-wide
     flex items-center gap-3 text-white
@@ -34,7 +32,7 @@ shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
 
     <!-- LEFT SIDE -->
     <!-- LEFT SIDE -->
-     <div class="md:col-span-2
+    <div class="md:col-span-2
 
     bg-gradient-to-br from-slate-800 to-slate-900
 
@@ -48,14 +46,13 @@ shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
 
         <!-- Header -->
         <!-- CUSTOMER SELECT -->
-       <div class="mb-4">
+        <div class="mb-4">
 
-    <label class="text-sm text-gray-300 tracking-wide">
-        Purchase-Suppliers
-    </label>
+            <label class="text-sm text-gray-300 tracking-wide">
+                Purchase-Suppliers
+            </label>
 
-    <select id="supplierSelect"
-    class="w-full mt-1 p-3 rounded-xl bg-slate-700 text-white
+            <select id="supplierSelect" class="w-full mt-1 p-3 rounded-xl bg-slate-700 text-white
 
     outline-none
 
@@ -69,29 +66,29 @@ shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
     focus:ring-0
     ">
 
-        <option value="">Select Supplier</option>
+                <option value="">Select Supplier</option>
 
-        {% for s in suppliers %}
-        <option value="{{ s.id }}">
-            {{ s.name }}{% if s.phone %} ({{ s.phone }}){% endif %}
-        </option>
-        {% endfor %}
+                {% for s in suppliers %}
+                <option value="{{ s.id }}">
+                    {{ s.name }}{% if s.phone %} ({{ s.phone }}){% endif %}
+                </option>
+                {% endfor %}
 
-    </select>
+            </select>
 
-    <!-- OUTSTANDING -->
-    <div class="mt-2 text-sm text-yellow-400 font-medium tracking-wide
+            <!-- OUTSTANDING -->
+            <div class="mt-2 text-sm text-yellow-400 font-medium tracking-wide
 
     drop-shadow-[0_0_6px_rgba(255,215,0,0.5)]">
 
-        Outstandings: ₹ 
-        <span id="supplierOutstanding" class="font-bold text-yellow-300">
-            0
-        </span>
+                Outstandings: ₹
+                <span id="supplierOutstanding" class="font-bold text-yellow-300">
+                    0
+                </span>
 
-    </div>
+            </div>
 
-</div>
+        </div>
         <div class="mb-4">
 
             <!-- HEADER -->
@@ -106,22 +103,21 @@ shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
 
                     <input type="file" id="bulkFile" accept=".csv,.xlsx" class="hidden"
                         onchange="uploadBulkFile(event)">
-             <button onclick="document.getElementById('bulkFile').click()" 
-class="flex-1 relative overflow-hidden 
+                    <button onclick="document.getElementById('bulkFile').click()" class="flex-1 relative overflow-hidden 
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
 text-black font-semibold whitespace-nowrap md:w-56
 
 shadow-[inset_3px_3px_8px_rgba(255,255,255,0.5),_6px_6px_18px_rgba(0,0,0,0.3)]
-shadow-yello-400/15
+shadow-yellow-400/15
 
 active:scale-95 active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.4)]
 py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-200
 
 before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/30 before:to-transparent before:opacity-60
 ">
-    <i class="fa-solid fa-layer-group relative z-10"></i>
-    <span class="relative z-10">Bulk Upload</span>
-</button>
+                        <i class="fa-solid fa-layer-group relative z-10"></i>
+                        <span class="relative z-10">Bulk Upload</span>
+                    </button>
 
                     <button onclick="startScanner()" class="flex-1 relative overflow-hidden
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
@@ -166,17 +162,14 @@ before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 bef
         <!-- Product Add Row -->
         <div class="flex flex-col gap-3 text-white">
 
-          <!-- TOP ROW (SEARCH + QTY) -->
-<div class="flex flex-col md:flex-row gap-3 items-start">
+            <!-- TOP ROW (SEARCH + QTY) -->
+            <div class="flex flex-col md:flex-row gap-3 items-start">
 
-    <!-- SEARCH INPUT -->
-    <div class="relative flex-1 w-full">
+                <!-- SEARCH INPUT -->
+                <div class="relative flex-1 w-full">
 
-        <input type="text" id="productSearch"
-        placeholder="Search product by name or barcode..."
-        autocomplete="off"
-
-        class="w-full p-3 rounded-xl bg-slate-700 text-white
+                    <input type="text" id="productSearch" placeholder="Search product by name or barcode..."
+                        autocomplete="off" class="w-full p-3 rounded-xl bg-slate-700 text-white
 
         outline-none
 
@@ -189,19 +182,16 @@ before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 bef
         focus:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.15),_0_0_10px_rgba(59,130,246,0.4)]
         ">
 
-        <!-- DROPDOWN -->
-        <div id="productList"
-        class="absolute z-50 w-full bg-slate-800 border border-gray-600 rounded-xl mt-1 max-h-60 overflow-y-auto
+                    <!-- DROPDOWN -->
+                    <div id="productList" class="absolute z-50 w-full bg-slate-800 border border-gray-600 rounded-xl mt-1 max-h-60 overflow-y-auto
 
         shadow-[6px_6px_20px_rgba(0,0,0,0.8)] hidden">
-        </div>
+                    </div>
 
-    </div>
+                </div>
 
-    <!-- QTY -->
-    <input id="qty" type="number" min="1" value="1"
-
-    class="w-full md:w-24 p-3 rounded-xl bg-slate-700 text-white
+                <!-- QTY -->
+                <input id="qty" type="number" min="1" value="1" class="w-full md:w-24 p-3 rounded-xl bg-slate-700 text-white
 
     outline-none
 
@@ -214,10 +204,8 @@ before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 bef
     focus:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.15),_0_0_10px_rgba(34,197,94,0.4)]
     ">
 
-    <!-- RATE -->
-    <input id="rate" type="number" placeholder="Rate"
-
-    class="w-full md:w-28 p-3 rounded-xl bg-slate-700 text-white
+                <!-- RATE -->
+                <input id="rate" type="number" placeholder="Rate" class="w-full md:w-28 p-3 rounded-xl bg-slate-700 text-white
 
     outline-none
 
@@ -230,10 +218,10 @@ before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 bef
     focus:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.15),_0_0_10px_rgba(234,179,8,0.4)]
     ">
 
-</div>
+            </div>
 
-           <!-- ✅ STOCK ROW (SEPARATE FIXED) -->
-<div class="flex items-center w-full px-3 py-2 rounded-xl
+            <!-- ✅ STOCK ROW (SEPARATE FIXED) -->
+            <div class="flex items-center w-full px-3 py-2 rounded-xl
 
 bg-gradient-to-br from-slate-800 to-slate-900
 
@@ -243,23 +231,21 @@ border border-white/5
 
 transition-all duration-300">
 
-    <!-- LEFT -->
-    <div class="flex items-center gap-1 text-gray-400 text-xs sm:text-sm tracking-wide">
+                <!-- LEFT -->
+                <div class="flex items-center gap-1 text-gray-400 text-xs sm:text-sm tracking-wide">
 
-        <span>Available Stock:</span>
+                    <span>Available Stock:</span>
 
-        <span id="availableStock"
-        class="font-bold text-green-400
+                    <span id="availableStock" class="font-bold text-green-400
 
         drop-shadow-[0_0_6px_rgba(34,197,94,0.6)]">
-            -
-        </span>
+                        -
+                    </span>
 
-    </div>
+                </div>
 
-    <!-- RIGHT -->
-    <button onclick="openChecklist()"
-    class="ml-auto flex items-center gap-1 px-3 py-1.5 rounded-lg
+                <!-- RIGHT -->
+                <button onclick="openChecklist()" class="ml-auto flex items-center gap-1 px-3 py-1.5 rounded-lg
 
     text-yellow-400 font-semibold
 
@@ -276,12 +262,12 @@ transition-all duration-300">
     active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
     ">
 
-        <i class="fa-solid fa-list-check text-sm"></i>
-        <span class="font-bold text-xs sm:text-sm">Checklist</span>
+                    <i class="fa-solid fa-list-check text-sm"></i>
+                    <span class="font-bold text-xs sm:text-sm">Checklist</span>
 
-    </button>
+                </button>
 
-</div>
+            </div>
 
         </div>
 
@@ -323,13 +309,12 @@ hover:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.08),_12px_12px_32px_rgba(0,0,
 hover:scale-[1.01]">
 
         <h2 class="text-xl font-bold mb-3">Summary</h2>
-       <!-- PAYMENT MODE -->
-<label class="text-sm text-gray-300 tracking-wide">
-    Payment Mode
-</label>
+        <!-- PAYMENT MODE -->
+        <label class="text-sm text-gray-300 tracking-wide">
+            Payment Mode
+        </label>
 
-<select id="paymentMode"
-class="w-full p-3 rounded-xl bg-slate-700 text-white mb-3
+        <select id="paymentMode" class="w-full p-3 rounded-xl bg-slate-700 text-white mb-3
 
 outline-none
 
@@ -342,26 +327,26 @@ transition-all duration-300
 focus:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.15),_0_0_12px_rgba(255,215,0,0.3)]
 ">
 
-    <option value="cash" class="bg-green-500 text-white font-semibold">
-        💵 Cash
-    </option>
+            <option value="cash" class="bg-green-500 text-white font-semibold">
+                💵 Cash
+            </option>
 
-    <option value="bank" class="bg-blue-500 text-white font-semibold">
-        🏦 Bank / UPI
-    </option>
+            <option value="bank" class="bg-blue-500 text-white font-semibold">
+                🏦 Bank / UPI
+            </option>
 
-    <option value="credit" class="bg-red-500 text-white font-semibold">
-        📒 Credit
-    </option>
+            <option value="credit" class="bg-red-500 text-white font-semibold">
+                📒 Credit
+            </option>
 
-</select>
+        </select>
         <label class="flex items-center gap-3 mb-3 cursor-pointer select-none">
 
-    <!-- HIDDEN INPUT -->
-    <input type="checkbox" id="gstToggle" checked class="hidden peer">
+            <!-- HIDDEN INPUT -->
+            <input type="checkbox" id="gstToggle" checked class="hidden peer">
 
-    <!-- CUSTOM BOX -->
-    <span class="w-5 h-5 flex items-center justify-center rounded-md
+            <!-- CUSTOM BOX -->
+            <span class="w-5 h-5 flex items-center justify-center rounded-md
 
     bg-gradient-to-br from-slate-800 to-slate-900
 
@@ -375,8 +360,8 @@ focus:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.15),_0_0_12px_rgba(255,215,0,
     peer-checked:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.4),_4px_4px_12px_rgba(0,0,0,0.7)]
     ">
 
-        <!-- CHECK ICON -->
-        <i class="fa-solid fa-check text-black text-xs
+                <!-- CHECK ICON -->
+                <i class="fa-solid fa-check text-black text-xs
 
         opacity-0
 
@@ -388,16 +373,16 @@ focus:shadow-[inset_2px_2px_8px_rgba(255,255,255,0.15),_0_0_12px_rgba(255,215,0,
         peer-checked:scale-110
         "></i>
 
-    </span>
+            </span>
 
-    <!-- LABEL TEXT -->
-    <span class="text-white font-medium tracking-wide
+            <!-- LABEL TEXT -->
+            <span class="text-white font-medium tracking-wide
 
     drop-shadow-[0_0_4px_rgba(255,255,255,0.2)]">
-        GST (18%)
-    </span>
+                GST (18%)
+            </span>
 
-</label>
+        </label>
         <div class="space-y-2 text-sm">
             <div>CGST (9%) : ₹ <span id="cgst">0</span></div>
             <div>SGST (9%) : ₹ <span id="sgst">0</span></div>
@@ -454,7 +439,7 @@ before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 bef
 </div>
 <!-- SCAN RESULT MODAL -->
 <div id="scanProductModal"
-class="fixed inset-0 bg-black/70 backdrop-blur-md hidden flex items-center justify-center z-[9999]">
+    class="fixed inset-0 bg-black/70 backdrop-blur-md hidden flex items-center justify-center z-[9999]">
 
     <!-- CARD -->
     <div class="relative
@@ -468,7 +453,8 @@ class="fixed inset-0 bg-black/70 backdrop-blur-md hidden flex items-center justi
     border border-white/10">
 
         <!-- SHINE -->
-        <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
+        <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-white/10 to-transparent pointer-events-none">
+        </div>
 
         <!-- TITLE -->
         <h2 class="flex items-center gap-2 text-lg font-bold mb-4 tracking-wide relative z-10">
@@ -479,9 +465,7 @@ class="fixed inset-0 bg-black/70 backdrop-blur-md hidden flex items-center justi
         <!-- NAME -->
         <div class="mb-3 relative z-10">
             <label class="text-sm text-gray-400">Product</label>
-            <input id="scanName" readonly
-
-            class="w-full p-3 rounded-xl bg-slate-700 text-white
+            <input id="scanName" readonly class="w-full p-3 rounded-xl bg-slate-700 text-white
 
             shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
 
@@ -491,9 +475,7 @@ class="fixed inset-0 bg-black/70 backdrop-blur-md hidden flex items-center justi
         <!-- QTY -->
         <div class="mb-3 relative z-10">
             <label class="text-sm text-gray-400">Qty</label>
-            <input id="scanQty" type="number" value="1" min="1"
-
-            class="w-full p-3 rounded-xl bg-slate-700 text-white
+            <input id="scanQty" type="number" value="1" min="1" class="w-full p-3 rounded-xl bg-slate-700 text-white
 
             shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
 
@@ -506,9 +488,7 @@ class="fixed inset-0 bg-black/70 backdrop-blur-md hidden flex items-center justi
         <!-- RATE -->
         <div class="mb-4 relative z-10">
             <label class="text-sm text-gray-400">Rate</label>
-            <input id="scanPrice" type="number"
-
-            class="w-full p-3 rounded-xl bg-slate-700 text-white
+            <input id="scanPrice" type="number" class="w-full p-3 rounded-xl bg-slate-700 text-white
 
             shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
 
@@ -522,9 +502,7 @@ class="fixed inset-0 bg-black/70 backdrop-blur-md hidden flex items-center justi
         <div class="flex gap-2 relative z-10">
 
             <!-- ADD -->
-            <button onclick="confirmScanAdd()"
-
-            class="flex-1 relative overflow-hidden
+            <button onclick="confirmScanAdd()" class="flex-1 relative overflow-hidden
 
             bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
             text-black font-bold tracking-wide
@@ -550,9 +528,7 @@ class="fixed inset-0 bg-black/70 backdrop-blur-md hidden flex items-center justi
             </button>
 
             <!-- CANCEL -->
-            <button onclick="closeScanModal()"
-
-            class="flex-1 relative overflow-hidden
+            <button onclick="closeScanModal()" class="flex-1 relative overflow-hidden
 
             bg-gradient-to-br from-red-500 to-red-600
             text-white font-bold tracking-wide
@@ -607,7 +583,7 @@ class="fixed inset-0 bg-black/70 backdrop-blur-md hidden flex items-center justi
     p-2 flex flex-col">
 
             <!-- HEADER -->
-          <div class="flex items-center justify-between mb-3
+            <div class="flex items-center justify-between mb-3
 
 px-3 py-2 rounded-xl
 
@@ -617,50 +593,28 @@ shadow-[inset_2px_2px_6px_rgba(255,255,255,0.06),_6px_6px_18px_rgba(0,0,0,0.7)]
 
 border border-white/5">
 
-    <!-- TITLE -->
-    <h2 class="flex items-center gap-2 text-lg font-bold text-white tracking-wide">
+                <!-- TITLE -->
+                <h2 class="flex items-center gap-2 text-lg font-bold text-white tracking-wide">
 
-        <span class="w-8 h-8 flex items-center justify-center rounded-lg
+                    <span class="w-8 h-8 flex items-center justify-center rounded-lg
 
         bg-black/20
 
         shadow-[inset_1px_1px_4px_rgba(255,255,255,0.2),_2px_2px_6px_rgba(0,0,0,0.6)]">
 
-            <i class="fa-solid fa-list-check text-yellow-400"></i>
+                        <i class="fa-solid fa-list-check text-yellow-400"></i>
 
-        </span>
+                    </span>
 
-        Products Check List
+                    Products Check List
 
-    </h2>
+                </h2>
 
-    <!-- ACTION BUTTONS -->
-    <div class="flex gap-2">
+                <!-- ACTION BUTTONS -->
+                <div class="flex gap-2">
 
-        <!-- NEXT -->
-        <button onclick="showSummary()"
-        class="w-9 h-9 flex items-center justify-center rounded-lg
-
-        text-yellow-400 text-lg
-
-        bg-black/20
-
-        shadow-[inset_1px_1px_4px_rgba(255,255,255,0.1),_3px_3px_8px_rgba(0,0,0,0.6)]
-
-        transition-all duration-200
-
-        hover:scale-[1.08]
-        hover:shadow-[inset_1px_1px_4px_rgba(255,255,255,0.2),_5px_5px_12px_rgba(0,0,0,0.8),_0_0_10px_rgba(255,215,0,0.5)]
-
-        active:scale-95
-        active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
-        ">
-            <i class="fa-solid fa-arrow-right"></i>
-        </button>
-
-        <!-- BACK -->
-        <button onclick="goBackToChecklist()"
-        class="w-9 h-9 flex items-center justify-center rounded-lg
+                    <!-- NEXT -->
+                    <button onclick="showSummary()" class="w-9 h-9 flex items-center justify-center rounded-lg
 
         text-yellow-400 text-lg
 
@@ -676,12 +630,31 @@ border border-white/5">
         active:scale-95
         active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
         ">
-            <i class="fa-solid fa-arrow-left"></i>
-        </button>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
 
-        <!-- CLOSE -->
-        <button onclick="closeChecklist()"
-        class="w-9 h-9 flex items-center justify-center rounded-lg
+                    <!-- BACK -->
+                    <button onclick="goBackToChecklist()" class="w-9 h-9 flex items-center justify-center rounded-lg
+
+        text-yellow-400 text-lg
+
+        bg-black/20
+
+        shadow-[inset_1px_1px_4px_rgba(255,255,255,0.1),_3px_3px_8px_rgba(0,0,0,0.6)]
+
+        transition-all duration-200
+
+        hover:scale-[1.08]
+        hover:shadow-[inset_1px_1px_4px_rgba(255,255,255,0.2),_5px_5px_12px_rgba(0,0,0,0.8),_0_0_10px_rgba(255,215,0,0.5)]
+
+        active:scale-95
+        active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
+        ">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+
+                    <!-- CLOSE -->
+                    <button onclick="closeChecklist()" class="w-9 h-9 flex items-center justify-center rounded-lg
 
         text-red-400 text-lg
 
@@ -697,15 +670,15 @@ border border-white/5">
         active:scale-95
         active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
         ">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
 
-    </div>
+                </div>
 
-</div>
+            </div>
 
-           <!-- SCROLL AREA -->
-<div class="flex-1 overflow-y-auto pr-1
+            <!-- SCROLL AREA -->
+            <div class="flex-1 overflow-y-auto pr-1
 
 rounded-xl
 
@@ -717,16 +690,16 @@ border border-white/5
 
 p-3">
 
-    <!-- STEP 1 -->
-    <div id="step1">
-        <div id="checklistItems" class="space-y-2"></div>
-    </div>
+                <!-- STEP 1 -->
+                <div id="step1">
+                    <div id="checklistItems" class="space-y-2"></div>
+                </div>
 
-    <!-- STEP 2 -->
-    <div id="step2" class="hidden">
+                <!-- STEP 2 -->
+                <div id="step2" class="hidden">
 
-        <!-- HEADER -->
-        <div class="flex justify-between items-center mb-3
+                    <!-- HEADER -->
+                    <div class="flex justify-between items-center mb-3
 
         px-3 py-2 rounded-xl
 
@@ -734,18 +707,19 @@ p-3">
 
         shadow-[inset_1px_1px_4px_rgba(255,255,255,0.1),_3px_3px_8px_rgba(0,0,0,0.6)]">
 
-            <h3 class="flex items-center gap-2 text-lg font-bold text-white tracking-wide">
+                        <h3 class="flex items-center gap-2 text-lg font-bold text-white tracking-wide">
 
-                <i class="fa-solid fa-file-invoice text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
-                Summary
+                            <i
+                                class="fa-solid fa-file-invoice text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+                            Summary
 
-            </h3>
+                        </h3>
 
-            <div></div>
-        </div>
+                        <div></div>
+                    </div>
 
-        <!-- SUMMARY BOX -->
-        <div class="space-y-2 text-sm text-white
+                    <!-- SUMMARY BOX -->
+                    <div class="space-y-2 text-sm text-white
 
         p-3 rounded-xl
 
@@ -755,52 +729,52 @@ p-3">
 
         border border-white/5">
 
-            <div class="flex justify-between">
-                <span class="text-gray-400">CGST (9%)</span>
-                <span>₹ <span id="s_cgst"></span></span>
-            </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">CGST (9%)</span>
+                            <span>₹ <span id="s_cgst"></span></span>
+                        </div>
 
-            <div class="flex justify-between">
-                <span class="text-gray-400">SGST (9%)</span>
-                <span>₹ <span id="s_sgst"></span></span>
-            </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">SGST (9%)</span>
+                            <span>₹ <span id="s_sgst"></span></span>
+                        </div>
 
-            <div class="flex justify-between">
-                <span class="text-gray-400">Round Off</span>
-                <span>₹ <span id="s_round"></span></span>
-            </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Round Off</span>
+                            <span>₹ <span id="s_round"></span></span>
+                        </div>
 
-            <div class="flex justify-between">
-                <span class="text-gray-400">Subtotal</span>
-                <span>₹ <span id="s_subtotal"></span></span>
-            </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Subtotal</span>
+                            <span>₹ <span id="s_subtotal"></span></span>
+                        </div>
 
-            <div class="flex justify-between">
-                <span class="text-gray-400">Outstandings</span>
-                <span class="text-yellow-400 font-semibold">
-                    ₹ <span id="s_outstanding"></span>
-                </span>
-            </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Outstandings</span>
+                            <span class="text-yellow-400 font-semibold">
+                                ₹ <span id="s_outstanding"></span>
+                            </span>
+                        </div>
 
-            <!-- TOTAL -->
-            <div class="flex justify-between mt-3 pt-2
+                        <!-- TOTAL -->
+                        <div class="flex justify-between mt-3 pt-2
 
             border-t border-white/10
 
             font-bold text-lg">
 
-                <span>Total Balance</span>
+                            <span>Total Balance</span>
 
-                <span class="text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]">
-                    ₹ <span id="s_total"></span>
-                </span>
+                            <span class="text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]">
+                                ₹ <span id="s_total"></span>
+                            </span>
 
-            </div>
+                        </div>
 
-        </div>
+                    </div>
 
-        <!-- SAVE BUTTON (already gold 3D) -->
-        <button onclick="savePurchase()" class="mt-4 w-full relative overflow-hidden
+                    <!-- SAVE BUTTON (already gold 3D) -->
+                    <button onclick="savePurchase()" class="mt-4 w-full relative overflow-hidden
 
         bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
         text-black font-bold tracking-wide
@@ -818,55 +792,18 @@ p-3">
         before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 before:to-transparent before:opacity-70
         ">
 
-            <span class="relative z-10 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-floppy-disk"></i>
-                SAVE Bill
-            </span>
+                        <span class="relative z-10 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            SAVE Bill
+                        </span>
 
-        </button>
+                    </button>
 
-    </div>
-
-</div>
-
-        </div>
-
-        <!-- STEP 1 -->
-        <div id="step1">
-            <div id="checklistItems" class="space-y-2"></div>
-        </div>
-
-        <!-- STEP 2 -->
-        <div id="step2" class="hidden">
-
-            <!-- HEADER -->
-            <div class="flex justify-between items-center mb-3">
-                <button onclick="goBackToChecklist()" class="text-yellow-400 text-xl">⬅️</button>
-                <h3 class="text-lg font-bold">🧾 Summary</h3>
-                <div></div>
-            </div>
-
-            <!-- REAL SUMMARY -->
-            <div class="space-y-2 text-sm">
-
-                <div>CGST (9%) : ₹ <span id="s_cgst"></span></div>
-                <div>SGST (9%) : ₹ <span id="s_sgst"></span></div>
-                <div>Round Off : ₹ <span id="s_round"></span></div>
-                <div>Subtotal : ₹ <span id="s_subtotal"></span></div>
-                <div>Outstandings : ₹ <span id="s_outstanding"></span></div>
-
-                <div class="font-bold text-lg mt-2">
-                    Total Balance : ₹ <span id="s_total"></span>
                 </div>
 
             </div>
 
-            <button onclick="savePurchase()" class="mt-4 w-full bg-green-500 p-3 rounded-xl font-bold">
-                ✅ SAVE PURCHASE
-            </button>
-
         </div>
-
     </div>
 </div>
 
@@ -935,10 +872,60 @@ p-3">
     <td>${item.qty}</td>
     <td>₹ ${item.price}</td>         <!-- MRP -->
     <td class="text-yellow-400 font-bold">₹ ${line.toFixed(2)}</td>   <!-- VALUE -->
-    <td class="flex gap-2">
-    <button onclick="editItem(${index})">✏️</button>
-    <button onclick="removeItem(${index})">❌</button>
+
+ <td class="flex gap-3">
+
+    <!-- EDIT BUTTON -->
+    <button onclick="editItem(${index})"
+    class="w-7 h-7 flex items-center justify-center rounded-lg
+
+    text-yellow-400 text-lg
+
+    bg-gradient-to-br from-slate-800 to-slate-900
+
+    shadow-[inset_2px_2px_5px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+    border border-white/5
+
+    transition-all duration-200
+
+    hover:scale-[1.08]
+    hover:shadow-[inset_1px_1px_4px_rgba(255,255,255,0.2),_6px_6px_16px_rgba(0,0,0,0.9),_0_0_10px_rgba(255,215,0,0.5)]
+
+    active:scale-90
+    active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
+    ">
+
+        <i class="fa-solid fa-pen-to-square drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+    </button>
+
+
+    <!-- DELETE BUTTON -->
+    <button onclick="removeItem(${index})"
+    class="w-7 h-7 flex items-center justify-center rounded-lg
+
+    text-red-500 text-lg
+
+    bg-gradient-to-br from-slate-800 to-slate-900
+
+    shadow-[inset_2px_2px_5px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+    border border-white/5
+
+    transition-all duration-200
+
+    hover:scale-[1.08]
+    hover:shadow-[inset_1px_1px_4px_rgba(255,255,255,0.2),_6px_6px_16px_rgba(0,0,0,0.9),_0_0_10px_rgba(255,0,0,0.5)]
+
+    active:scale-90
+    active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
+    ">
+
+        <i class="fa-solid fa-trash-can drop-shadow-[0_0_6px_rgba(255,0,0,0.6)]"></i>
+    </button>
+
 </td>
+
 </tr>
         `;
 
@@ -1016,7 +1003,6 @@ p-3">
     ">
 
         <i class="fa-solid fa-trash-can drop-shadow-[0_0_6px_rgba(255,0,0,0.6)]"></i>
-
     </button>
 
 </div>
