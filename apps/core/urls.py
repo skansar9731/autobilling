@@ -92,4 +92,5 @@ urlpatterns = [
     path("get-purchases/", views.get_purchases),
     path("get-items/", views.get_items),
     path("purchase-return/print/<int:id>/", views.purchase_return_print),
+    path("supplier-summary/", views.supplier_summary, name="supplier_summary"),
 ]

@@ -190,7 +190,16 @@ def sales_invoices(request):
 
 @login_required
 def purchase_invoices(request):
-    purchases = Purchase.objects.all().order_by("-date")
+
+    supplier_id = request.GET.get("supplier_id")
+
+    if supplier_id:
+        purchases = Purchase.objects.filter(
+            supplier_id=supplier_id
+        ).order_by("-date")
+    else:
+        purchases = Purchase.objects.all().order_by("-date")
+
     return render(request, "dashboard/purchase_invoices.html", {
         "purchases": purchases
     })
@@ -1170,7 +1179,7 @@ def purchase_return(request):
         purchase.supplier.balance -= total_return
         purchase.supplier.save()
 
-        messages.success(request, "Purchase Return Saved Successfully")
+        # messages.success(request, "Purchase Return Saved Successfully")
 
         return redirect(f"/purchase-return/print/{pr.id}/")
 
@@ -1184,11 +1193,29 @@ def purchase_return_print(request, id):
     
     pr = PurchaseReturn.objects.get(id=id)
     company = Company.objects.first()
-    amount_words = number_to_words(pr.total)
+
+    total = Decimal("0.00")
+
+    # 🔥 RECALCULATE FROM ITEMS
+    for item in pr.items.all():
+        total += item.qty * item.price
+
+    gst = (total * Decimal("0.18")).quantize(Decimal("0.01"))
+    cgst = (gst / 2).quantize(Decimal("0.01"))
+    sgst = (gst / 2).quantize(Decimal("0.01"))
+
+    grand_total = total + gst
+
+    amount_words = number_to_words(int(grand_total))
+
     return render(request, "dashboard/purchase_return_invoice.html", {
         "return": pr,
         "purchase": pr.purchase,
-        "company": company, 
+        "company": company,
+        "subtotal": total,
+        "cgst": cgst,
+        "sgst": sgst,
+        "total": grand_total,
         "amount_words": amount_words
     })
 
@@ -1645,4 +1672,43 @@ def get_items(request):
         })
 
     return JsonResponse(data, safe=False)
+
+@login_required
+def supplier_summary(request):
+
+    try:
+        suppliers = Supplier.objects.all()
+
+        data = []
+
+        for s in suppliers:
+
+            purchases = Purchase.objects.filter(supplier=s)
+
+            total_purchase = 0
+            outstanding = 0
+
+            for p in purchases:
+
+                # SAFE access
+                total_purchase += float(p.total or 0)
+
+                if p.payment_mode == "credit":
+                    outstanding += float(getattr(p, "balance", 0))
+
+            data.append({
+                "id": s.id,
+                "name": s.name,
+                "total": total_purchase,
+                "outstanding": outstanding
+            })
+
+        return render(request, "dashboard/supplier_summary.html", {
+            "suppliers": data
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            "error": str(e)
+        })
     

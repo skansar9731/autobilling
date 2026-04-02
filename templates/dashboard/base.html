@@ -258,7 +258,7 @@ Sales Returns (Debit Note)
 class="flex justify-between items-center w-full px-3 py-2 rounded-xl
 transition-all duration-300 ease-in-out relative overflow-hidden
 
-{% if '/purchase' in request.path or '/purchase-invoices' in request.path or '/creditors' in request.path or '/payment' in request.path or '/debit-note' in request.path %}
+{% if '/purchase' in request.path or '/purchase-invoices' in request.path or '/supplier-summary' in request.path or '/creditors' in request.path or '/payment' in request.path or '/debit-note' in request.path %}
 
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
 text-black font-semibold
@@ -287,7 +287,7 @@ hover:scale-[1.03]
 </span>
 
 <span id="purchaseArrow" class="transition-transform duration-300 relative z-10">
-{% if request.path == '/purchase/' or request.path == '/creditors/' or request.path == '/payment/' or request.path == '/purchase-invoices/' %}
+{% if request.path == '/purchase/' or request.path == '/creditors/' or request.path == '/payment/' or request.path == '/purchase-invoices/' or request.path == '/supplier-summary/' %}
 ▲
 {% else %}
 ▼
@@ -299,7 +299,7 @@ hover:scale-[1.03]
 
 <ul id="purchaseMenu"
 class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
-{% if '/purchase' in request.path or '/creditors' in request.path or '/payment' in request.path or '/purchase-invoices' in request.path %}block{% else %}hidden{% endif %}
+{% if '/purchase' in request.path or '/creditors' in request.path or '/payment' in request.path or '/purchase-invoices' in request.path or '/supplier-summary' in request.path %}block{% else %}hidden{% endif %}
 ">
 
 <li>
@@ -323,10 +323,10 @@ New Purchase
 </li>
 
 <li>
-<a href="/purchase-invoices/" 
+<a href="/supplier-summary/" 
 class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
 
-{% if request.path == '/purchase-invoices/' %}
+{% if request.path == '/supplier-summary/' %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
 shadow-[inset_2px_2px_6px_rgba(255,255,255,0.5),_4px_4px_12px_rgba(0,0,0,0.3)]
 before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/30 before:to-transparent before:opacity-60
@@ -977,7 +977,7 @@ active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
 
 <!-- MAIN CONTENT -->
 
-<main class="flex-1 p-4 md:p-6 pb-24">
+<main class="flex-1 p-4 md:p-6 pb-24 pt-20 md:pt-6">
 
 {% block content %}
 {% endblock %}

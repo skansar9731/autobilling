@@ -1,0 +1,138 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-3">
+
+    <!-- TITLE -->
+    <h1 class="text-2xl font-bold mb-6 text-white tracking-wide
+    drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+        <i class="fa-solid fa-truck text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+         Supplier Summary
+    </h1>
+
+    <!-- DESKTOP TABLE -->
+    <div class="hidden md:block
+
+    bg-gradient-to-br from-slate-800 to-slate-900
+
+    rounded-3xl p-5
+
+    shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_10px_10px_30px_rgba(0,0,0,0.8)]
+
+    border border-white/10
+
+    overflow-auto max-h-[500px]">
+
+        <table class="w-full text-sm text-white">
+
+            <thead class="sticky top-0 bg-slate-900 z-10
+            shadow-[inset_0_-2px_6px_rgba(255,255,255,0.05)]">
+
+                <tr>
+                    <th class="py-3 px-2">Supplier</th>
+                    <th>Total Purchase</th>
+                    <th>Outstanding</th>
+                </tr>
+
+            </thead>
+
+            <tbody class="divide-y divide-white/5">
+
+                {% for s in suppliers %}
+
+                <tr onclick="openSupplier({{ s.id }})"
+                    class="cursor-pointer transition-all duration-200
+
+                    hover:bg-white/5 hover:scale-[1.01]">
+
+                    <td class="py-3 font-bold">
+                        {{ s.name }}
+                    </td>
+
+                    <td class="text-blue-400 font-semibold
+                    drop-shadow-[0_0_6px_rgba(59,130,246,0.6)]">
+                        ₹ {{ s.total }}
+                    </td>
+
+                    <td class="font-bold
+                    {% if s.outstanding > 0 %}
+                        text-red-400 drop-shadow-[0_0_6px_rgba(255,0,0,0.6)]
+                    {% else %}
+                        text-green-400
+                    {% endif %}">
+                        ₹ {{ s.outstanding }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- MOBILE VIEW -->
+    <div class="md:hidden space-y-4">
+
+        {% for s in suppliers %}
+
+        <div onclick="openSupplier({{ s.id }})"
+
+        class="p-5 rounded-3xl cursor-pointer
+
+        bg-gradient-to-br from-slate-800 to-slate-900
+
+        shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_8px_8px_20px_rgba(0,0,0,0.8)]
+
+        border border-white/10
+
+        transition-all duration-200
+
+        hover:scale-[1.02] hover:bg-white/5">
+
+            <div class="flex justify-between items-center">
+
+                <div>
+                    <h2 class="text-lg font-bold text-white">
+                        {{ s.name }}
+                    </h2>
+
+                    <p class="text-sm text-gray-400">
+                        Total: ₹ {{ s.total }}
+                    </p>
+                </div>
+
+                <div class="text-right">
+
+                    <div class="text-sm text-gray-400">Outstanding</div>
+
+                    <div class="text-lg font-bold
+                    {% if s.outstanding > 0 %}
+                        text-red-400
+                    {% else %}
+                        text-green-400
+                    {% endif %}">
+                        ₹ {{ s.outstanding }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<script>
+function openSupplier(id){
+    window.location.href = `/purchase-invoices/?supplier_id=${id}`;
+}
+</script>
+
+{% endblock %}
