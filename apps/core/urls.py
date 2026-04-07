@@ -93,4 +93,5 @@ urlpatterns = [
     path("get-items/", views.get_items),
     path("purchase-return/print/<int:id>/", views.purchase_return_print),
     path("supplier-summary/", views.supplier_summary, name="supplier_summary"),
+    path("get-return-info/", views.get_return_info),
 ]

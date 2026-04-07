@@ -1142,7 +1142,8 @@ def purchase_return(request):
             remaining = purchase_item.qty - returned
 
             if qty > remaining:
-                continue  # skip invalid qty
+                messages.error(request, f"{product.name} exceeds remaining qty ❌")
+                return redirect("purchase_return")
 
              # ================= CALCULATION =================
             line_total = Decimal(qty) * purchase_item.price
@@ -1711,4 +1712,30 @@ def supplier_summary(request):
         return JsonResponse({
             "error": str(e)
         })
+@login_required
+def get_return_info(request):
+
+    purchase_id = request.GET.get("purchase_id")
+    product_id = request.GET.get("product_id")
+
+    items = PurchaseReturnItem.objects.filter(
+        purchase_return__purchase_id=purchase_id,
+        product_id=product_id
+    ).select_related("purchase_return")
+
+    total = 0
+    history = []
+
+    for i in items:
+        total += i.qty
+
+        history.append({
+            "date": i.purchase_return.date.strftime("%d %b %Y"),
+            "qty": i.qty
+        })
+
+    return JsonResponse({
+        "returned": total,
+        "history": history
+    })
     

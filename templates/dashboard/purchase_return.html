@@ -221,7 +221,78 @@ border border-white/10
         </form>
 
     </div>
+  <!-- RETURN HISTORY MODAL -->
+<div id="returnModal"
+class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50">
+
+    <div class="bg-slate-900 p-5 rounded-2xl w-[95%] max-w-md text-white">
+
+        <h2 class="text-lg font-bold mb-3 flex justify-between">
+            Return History
+            <span class="text-red-400 cursor-pointer" onclick="closeModal()">✕</span>
+        </h2>
+
+        <!-- SUMMARY -->
+        <div class="text-sm space-y-1 mb-3">
+            <div>Total: <span id="modal_total"></span></div>
+            <div>Returned: <span id="modal_returned"></span></div>
+            <div class="text-yellow-400 font-semibold">
+                Remaining: <span id="modal_remaining"></span>
+            </div>
+        </div>
+
+        <!-- HISTORY SCROLL -->
+        <div id="modal_history"
+        class="max-h-60 overflow-y-auto space-y-2 pr-1">
+        </div>
+
+    </div>
+</div>
     <script>
+function openReturnModal(id) {
+
+    let item = selected[id];
+    if (!item) return;
+
+    fetch(`/get-return-info/?purchase_id=${document.getElementById("purchase_id").value}&product_id=${id}`)
+        .then(res => res.json())
+        .then(data => {
+
+            let total = item.qty;
+            let returned = data.returned || 0;
+            let remaining = total - returned;
+
+            // store for disable logic
+            selected[id].returned = returned;
+
+            document.getElementById("modal_total").innerText = total;
+            document.getElementById("modal_returned").innerText = returned;
+            document.getElementById("modal_remaining").innerText = remaining;
+
+            // 🔥 HISTORY RENDER
+            let historyHtml = "";
+
+            if (data.history.length === 0) {
+                historyHtml = `<div class="text-gray-400 text-center">No returns yet</div>`;
+            }
+
+            data.history.forEach(h => {
+                historyHtml += `
+                <div class="p-3 rounded-xl bg-slate-800 flex justify-between">
+                    <span>${h.date}</span>
+                    <span class="text-green-400">₹ ${h.qty}</span>
+                </div>`;
+            });
+
+            document.getElementById("modal_history").innerHTML = historyHtml;
+
+            document.getElementById("returnModal").classList.remove("hidden");
+        });
+}
+
+function closeModal() {
+    document.getElementById("returnModal").classList.add("hidden");
+}
 
         let allItems = [];
         let selected = {};
@@ -264,10 +335,25 @@ border border-white/10
                 .then(res => res.json())
                 .then(data => {
 
-                    allItems = data;
-                    renderDropdown(data);
+    allItems = data;
 
-                });
+    // ✅ fetch returned for all items
+    data.forEach(item => {
+        fetch(`/get-return-info/?purchase_id=${purchase_id}&product_id=${item.id}`)
+        .then(res => res.json())
+        .then(r => {
+            item.returned = r.returned || 0;
+
+            // agar already selected hai to update bhi karo
+            if (selected[item.id]) {
+                selected[item.id].returned = item.returned;
+                renderSelected();
+            }
+        });
+    });
+
+    renderDropdown(data);
+});
 
         });
 
@@ -361,7 +447,7 @@ transition-all duration-200">
             } else {
                 selected[id] = {
                     ...item,
-                    return_qty: 1
+                    return_qty: 1,
                 };
             }
 
@@ -381,6 +467,26 @@ transition-all duration-200">
                 let itemTotal = i.return_qty * i.price;
                 total += itemTotal;
 
+                let returned = i.returned ?? 0;
+let isFullyReturned = returned >= i.qty;
+
+// 🔥 force qty = 0 if fully returned
+if (isFullyReturned) {
+    i.return_qty = 0;
+}
+if (isFullyReturned && !i._timerSet) {
+
+    i._timerSet = true;
+
+    setTimeout(() => {
+        if (selected[i.id] && selected[i.id].return_qty === 0) {
+            delete selected[i.id];
+            renderSelected();
+        }
+    }, 20000);
+}
+let disabled = returned >= i.qty;
+
                 html += `
 <div class="w-full max-w-full overflow-hidden
 
@@ -399,10 +505,21 @@ transition-all duration-200 hover:scale-[1.01]">
     <!-- LEFT -->
     <div class="flex-1 min-w-0 overflow-hidden">
 
-        <div class="font-semibold text-white truncate">
-            ${i.name}
-        </div>
+   <div class="flex items-center justify-between font-semibold text-white truncate">
+    
+    <span class="truncate ${isFullyReturned ? 'opacity-40' : ''}">
+        ${i.name}
+    </span>
+    
+    <!-- ✅ Eye ALWAYS visible -->
+    <i class="fa-solid fa-eye ml-2 cursor-pointer text-yellow-400"
+       onclick="openReturnModal(${i.id})"></i>
 
+    <!-- label -->
+    ${isFullyReturned ? `
+    <span class="text-red-400 text-xs ml-2">Returned</span>
+    ` : ``}
+</div>
         <div class="text-xs text-gray-400 truncate">
             ₹${i.price} × ${i.qty} =
             <span class="text-yellow-400 font-semibold">
@@ -419,6 +536,7 @@ transition-all duration-200 hover:scale-[1.01]">
         <input type="number"
         min="1"
         max="${i.qty}"
+        ${isFullyReturned ? 'disabled' : ''}
         value="${i.return_qty}"
         onchange="updateQty(${i.id}, this.value)"
 
@@ -440,29 +558,28 @@ transition-all duration-200 hover:scale-[1.01]">
         </div>
 
         <!-- DELETE -->
-        <button onclick="removeItem(${i.id})"
+     <button 
+    onclick="removeItem(${i.id})"
+    ${isFullyReturned ? 'disabled' : ''}
 
-        class="shrink-0 w-9 h-9 flex items-center justify-center
+    class="shrink-0 w-9 h-9 flex items-center justify-center
+    ${isFullyReturned ? 'opacity-30 cursor-not-allowed' : ''}
 
-        rounded-xl
+    rounded-xl
+    bg-gradient-to-br from-red-500 to-red-600
+    text-white
 
-        bg-gradient-to-br from-red-500 to-red-600
+    shadow-[inset_2px_2px_5px_rgba(255,255,255,0.2),_4px_4px_12px_rgba(0,0,0,0.7)]
 
-        text-white
+    hover:scale-110
+    active:scale-90
+    transition-all duration-200">
 
-        shadow-[inset_2px_2px_5px_rgba(255,255,255,0.2),_4px_4px_12px_rgba(0,0,0,0.7)]
+    <i class="fa-solid fa-xmark"></i>
 
-        hover:scale-110
+</button>
 
-        active:scale-90
-
-        transition-all duration-200">
-
-            <i class="fa-solid fa-xmark"></i>
-
-        </button>
-
-    </div>
+           </div>
 
 </div>
 `;
@@ -544,10 +661,12 @@ transition-all duration-200 hover:scale-[1.01]">
             let data = [];
 
             Object.values(selected).forEach(i => {
-                data.push({
-                    product_id: i.id,
-                    qty: i.return_qty
-                });
+                 if (i.return_qty > 0) { 
+        data.push({
+            product_id: i.id,
+            qty: i.return_qty
+        });
+    }
             });
 
             // ❌ STOP if no items
