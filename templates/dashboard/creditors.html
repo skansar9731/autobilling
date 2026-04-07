@@ -4,8 +4,9 @@
 
 <div class="max-w-7xl mx-auto px-3 sm:px-4">
 
+    <div id="creditorListSection">
 <!-- HEADER -->
-<h1 onclick="toggleCustomerForm()"
+<h1 id="creditorHeader" onclick="toggleCustomerForm()"
 class="text-xl sm:text-2xl font-bold mb-4 cursor-pointer flex justify-between items-center
 
 text-white tracking-wide
@@ -95,13 +96,44 @@ transition-all duration-200">
 </div>
 
 
-<div><input type="text" placeholder="Search Suppliers..." class="bg-slate-700 text-white placeholder:text-gray-400 border border-white/5 focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
+<div class="relative">
+
+    <!-- ICON -->
+    <i class="fa-solid fa-magnifying-glass 
+    absolute left-4 top-1/2 -translate-y-1/2 
+    text-yellow-400 
+    z-10 
+    drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+
+    <!-- SEARCH INPUT -->
+    <input 
+        type="text" 
+        id="supplierSearch"
+        placeholder="Search by Name, Phone, GST, Address..."
+        
+        class="w-full pl-11 pr-4 py-3 rounded-2xl
+            
+        bg-white/5 backdrop-blur-lg 
+        border border-white/10
+            
+        text-white placeholder-gray-400
+            
+        shadow-[0_8px_25px_rgba(0,0,0,0.6),inset_0_2px_6px_rgba(255,255,255,0.1)]
+            
+        focus:outline-none 
+        focus:ring-2 focus:ring-yellow-400
+        focus:shadow-[0_0_20px_rgba(250,204,21,0.4)]
+            
+        transition-all duration-200 mt-2"
+    >
+
+</div>
 <!-- DESKTOP TABLE -->
 <div class="hidden md:block
 
 bg-gradient-to-br from-slate-800 to-slate-900
 
-rounded-3xl
+rounded-3xl mt-5
 
 shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_10px_10px_30px_rgba(0,0,0,0.8)]
 
@@ -150,7 +182,7 @@ hover:bg-white/5 hover:scale-[1.01]">
 
 
 <!-- MOBILE CARDS -->
-<div class="md:hidden space-y-3">
+<div class="md:hidden space-y-3 mt-5">
 
 {% for c in suppliers %}
 
@@ -179,8 +211,7 @@ active:scale-95 transition cursor-pointer">
 {% endfor %}
 
 </div>
-
-
+</div>
 <!-- SUPPLIER DETAILS -->
 <div id="creditorDetail"
 
@@ -191,6 +222,28 @@ bg-gradient-to-br from-slate-800 to-slate-900
 shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_10px_10px_28px_rgba(0,0,0,0.8)]
 
 border border-white/10">
+<button onclick="goBackToList()"
+class="flex items-center justify-center
+
+        w-10 h-10
+
+        rounded-xl
+
+        bg-gradient-to-br from-slate-700 to-slate-900
+
+        shadow-[inset_2px_2px_5px_rgba(255,255,255,0.1),_6px_6px_15px_rgba(0,0,0,0.8)]
+
+        border border-white/10
+
+        cursor-pointer
+
+        transition-all duration-200
+
+        hover:scale-110 hover:shadow-[0_0_15px_rgba(250,204,21,0.6)]
+
+        active:scale-90">
+<i class="fa-solid fa-arrow-left text-white text-sm"></i>
+</button>
 
 <h2 id="creditorName"
 class="text-lg sm:text-xl font-bold mb-2 text-white tracking-wide"></h2>
@@ -206,35 +259,36 @@ Total Outstanding Balance : ₹ <span id="debtorBalance">0</span>
 
 <!-- BILL TABLE -->
 <div class="hidden md:block">
-
-<div class="overflow-x-auto">
-<div class="max-h-[260px] overflow-y-auto">
-
-<table class="w-full text-sm text-white min-w-[500px]">
-
-<thead class="sticky top-0 bg-black/30">
-<tr class="border-b border-white/10">
-<th class="p-2">Bill</th>
-<th class="p-2">Total</th>
-<th class="p-2">Paid</th>
-<th class="p-2">Balance</th>
-<th class="p-2">View</th>
-</tr>
-</thead>
-
-<tbody id="debtorBills"></tbody>
-
-</table>
-
-</div>
-</div>
-
+    
+    <div class="overflow-x-auto">
+        <div class="max-h-[260px] overflow-y-auto">
+            
+            <table class="w-full text-sm text-white min-w-[500px]">
+                
+                <thead class="sticky top-0 bg-black/30">
+                    <tr class="border-b border-white/10">
+                        <th class="p-2">Bill</th>
+                        <th class="p-2">Total</th>
+                        <th class="p-2">Paid</th>
+                        <th class="p-2">Balance</th>
+                        <th class="p-2">View</th>
+                    </tr>
+                </thead>
+                
+                <tbody id="debtorBills"></tbody>
+                
+            </table>
+            
+        </div>
+    </div>
+    
 </div>
 
 
 <!-- MOBILE -->
 <div id="mobileBills" class="md:hidden space-y-3"></div>
 
+</div>
 </div>
 
 </div>
@@ -244,26 +298,28 @@ Total Outstanding Balance : ₹ <span id="debtorBalance">0</span>
 
 function loadCreditor(id){
 
-fetch("/creditor/"+id+"/")
+    // 🔥 HIDE LIST UI
+    document.getElementById("creditorListSection").style.display = "none";
 
-.then(res => res.json())
+    fetch("/creditor/"+id+"/")
+    .then(res => res.json())
+    .then(data => {
 
-.then(data => {
+        // 🔥 SHOW DETAIL
+        document.getElementById("creditorDetail").classList.remove("hidden");
 
-document.getElementById("creditorDetail").classList.remove("hidden")
+        document.getElementById("creditorName").innerText = data.supplier;
+        document.getElementById("debtorBalance").innerText = data.balance;
 
-document.getElementById("creditorName").innerText = data.supplier
-document.getElementById("debtorBalance").innerText = data.balance;
+        let tableHTML = "";
+        let cardHTML = "";
 
-let tableHTML = ""
-let cardHTML = ""
+        // 🔥 LOOP
+        data.purchase.forEach(bill => {
 
-data.purchase.forEach(bill => {
-
-tableHTML += `
+            tableHTML += `
 
 <tr class="transition-all duration-200
-
 hover:bg-white/5 hover:scale-[1.01]">
 
 <td class="p-2 font-semibold text-white">${bill.invoice}</td>
@@ -306,9 +362,9 @@ transition-all duration-200">
 
 </tr>
 
-`
+`;
 
-cardHTML += `
+            cardHTML += `
 
 <div class="p-4 rounded-2xl
 
@@ -360,14 +416,23 @@ View Bill
 
 </div>
 
-`
+`;
 
-})
+        });
 
-document.getElementById("debtorBills").innerHTML = tableHTML
-document.getElementById("mobileBills").innerHTML = cardHTML
+        // 🔥 EMPTY CASE HANDLE (important)
+        if(data.purchase.length === 0){
+            tableHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-400">No pending bills</td></tr>`;
+            cardHTML = `<div class="text-center text-gray-400">No pending bills</div>`;
+        }
 
-})
+        document.getElementById("debtorBills").innerHTML = tableHTML;
+        document.getElementById("mobileBills").innerHTML = cardHTML;
+
+    })
+    .catch(err => {
+        console.error("Error:", err);
+    });
 
 }
 
@@ -386,7 +451,48 @@ icon.innerText = "-"
 }
 
 }
+document.getElementById("supplierSearch").addEventListener("input", function () {
 
+    let value = this.value.toLowerCase();
+
+    // ✅ DESKTOP TABLE
+    let rows = document.querySelectorAll("tbody tr");
+
+    rows.forEach(row => {
+
+        let name = row.children[0].innerText.toLowerCase();
+        let phone = row.children[1].innerText.toLowerCase();
+        let gst = row.children[2].innerText.toLowerCase();
+        let address = row.children[3].innerText.toLowerCase();
+
+        let match =
+            name.includes(value) ||
+            phone.includes(value) ||
+            gst.includes(value) ||
+            address.includes(value);
+
+        row.style.display = match ? "" : "none";
+    });
+
+
+    // ✅ MOBILE CARDS
+    let cards = document.querySelectorAll(".md\\:hidden > div");
+
+    cards.forEach(card => {
+
+        let text = card.innerText.toLowerCase();
+
+        card.style.display = text.includes(value) ? "" : "none";
+    });
+
+});
+function goBackToList(){
+
+    document.getElementById("creditorListSection").style.display = "";
+
+    document.getElementById("creditorDetail").classList.add("hidden");
+
+}
 </script>
 
 {% endblock %}

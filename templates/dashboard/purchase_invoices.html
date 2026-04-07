@@ -131,14 +131,14 @@ transition-all duration-200">
     hover:shadow-[0_0_10px_rgba(255,215,0,0.6)]
     transition-all duration-200">
 
-                            <i class="fa-solid fa-pen text-black text-xs"></i>
+                            <i class="fa-solid fa-pen-to-square text-black text-xs"></i>
                         </a>
                         {% else %}
                         <!-- LOCK -->
                         <div class="w-8 h-8 flex items-center justify-center rounded-lg
     bg-gray-600 cursor-not-allowed opacity-60" title="Locked">
 
-                            <i class="fa-solid fa-lock text-white text-xs"></i>
+                            <i class="fa-solid fa-pen-to-square text-white text-xs"></i>
                         </div>
                         {% endif %}
 
@@ -153,14 +153,14 @@ transition-all duration-200">
     hover:shadow-[0_0_10px_rgba(255,0,0,0.6)]
     transition-all duration-200">
 
-                            <i class="fa-solid fa-trash text-white text-xs"></i>
+                            <i class="fa-solid fa-trash-can text-white text-xs"></i>
                         </a>
                         {% else %}
                         <!-- LOCK -->
                         <div class="w-8 h-8 flex items-center justify-center rounded-lg
     bg-gray-600 cursor-not-allowed opacity-60" title="Locked">
 
-                            <i class="fa-solid fa-lock text-white text-xs"></i>
+                            <i class="fa-solid fa-trash-can text-white text-xs"></i>
                         </div>
                         {% endif %}
 
@@ -246,14 +246,14 @@ bg-gradient-to-br from-yellow-400 to-amber-500 text-black
 shadow-[inset_2px_2px_5px_rgba(255,255,255,0.4),_4px_4px_12px_rgba(0,0,0,0.6)]
 text-sm font-semibold">
 
-                    <i class="fa-solid fa-pen"></i> Edit
+                    <i class="fa-solid fa-pen-to-square"></i> Edit
                 </a>
                 {% else %}
                 <div class="flex-1 text-center py-2 rounded-xl
 bg-gray-600 text-white opacity-60 cursor-not-allowed
 text-sm font-semibold" title="Payment Done - Locked">
 
-                    <i class="fa-solid fa-lock"></i> Locked
+                    <i class="fa-solid fa-pen-to-square"></i> Edit
                 </div>
                 {% endif %}
 
@@ -261,13 +261,13 @@ text-sm font-semibold" title="Payment Done - Locked">
                 <a href="/purchase/delete/{{ p.id }}/" class="flex-1 text-center py-2 rounded-xl
 bg-gradient-to-br from-red-500 to-red-600 text-white">
 
-                    <i class="fa-solid fa-trash"></i> Delete
+                    <i class="fa-solid fa-trash-can"></i></i> Delete
                 </a>
                 {% else %}
                 <div class="flex-1 text-center py-2 rounded-xl
 bg-gray-600 text-white opacity-60 cursor-not-allowed" title="Payment Done - Locked">
 
-                    <i class="fa-solid fa-lock"></i> Locked
+                    <i class="fa-solid fa-trash-can"></i> Delete
                 </div>
                 {% endif %}
 
