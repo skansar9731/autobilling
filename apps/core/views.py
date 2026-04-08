@@ -960,6 +960,55 @@ def save_purchase(request):
         })
 
 @login_required
+@transaction.atomic
+def update_purchase(request, id):
+
+    purchase = Purchase.objects.get(id=id)
+
+    data = json.loads(request.body)
+    items = data.get("items", [])
+
+    # 🔥 OLD STOCK REVERT
+    for item in purchase.items.all():
+        product = item.product
+        product.stock -= item.qty
+        product.save()
+
+    purchase.items.all().delete()
+
+    subtotal = Decimal("0.00")
+
+    for item in items:
+        product = Product.objects.get(id=item["product_id"])
+        qty = int(item["qty"])
+
+        PurchaseItem.objects.create(
+            purchase=purchase,
+            product=product,
+            qty=qty,
+            price=product.price
+        )
+
+        product.stock += qty
+        product.save()
+
+        subtotal += Decimal(qty) * product.price
+
+    gst = subtotal * Decimal("0.18")
+    total = subtotal + gst
+
+    purchase.subtotal = subtotal
+    purchase.cgst = gst / 2
+    purchase.sgst = gst / 2
+    purchase.total = total
+    purchase.save()
+
+    return JsonResponse({
+        "status": "success",
+        "purchase_id": purchase.id
+    })
+
+@login_required
 def purchase_preview(request, id):
 
     purchase = Purchase.objects.get(id=id)

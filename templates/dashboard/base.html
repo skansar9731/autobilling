@@ -21,7 +21,7 @@
 </head>
 
 
-<body class="bg-gradient-to-br from-[#0f172a] via-[#020617] to-black min-h-screen text-white">
+<body class="bg-gradient-to-br from-[#0f172a] via-[#020617] to-black h-screen overflow-hidden text-white">
 
 <!-- MOBILE HEADER -->
 
@@ -47,12 +47,12 @@ bg-black/95 text-white px-6">
 
 </div>
 
-<div class="flex">
+<div class="flex h-screen overflow-hidden">
 
 <!-- SIDEBAR -->
 
 <aside id="sidebar"
-class="fixed md:static left-0 top-0 h-screen w-[315px] bg-slate-800 shadow-xl overflow-y-auto
+class="fixed md:static left-0 top-0 h-screen w-[315px] bg-slate-800 shadow-xl h-full overflow-y-auto
 transform -translate-x-full md:translate-x-0 transition duration-300 z-50">
 
 <div class="p-5">
@@ -60,10 +60,6 @@ transform -translate-x-full md:translate-x-0 transition duration-300 z-50">
 <div class="flex items-center justify-between bg-slate-800 px-4 py-3 shadow-lg">
 
 <h1 class="font-bold text-lg">MH Auto Billing</h1>
-
-<button onclick="toggleSidebar()" class="text-2xl md:hidden">
-☰
-</button>
 
 </div>
 
@@ -73,7 +69,7 @@ transform -translate-x-full md:translate-x-0 transition duration-300 z-50">
 
 <li>
 <a href="/dashboard/"
-class="block px-3 py-2 rounded-xl transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-xl transition-all duration-300 relative overflow-hidden
 
 {% if '/dashboard' in request.path %}
 
@@ -109,7 +105,7 @@ hover:scale-[1.02]
 <!-- SALES -->
 <li>
 <button onclick="toggleMenu('salesMenu','salesArrow')"
-class="flex justify-between items-center w-full px-3 py-2 rounded-xl
+class="flex justify-between items-center w-full px-3 py-3 rounded-xl
 transition-all duration-300 ease-in-out relative overflow-hidden
 
 {% if request.path == '/billing/' or request.path == '/sales-invoices/' or request.path == '/customers/' or request.path == '/receipt/' or request.path == '/sales-return/' %}
@@ -157,7 +153,7 @@ class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
 
 <li>
 <a href="/billing/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/billing' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -177,7 +173,7 @@ New Sale
 
 <li>
 <a href="/sales-invoices/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if request.path == '/sales-invoices/' %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -191,13 +187,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-Sales Invoices
+View Invoices & Vouchers
 </a>
 </li>
 
 <li>
 <a href="/customers/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/customers' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -217,7 +213,7 @@ Customers (Debtors)
 
 <li>
 <a href="/receipt/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/receipt' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -237,7 +233,7 @@ Balance Received (Receipt Voucher)
 
 <li>
 <a href="/sales-return/"
-class="block px-3 py-2 rounded-lg whitespace-nowrap transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg whitespace-nowrap transition-all duration-300 relative overflow-hidden
 
 {% if '/sales-return' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -266,7 +262,7 @@ Sales Returns (Debit Note)
 <li>
 
 <button onclick="toggleMenu('purchaseMenu','purchaseArrow')"
-class="flex justify-between items-center w-full px-3 py-2 rounded-xl
+class="flex justify-between items-center w-full px-3 py-3 rounded-xl
 transition-all duration-300 ease-in-out relative overflow-hidden
 
 {% if '/purchase' in request.path or '/purchase-invoices' in request.path or '/supplier-summary' in request.path or '/creditors' in request.path or '/payment' in request.path or '/debit-note' in request.path %}
@@ -315,7 +311,7 @@ class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
 
 <li>
 <a href="/purchase/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/purchase/' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -335,7 +331,7 @@ New Purchase
 
 <li>
 <a href="/supplier-summary/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if request.path == '/supplier-summary/' %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -349,13 +345,13 @@ hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-ambe
 hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
 {% endif %}
 ">
-Purchase Invoices
+View Invoices & Vouchers
 </a>
 </li>
 
 <li>
 <a href="/creditors/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/creditors' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -375,7 +371,7 @@ Suppliers (Creditors)
 
 <li>
 <a href="/payment/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg whitespace-nowrap transition-all duration-300 relative overflow-hidden
 
 {% if request.path == '/payment/' %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -395,7 +391,7 @@ Supplier Payments (Payment Voucher)
 
 <li>
 <a href="/debit-note/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if request.path == '/debit-note/' %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -424,7 +420,7 @@ Purchase Returns (Credit Note)
 <li>
 
 <button onclick="toggleMenu('inventoryMenu','inventoryArrow')"
-class="flex justify-between items-center w-full px-3 py-2 rounded-xl
+class="flex justify-between items-center w-full px-3 py-3 rounded-xl
 transition-all duration-300 ease-in-out relative overflow-hidden
 
 {% if '/products' in request.path or '/stocks' in request.path %}
@@ -473,7 +469,7 @@ class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
 
 <li>
 <a href="/products/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/products' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -493,7 +489,7 @@ Products
 
 <li>
 <a href="/stocks/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/stocks' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -520,7 +516,7 @@ Stock
 <li>
 
 <button onclick="toggleMenu('expenseMenu','expenseArrow')"
-class="flex justify-between items-center w-full px-3 py-2 rounded-xl
+class="flex justify-between items-center w-full px-3 py-3 rounded-xl
 transition-all duration-300 ease-in-out relative overflow-hidden
 
 {% if '/expense' in request.path %}
@@ -569,7 +565,7 @@ class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
 
 <li>
 <a href="/expenses/add/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/expenses/add' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -589,7 +585,7 @@ Add Expense
 
 <li>
 <a href="/expenses/categories/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/expenses/categories' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -609,7 +605,7 @@ Expense Categories
 
 <li>
 <a href="/expenses/history/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/expenses/history' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -636,7 +632,7 @@ Expense History
 <li>
 
 <button onclick="toggleMenu('accountsMenu','accountsArrow')"
-class="flex justify-between items-center w-full px-3 py-2 rounded-xl
+class="flex justify-between items-center w-full px-3 py-3 rounded-xl
 transition-all duration-300 ease-in-out relative overflow-hidden
 
 {% if '/accounts' in request.path or '/bank' in request.path %}
@@ -685,7 +681,7 @@ class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
 
 <li>
 <a href="/accounts/ledger/" 
-class="block px-3 py-2 rounded-lg whitespace-nowrap transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg whitespace-nowrap transition-all duration-300 relative overflow-hidden
 
 {% if '/accounts/ledger' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -705,7 +701,7 @@ Ledger
 
 <li>
 <a href="/accounts/trial/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/accounts/trial' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -725,7 +721,7 @@ Trial Balance
 
 <li>
 <a href="/accounts/pl/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/accounts/pl' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -745,7 +741,7 @@ Profit & Loss
 
 <li>
 <a href="/accounts/balance/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/accounts/balance' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -765,7 +761,7 @@ Balance Sheet
 
 <li>
 <a href="/bank/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/bank' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -793,7 +789,7 @@ Bank Accounts
 <li>
 
 <button onclick="toggleMenu('reportsMenu','reportsArrow')"
-class="flex justify-between items-center w-full px-3 py-2 rounded-xl
+class="flex justify-between items-center w-full px-3 py-3 rounded-xl
 transition-all duration-300 ease-in-out relative overflow-hidden
 
 {% if '/reports' in request.path %}
@@ -842,7 +838,7 @@ class="space-y-2 mt-3 pl-3 border-l border-yellow-500/40
 
 <li>
 <a href="/reports/sales/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/reports/sales' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -862,7 +858,7 @@ Sales Report
 
 <li>
 <a href="/reports/purchase/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/reports/purchase' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -882,7 +878,7 @@ Purchase Report
 
 <li>
 <a href="/reports/expenses/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/reports/expense' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -902,7 +898,7 @@ Expense Report
 
 <li>
 <a href="/reports/profit/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/reports/profit' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -922,7 +918,7 @@ Profit Report
 
 <li>
 <a href="/reports/gst/" 
-class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+class="block px-3 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
 
 {% if '/reports/gst' in request.path %}
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
@@ -988,7 +984,7 @@ active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6)]
 
 <!-- MAIN CONTENT -->
 
-<main class="flex-1 p-4 md:p-6 pb-24 pt-20 md:pt-6">
+<main class="flex-1 p-4 md:p-6 pb-24 pt-20 md:pt-6 overflow-y-auto">
 
 {% block content %}
 {% endblock %}
