@@ -1,8 +1,7 @@
 {% extends "dashboard/base.html" %}
 {% block content %}
 
-<div class="max-w-7xl mx-auto text-white">
-
+<div class="max-w-7xl mx-auto text-white pb-28 min-h-screen">
     <!-- TOAST -->
     {% if messages %}
     <div id="toastMessage" class="mb-4 space-y-2">
@@ -41,7 +40,7 @@ bg-gradient-to-br from-slate-800 to-slate-900
 
 shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_12px_12px_30px_rgba(0,0,0,0.8)]
 
-border border-white/10">
+border border-white/10 overflow-visible">
 
         <!-- SHINE -->
         <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-white/10 to-transparent pointer-events-none">
@@ -94,7 +93,7 @@ border border-white/10">
                 <div class="relative">
 
                     <!-- ICON -->
-                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 mt-7 -translate-y-1/2
 
     text-yellow-400
 
@@ -112,18 +111,24 @@ border border-white/10">
     focus:shadow-[0_0_10px_rgba(255,215,0,0.5)]
 
     transition-all duration-300" onclick="toggleDropdown()">
-
+ 
                     <!-- DROPDOWN -->
-                    <div id="productDropdownList" class="hidden absolute w-full mt-2
+                   <div id="productDropdownList" class="hidden absolute left-0 right-0 mt-2
 
-    bg-gradient-to-br from-slate-800 to-slate-900
+bg-gradient-to-br from-slate-800 to-slate-900
+rounded-xl max-h-60 overflow-y-auto z-[9999]
 
-    rounded-xl max-h-60 overflow-y-auto z-50
+shadow-[0_8px_20px_rgba(0,0,0,0.8)]
+border border-white/10">
+ <span class="text-xs text-gray-400">Bulk Action</span>
 
-    shadow-[0_8px_20px_rgba(0,0,0,0.6)]
+    <button onclick="toggleCheckAll()" type="button"
+        class="text-xs bg-yellow-400 text-black px-3 py-1 rounded-lg flex items-center gap-1">
 
-    border border-white/10">
+        <i id="checkIcon" class="fa-solid fa-square-check text-sm"></i>
+        <span id="checkText">Check All</span>
 
+    </button>
                     </div>
 
                 </div>
@@ -137,7 +142,7 @@ border border-white/10">
 
                     <div id="selectedItems" class="space-y-3
 
-max-h-[40vh] overflow-y-auto pr-2
+max-h-[50vh] sm:max-h-[55vh] overflow-y-auto overflow-x-hidden pr-2
 
 scroll-smooth
 
@@ -251,42 +256,97 @@ class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50">
     <script>
 function openReturnModal(id) {
 
-    let item = selected[id];
+    // ✅ support both selected + dropdown
+    let item = selected[id] || allItems.find(i => i.id == id);
     if (!item) return;
 
-    fetch(`/get-return-info/?purchase_id=${document.getElementById("purchase_id").value}&product_id=${id}`)
+    let purchaseId = document.getElementById("purchase_id").value;
+
+    fetch(`/get-return-info/?purchase_id=${purchaseId}&product_id=${id}`)
         .then(res => res.json())
         .then(data => {
 
-            let total = item.qty;
+            let total = item.qty || 0;
             let returned = data.returned || 0;
+            let returnedAmount = data.returned_amount || 0;
             let remaining = total - returned;
 
-            // store for disable logic
-            selected[id].returned = returned;
-
-            document.getElementById("modal_total").innerText = total;
-            document.getElementById("modal_returned").innerText = returned;
-            document.getElementById("modal_remaining").innerText = remaining;
-
-            // 🔥 HISTORY RENDER
-            let historyHtml = "";
-
-            if (data.history.length === 0) {
-                historyHtml = `<div class="text-gray-400 text-center">No returns yet</div>`;
+            // ✅ update selected (only if exists)
+            if (selected[id]) {
+                selected[id].returned = returned;
             }
 
-            data.history.forEach(h => {
-                historyHtml += `
-                <div class="p-3 rounded-xl bg-slate-800 flex justify-between">
-                    <span>${h.date}</span>
-                    <span class="text-green-400">₹ ${h.qty}</span>
-                </div>`;
-            });
+            // ✅ summary
+            document.getElementById("modal_total").innerText = total;
+            document.getElementById("modal_returned").innerText =
+                returned + " (₹ " + returnedAmount.toFixed(2) + ")";
+            document.getElementById("modal_remaining").innerText = remaining;
+
+            // 🔥 HISTORY
+            let historyHtml = "";
+
+            if (!data.history || data.history.length === 0) {
+                historyHtml = `<div class="text-gray-400 text-center">No returns yet</div>`;
+            } else {
+
+                data.history.forEach(h => {
+
+                    let qty = h.qty || 0;
+                    let price = h.price || 0;
+                    let amount = h.amount || 0;
+
+                    historyHtml += `
+<div class="p-3 rounded-xl bg-slate-800">
+
+    <div class="flex justify-between items-center">
+
+        <!-- LEFT -->
+        <div>
+            <div class="font-semibold">${h.date}</div>
+
+            <div class="text-xs text-gray-400">
+                ${qty} × ₹${price}
+            </div>
+            <div class="text-xs text-yellow-400">
+    (Incl. GST)
+</div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="flex items-center gap-2">
+
+            <!-- 👁 VIEW -->
+            <a href="/purchase-return/print/${h.return_id}/"
+               target="_blank"
+               onclick="event.stopPropagation()"
+               class="text-yellow-400 hover:scale-110 transition">
+
+               <i class="fa-solid fa-eye"
+                  onclick="event.stopPropagation()"></i>
+            </a>
+
+            <!-- AMOUNT -->
+            <span class="text-green-400 font-bold">
+                ₹ ${amount.toFixed(2)}
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+`;
+                });
+            }
 
             document.getElementById("modal_history").innerHTML = historyHtml;
 
+            // ✅ open modal
             document.getElementById("returnModal").classList.remove("hidden");
+        })
+        .catch(err => {
+            console.error("Return Modal Error:", err);
+            alert("Something went wrong ❌");
         });
 }
 
@@ -352,7 +412,17 @@ function closeModal() {
         });
     });
 
-    renderDropdown(data);
+    renderDropdown(data);Promise.all(
+    data.map(item =>
+        fetch(`/get-return-info/?purchase_id=${purchase_id}&product_id=${item.id}`)
+        .then(res => res.json())
+        .then(r => {
+            item.returned = r.returned || 0;
+        })
+    )
+).then(() => {
+    renderDropdown(data); // 🔥 AFTER ALL DATA READY
+});
 });
 
         });
@@ -370,29 +440,50 @@ function closeModal() {
         // ================= RENDER DROPDOWN =================
         function renderDropdown(data) {
 
-            let html = "";
+            let html = `
+<div class="sticky top-0 z-10 bg-slate-900/95 backdrop-blur p-2 border-b border-white/10 flex justify-between items-center">
+
+    <span class="text-xs text-gray-400">Bulk Action</span>
+
+    <button onclick="toggleCheckAll()" type="button"
+        class="text-xs bg-yellow-400 text-black px-3 py-1 rounded-lg flex items-center gap-1">
+
+        <i id="checkIcon" class="fa-solid fa-square-check text-sm"></i>
+        <span id="checkText">Check All</span>
+
+    </button>
+
+</div>
+`;
 
             if (data.length === 0) {
                 html = `<div class="p-3 text-gray-400 text-center">No items found</div>`;
             }
 
-            data.forEach(i => {
+         data.forEach(i => {
 
-                let checked = selected[i.id] ? "checked" : "";
+    let isSelected = !!selected[i.id];
+let checked = isSelected ? "checked" : "";
 
-                html += `
-<div onclick="toggleItem(${i.id})"
+    let selectedItem = selected[i.id];
+let returned = selectedItem?.returned ?? i.returned ?? 0;
+    let isFullyReturned = returned >= i.qty;
+
+    html += `
+<div 
 
 class="flex items-center justify-between gap-3
 w-full max-w-full overflow-hidden
-px-4 py-3 rounded-xl cursor-pointer
+px-4 py-3 rounded-xl
+
+${isFullyReturned ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-[1.01] hover:bg-slate-700'}
 
 bg-gradient-to-br from-slate-800 to-slate-900
-
 shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_6px_6px_16px_rgba(0,0,0,0.7)]
+transition-all duration-200"
 
-hover:scale-[1.01] hover:bg-slate-700
-transition-all duration-200">
+onclick="handleItemClick(${i.id})"
+>
 
     <!-- LEFT -->
     <div class="flex-1 min-w-0 overflow-hidden">
@@ -404,93 +495,108 @@ transition-all duration-200">
         </div>
     </div>
 
-    <!-- CHECKBOX -->
-    <label class="shrink-0 cursor-pointer"
-        onclick="event.stopPropagation()">  <!-- 🔥 IMPORTANT -->
+    <!-- RIGHT -->
+    <div class="flex items-center gap-3">
 
-        <input type="checkbox" ${checked}
-        onchange="toggleItem(${i.id})"
-        class="hidden peer">
+        <!-- 👁 EYE (ALWAYS) -->
+          <div class="w-9 h-9 flex items-center justify-center rounded-xl
 
-        <div class="w-5 h-5 rounded-md flex items-center justify-center
+    bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500
 
-        bg-gradient-to-br from-slate-700 to-slate-900
+    text-black
 
-        shadow-[inset_2px_2px_5px_rgba(255,255,255,0.08),_4px_4px_10px_rgba(0,0,0,0.7)]
+    shadow-[inset_2px_2px_6px_rgba(255,255,255,0.6),_4px_4px_12px_rgba(0,0,0,0.6)]
 
-        peer-checked:bg-gradient-to-br peer-checked:from-yellow-300 peer-checked:to-amber-500
+    hover:scale-110
+    hover:shadow-[0_0_10px_rgba(255,215,0,0.6)]
 
-        transition">
+    active:scale-90
 
-            <i class="fa-solid fa-check text-black text-xs opacity-0 peer-checked:opacity-100"></i>
+    transition-all duration-200
 
-        </div>
-    </label>
+    cursor-pointer"
+
+    onclick="event.stopPropagation(); openReturnModal(${i.id})">
+
+        <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+
+    </div>
+
+        <!-- CHECKBOX -->
+        <label">
+            <input type="checkbox" onclick="event.stopPropagation()" ${checked}
+            ${isFullyReturned ? 'disabled' : ''}
+            onchange="toggleItem(${i.id})"
+            class="hidden peer">
+
+           <div class="w-5 h-5 rounded-md flex items-center justify-center
+${isSelected ? 'bg-yellow-400' : 'bg-gradient-to-br from-slate-700 to-slate-900'}">
+
+               <i class="fa-solid fa-check text-black text-xs ${isSelected ? 'opacity-100' : 'opacity-0'}"></i>
+
+            </div>
+        </label>
+
+    </div>
 
 </div>
 `;
-            });
+});
 
             document.getElementById("productDropdownList").innerHTML = html;
         }
 
-
         // ================= SELECT ITEM =================
-        function toggleItem(id) {
+      function toggleItem(id) {
 
-            let item = allItems.find(i => i.id == id);
+    let item = allItems.find(i => i.id == id);
 
-            if (!item) return;
+    if (!item) return;
 
-            if (selected[id]) {
-                delete selected[id];
-            } else {
-                selected[id] = {
-                    ...item,
-                    return_qty: 1,
-                };
-            }
+    let returned = item.returned || 0;
 
-            renderSelected();
-            renderDropdown(allItems);
+    // 🔥 FINAL BLOCK
+    if (returned >= item.qty) {
+        return;
+    }
+
+    if (selected[id]) {
+        delete selected[id];
+    } else {
+      let remaining = item.qty - (item.returned || 0);
+
+selected[id] = {
+    ...item,
+    return_qty: remaining > 0 ? remaining : 0,
+};
+    }
+
+    renderSelected();
+    renderDropdown(allItems);
+}
+
+
+ function renderSelected() {
+
+    let html = "";
+    let total = 0;
+
+    Object.values(selected).forEach(i => {
+
+        let itemTotal = i.return_qty * i.price;
+        total += itemTotal;
+
+        let returned = i.returned ?? 0;
+        let isFullyReturned = returned >= i.qty;
+
+        if (isFullyReturned) {
+            i.return_qty = 0;
         }
 
+        html += `
+<div class="w-full
 
-        // ================= RENDER SELECTED =================
-        function renderSelected() {
-
-            let html = "";
-            let total = 0;
-
-            Object.values(selected).forEach(i => {
-
-                let itemTotal = i.return_qty * i.price;
-                total += itemTotal;
-
-                let returned = i.returned ?? 0;
-let isFullyReturned = returned >= i.qty;
-
-// 🔥 force qty = 0 if fully returned
-if (isFullyReturned) {
-    i.return_qty = 0;
-}
-if (isFullyReturned && !i._timerSet) {
-
-    i._timerSet = true;
-
-    setTimeout(() => {
-        if (selected[i.id] && selected[i.id].return_qty === 0) {
-            delete selected[i.id];
-            renderSelected();
-        }
-    }, 20000);
-}
-let disabled = returned >= i.qty;
-
-                html += `
-<div class="w-full max-w-full overflow-hidden
-
-flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3
+flex flex-col sm:flex-row justify-between gap-3
 
 p-4 rounded-2xl
 
@@ -503,24 +609,43 @@ border border-white/5
 transition-all duration-200 hover:scale-[1.01]">
 
     <!-- LEFT -->
-    <div class="flex-1 min-w-0 overflow-hidden">
+    <div class="flex flex-col gap-2 flex-1 min-w-0">
 
-   <div class="flex items-center justify-between font-semibold text-white truncate">
-    
-    <span class="truncate ${isFullyReturned ? 'opacity-40' : ''}">
-        ${i.name}
-    </span>
-    
-    <!-- ✅ Eye ALWAYS visible -->
-    <i class="fa-solid fa-eye ml-2 cursor-pointer text-yellow-400"
-       onclick="openReturnModal(${i.id})"></i>
+        <!-- NAME + ACTION -->
+        <div class="flex justify-between items-start gap-2">
 
-    <!-- label -->
-    ${isFullyReturned ? `
-    <span class="text-red-400 text-xs ml-2">Returned</span>
-    ` : ``}
-</div>
-        <div class="text-xs text-gray-400 truncate">
+            <div class="truncate font-semibold text-white ${isFullyReturned ? 'opacity-40' : ''}">
+                ${i.name}
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+
+                <!-- HISTORY BUTTON -->
+                <div class="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-xl
+
+                bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500
+
+                text-black
+
+                shadow-[inset_2px_2px_6px_rgba(255,255,255,0.6),_4px_4px_12px_rgba(0,0,0,0.6)]
+
+                hover:scale-110 active:scale-90 transition cursor-pointer"
+
+                onclick="openReturnModal(${i.id})">
+
+                    <i class="fa-solid fa-clock-rotate-left text-xs md:text-sm"></i>
+                </div>
+
+                ${isFullyReturned ? `
+                <span class="text-red-400 text-xs whitespace-nowrap">Returned</span>
+                ` : ``}
+
+            </div>
+
+        </div>
+
+        <!-- PRICE -->
+        <div class="text-xs sm:text-sm text-gray-400 truncate">
             ₹${i.price} × ${i.qty} =
             <span class="text-yellow-400 font-semibold">
                 ₹${i.price * i.qty}
@@ -530,17 +655,17 @@ transition-all duration-200 hover:scale-[1.01]">
     </div>
 
     <!-- RIGHT SIDE -->
-    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+    <div class="flex flex-wrap md:flex-nowrap items-center gap-3 justify-between md:justify-end">
 
         <!-- QTY -->
         <input type="number"
         min="1"
-        max="${i.qty}"
+        max="${i.qty - (i.returned || 0)}"
         ${isFullyReturned ? 'disabled' : ''}
         value="${i.return_qty}"
         onchange="updateQty(${i.id}, this.value)"
 
-        class="w-16 shrink-0 text-center
+        class="w-14 sm:w-16 text-center
 
         bg-slate-700 text-white
 
@@ -553,54 +678,53 @@ transition-all duration-200 hover:scale-[1.01]">
         outline-none transition">
 
         <!-- AMOUNT -->
-        <div class="text-green-400 font-bold whitespace-nowrap shrink-0">
-            ₹${i.return_qty * i.price}
+        <div class="text-green-400 font-bold text-sm sm:text-base whitespace-nowrap">
+            ₹${(i.return_qty * i.price).toFixed(2)}
         </div>
 
         <!-- DELETE -->
-     <button 
-    onclick="removeItem(${i.id})"
-    ${isFullyReturned ? 'disabled' : ''}
+        <button 
+        onclick="removeItem(${i.id})"
+        ${isFullyReturned ? 'disabled' : ''}
 
-    class="shrink-0 w-9 h-9 flex items-center justify-center
-    ${isFullyReturned ? 'opacity-30 cursor-not-allowed' : ''}
+        class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center
 
-    rounded-xl
-    bg-gradient-to-br from-red-500 to-red-600
-    text-white
+        ${isFullyReturned ? 'opacity-30 cursor-not-allowed' : ''}
 
-    shadow-[inset_2px_2px_5px_rgba(255,255,255,0.2),_4px_4px_12px_rgba(0,0,0,0.7)]
+        rounded-xl
+        bg-gradient-to-br from-red-500 to-red-600
+        text-white
 
-    hover:scale-110
-    active:scale-90
-    transition-all duration-200">
+        shadow-[inset_2px_2px_5px_rgba(255,255,255,0.2),_4px_4px_12px_rgba(0,0,0,0.7)]
 
-    <i class="fa-solid fa-xmark"></i>
+        hover:scale-110 active:scale-90 transition">
 
-</button>
+            <i class="fa-solid fa-xmark text-xs sm:text-sm"></i>
+        </button>
 
-           </div>
+    </div>
 
 </div>
 `;
-            });
-            // 🔥 CALCULATE GST
-            let subtotal = total;
-            let cgst = subtotal * 0.09;
-            let sgst = subtotal * 0.09;
-            let grand = subtotal + cgst + sgst;
+    });
 
-            document.getElementById("selectedItems").innerHTML = html;
-            document.getElementById("subtotalAmount").innerText = subtotal.toFixed(2);
-            document.getElementById("cgstAmount").innerText = cgst.toFixed(2);
-            document.getElementById("sgstAmount").innerText = sgst.toFixed(2);
-            document.getElementById("totalAmount").innerText = grand.toFixed(2);
-            let btn = document.querySelector("button[type='submit']");
-            if (btn) {
-                btn.disabled = Object.keys(selected).length === 0;
-            }
+    // GST
+    let subtotal = total;
+    let cgst = subtotal * 0.09;
+    let sgst = subtotal * 0.09;
+    let grand = subtotal + cgst + sgst;
 
-        }
+    document.getElementById("selectedItems").innerHTML = html;
+    document.getElementById("subtotalAmount").innerText = subtotal.toFixed(2);
+    document.getElementById("cgstAmount").innerText = cgst.toFixed(2);
+    document.getElementById("sgstAmount").innerText = sgst.toFixed(2);
+    document.getElementById("totalAmount").innerText = grand.toFixed(2);
+
+    let btn = document.querySelector("button[type='submit']");
+    if (btn) {
+        btn.disabled = Object.keys(selected).length === 0;
+    }
+}
 
 
         // ================= UPDATE QTY =================
@@ -701,6 +825,62 @@ transition-all duration-200 hover:scale-[1.01]">
                 }, 500);
             }
         }, 3000); // 3 seconds
+
+let allChecked = false;
+
+function toggleCheckAll() {
+
+    allChecked = !allChecked;
+
+    let btnText = document.getElementById("checkText");
+    let btnIcon = document.getElementById("checkIcon");
+
+    if (allChecked) {
+
+        selected = {}; // reset first
+
+        allItems.forEach(i => {
+            let returned = i.returned || 0;
+
+            if (returned < i.qty) {
+ let remaining = i.qty - (i.returned || 0);
+
+selected[i.id] = {
+    ...i,
+    return_qty: remaining > 0 ? remaining : 0
+};
+            }
+        });
+
+        btnText.innerText = "Uncheck All";
+        btnIcon.className = "fa-solid fa-square-xmark text-sm";
+
+    } else {
+
+        selected = {};
+
+        btnText.innerText = "Check All";
+        btnIcon.className = "fa-solid fa-square-check text-sm";
+    }
+
+    renderSelected();
+    renderDropdown(allItems);
+}
+
+function handleItemClick(id) {
+
+    let item = allItems.find(i => i.id == id);
+    if (!item) return;
+
+    let returned = item.returned ?? 0;
+
+    if (returned >= item.qty) {
+        alert("Already fully returned ❌");
+        return;
+    }
+
+    toggleItem(id);
+}
     </script>
 
     {% endblock %}

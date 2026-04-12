@@ -188,20 +188,44 @@ def sales_invoices(request):
     })
 
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Sum
+from .models import Purchase, Supplier, PurchaseReturnItem
+
+
 @login_required
 def purchase_invoices(request):
 
     supplier_id = request.GET.get("supplier_id")
+    supplier = None
 
+    # ✅ FIRST get purchases
     if supplier_id:
         purchases = Purchase.objects.filter(
             supplier_id=supplier_id
         ).order_by("-date")
+
+        supplier = get_object_or_404(Supplier, id=supplier_id)
+
     else:
         purchases = Purchase.objects.all().order_by("-date")
 
+    # ✅ NOW loop (IMPORTANT)
+    for p in purchases:
+
+        total_qty = p.items.aggregate(total=Sum("qty"))["total"] or 0
+
+        returned_qty = PurchaseReturnItem.objects.filter(
+            purchase_return__purchase=p
+        ).aggregate(total=Sum("qty"))["total"] or 0
+
+        # ✅ FULL RETURN FLAG
+        p.is_fully_returned = returned_qty >= total_qty and total_qty > 0
+
     return render(request, "dashboard/purchase_invoices.html", {
-        "purchases": purchases
+        "purchases": purchases,
+        "supplier": supplier
     })
 
 # ---------------- PRODUCTS ----------------
@@ -1728,29 +1752,35 @@ def supplier_summary(request):
 
     try:
         suppliers = Supplier.objects.all()
-
         data = []
 
         for s in suppliers:
 
             purchases = Purchase.objects.filter(supplier=s)
 
-            total_purchase = 0
+            total_purchase = purchases.aggregate(total=Sum("total"))["total"] or 0
+
+            # ✅ CORRECT OUTSTANDING CALCULATION
             outstanding = 0
-
             for p in purchases:
+                outstanding += p.balance   # ✅ use property
 
-                # SAFE access
-                total_purchase += float(p.total or 0)
+            # optional (display only)
+            total_payment = PaymentAllocation.objects.filter(
+                purchase__supplier=s
+            ).aggregate(total=Sum("amount"))["total"] or 0
 
-                if p.payment_mode == "credit":
-                    outstanding += float(getattr(p, "balance", 0))
+            total_return = PurchaseReturn.objects.filter(
+                purchase__supplier=s
+            ).aggregate(total=Sum("total"))["total"] or 0
 
             data.append({
                 "id": s.id,
                 "name": s.name,
-                "total": total_purchase,
-                "outstanding": outstanding
+                "total": round(total_purchase, 2),
+                "payment": round(total_payment, 2),
+                "return": round(total_return, 2),
+                "outstanding": round(outstanding, 2)
             })
 
         return render(request, "dashboard/supplier_summary.html", {
@@ -1764,27 +1794,79 @@ def supplier_summary(request):
 @login_required
 def get_return_info(request):
 
+    from django.http import JsonResponse
+    from django.db.models import Sum
+    from decimal import Decimal
+
     purchase_id = request.GET.get("purchase_id")
     product_id = request.GET.get("product_id")
 
+    purchase = Purchase.objects.get(id=purchase_id)
+
+    # =========================================
+    # 🔥 CASE 1 → INVOICE LEVEL (RETURN ICON)
+    # =========================================
+    if not product_id:
+
+        items = PurchaseItem.objects.filter(purchase=purchase)
+
+        data = []
+
+        for item in items:
+
+            returned = PurchaseReturnItem.objects.filter(
+                purchase_return__purchase=purchase,
+                product=item.product
+            ).aggregate(total=Sum("qty"))["total"] or 0
+
+            remaining = item.qty - returned
+
+            data.append({
+                "product_id": item.product.id,
+                "name": item.product.name,
+                "qty": item.qty,
+                "returned": returned,
+                "remaining": remaining,
+                "has_return": returned > 0
+            })
+
+        return JsonResponse({
+            "items": data,
+            "invoice": purchase.invoice_number
+        })
+
+    # =========================================
+    # 🔥 CASE 2 → PRODUCT LEVEL (MODAL)
+    # =========================================
+
     items = PurchaseReturnItem.objects.filter(
-        purchase_return__purchase_id=purchase_id,
-        product_id=product_id
+        purchase_return__purchase=purchase,
+        product__id=product_id
     ).select_related("purchase_return")
 
-    total = 0
+    total_qty = 0
+    total_amount = Decimal("0.00")
     history = []
 
     for i in items:
-        total += i.qty
+
+        line_total = i.qty * i.price
+        gst = line_total * Decimal("0.18")
+        grand = line_total + gst
+
+        total_qty += i.qty
+        total_amount += grand
 
         history.append({
             "date": i.purchase_return.date.strftime("%d %b %Y"),
-            "qty": i.qty
+            "qty": i.qty,
+            "price": float(i.price),
+            "amount": float(grand),
+            "return_id": i.purchase_return.id
         })
 
     return JsonResponse({
-        "returned": total,
+        "returned": total_qty,
+        "returned_amount": float(total_amount),
         "history": history
     })
-    

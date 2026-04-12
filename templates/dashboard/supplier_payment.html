@@ -115,6 +115,39 @@ SAVE PAYMENT
 </button>
 
 </form>
+<!-- PAYMENT LIST -->
+<div class="mt-6">
+
+    <h2 class="text-lg font-bold text-white mb-3">
+        Payment History
+    </h2>
+
+    <div class="bg-slate-800 rounded-xl p-3">
+
+        {% for p in payments %}
+
+        <div class="flex justify-between border-b border-gray-600 py-2 text-sm text-white">
+
+            <div>
+                <div class="font-semibold">{{ p.supplier.name }}</div>
+                <div class="text-gray-400 text-xs">
+                    {{ p.note|default:"-" }}
+                </div>
+            </div>
+
+            <div class="text-green-400 font-bold">
+                ₹ {{ p.amount }}
+            </div>
+
+        </div>
+
+        {% empty %}
+        <p class="text-gray-400 text-sm">No payments yet</p>
+        {% endfor %}
+
+    </div>
+
+</div>
 {% if allocations %}
 <div class="mt-4 bg-slate-800 p-4 rounded-xl text-white">
     <h3 class="font-bold mb-2">Payment Adjusted To:</h3>

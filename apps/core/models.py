@@ -205,18 +205,41 @@ class PurchaseReturn(models.Model):
     reason = models.TextField(blank=True)
     date = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
     def __str__(self):
         return f"Return - {self.purchase.invoice_number}"
-    
+
+    # 🔥 AUTO TOTAL CALCULATION
+    def update_total(self):
+        total = 0
+        for item in self.items.all():
+            total += item.amount
+        self.total = total
+        self.save(update_fields=["total"])
+
+
 class PurchaseReturnItem(models.Model):
-    purchase_return = models.ForeignKey(PurchaseReturn, related_name="items", on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    purchase_return = models.ForeignKey(
+        PurchaseReturn,
+        related_name="items",
+        on_delete=models.CASCADE
+    )
+    product = models.ForeignKey("Product", on_delete=models.CASCADE)
     qty = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
     @property
     def amount(self):
-        return self.qty * self.price
+        return float(self.qty) * float(self.price)
+
+    # 🔥 AUTO UPDATE RETURN TOTAL AFTER SAVE
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.purchase_return.update_total()
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self.purchase_return.update_total()
     
 class ExpenseCategory(models.Model):
 

@@ -25,6 +25,8 @@
                 <tr>
                     <th class="py-3 px-2">Supplier</th>
                     <th>Total Purchase</th>
+                    <th>Payment</th>
+                    <th>Return</th>
                     <th>Outstanding</th>
                 </tr>
             </thead>
@@ -33,8 +35,7 @@
 
                 {% for s in suppliers %}
 
-                <tr onclick="openSupplier('{{ s.id }}')"
-                    class="cursor-pointer transition-all duration-200
+                <tr onclick="openSupplier('{{ s.id }}')" class="cursor-pointer transition-all duration-200
                     hover:bg-white/5 hover:scale-[1.01]">
 
                     <td class="py-3 font-bold">
@@ -43,7 +44,14 @@
 
                     <td class="text-blue-400 font-semibold
                     drop-shadow-[0_0_6px_rgba(59,130,246,0.6)]">
-                        ₹ {{ s.total }}
+                        ₹ {{ s.total|default:0 }}
+                    </td>
+                    <td class="text-green-400 font-semibold">
+                        ₹ {{ s.payment|default:0 }}
+                    </td>
+
+                    <td class="text-yellow-400 font-semibold">
+                        ₹ {{ s.return|default:0 }}
                     </td>
 
                     <td class="font-bold
@@ -52,7 +60,7 @@
                     {% else %}
                         text-green-400
                     {% endif %}">
-                        ₹ {{ s.outstanding }}
+                        ₹ {{ s.outstanding|default:0 }}
                     </td>
 
                 </tr>
@@ -78,9 +86,7 @@
 
         {% for s in suppliers %}
 
-        <div onclick="openSupplier('{{ s.id }}')"
-
-        class="p-5 rounded-3xl cursor-pointer
+        <div onclick="openSupplier('{{ s.id }}')" class="p-5 rounded-3xl cursor-pointer
         bg-gradient-to-br from-slate-800 to-slate-900
         shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_8px_8px_20px_rgba(0,0,0,0.8)]
         border border-white/10
@@ -94,9 +100,24 @@
                         {{ s.name }}
                     </h2>
 
-                    <p class="text-sm text-gray-400">
-                        Total: ₹ {{ s.total }}
-                    </p>
+                   <div class="space-y-2 text-sm">
+
+        <div class="flex justify-between">
+            <span class="text-gray-400">Total</span>
+            <span class="font-semibold">₹ {{ s.total }}</span>
+        </div>
+
+        <div class="flex justify-between">
+            <span class="text-gray-400">Payment</span>
+            <span class="text-red-400">(-) ₹ {{ s.payment|default:0 }}</span>
+        </div>
+
+        <div class="flex justify-between">
+            <span class="text-gray-400">Return</span>
+            <span class="text-red-400">(-) ₹ {{ s.return|default:0 }}</span>
+        </div>
+
+    </div>
                 </div>
 
                 <div class="text-right">
@@ -131,9 +152,9 @@
 </div>
 
 <script>
-function openSupplier(id){
-    window.location.href = `/purchase-invoices/?supplier_id=${id}`;
-}
+    function openSupplier(id) {
+        window.location.href = `/purchase-invoices/?supplier_id=${id}`;
+    }
 </script>
 
 {% endblock %}

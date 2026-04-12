@@ -6,8 +6,7 @@
     <div class="flex items-center gap-3 mb-6">
 
         <!-- BACK BUTTON -->
-        <div onclick="goBack()"
-        class="flex items-center justify-center
+        <div onclick="goBack()" class="flex items-center justify-center
 
         w-10 h-10
 
@@ -33,10 +32,17 @@
 
         <!-- TITLE -->
         <h1 class="text-2xl font-bold text-white tracking-wide
-        drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
+drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
 
-            <i class="fa-solid fa-receipt"></i>
-             Purchase Invoices
+            <i class="fa-solid fa-receipt "></i>
+            Purchase Invoices
+            <span> - (
+    {% if supplier %}
+        {{ supplier.name }}
+    {% else %}
+        All Suppliers
+    {% endif %} )
+</span>
 
         </h1>
 
@@ -72,7 +78,7 @@ shadow-[inset_0_-2px_6px_rgba(255,255,255,0.05)] sticky top-0 z-10 bg-slate-900"
                 <tr>
                     <th class="py-3 px-2">Invoice</th>
                     <th>Date</th>
-                    <!-- <th>Supplier</th> -->
+                    <th>Mode</th>
                     <th>Total</th>
                     <th>Action</th>
                 </tr>
@@ -98,9 +104,12 @@ hover:bg-white/5 hover:scale-[1.01]">
                         {{ p.date|date:"d M Y" }}
                     </td>
 
-                    <!-- <td class="text-gray-300">
-                        {{ p.supplier.name }}
-                    </td> -->
+                    <td class="text-sm font-bold 
+{% if p.payment_mode == 'cash' %} text-green-400 
+{% elif p.payment_mode == 'credit' %} text-yellow-400 
+{% else %} text-blue-400 {% endif %}">
+    {{ p.payment_mode|upper }}
+</td>
 
                     <td class="font-bold text-blue-400
 drop-shadow-[0_0_6px_rgba(59,130,246,0.6)]">
@@ -120,7 +129,24 @@ transition-all duration-200">
 
                             <i class="fa-solid fa-eye text-white text-xs"></i>
                         </a>
+<!-- RETURN -->
+<button onclick="openReturnHistory('{{ p.id }}')"
+class="w-8 h-8 flex items-center justify-center rounded-lg
 
+{% if p.is_fully_returned %}
+    bg-gray-600 opacity-60
+{% else %}
+    bg-gradient-to-br from-purple-500 to-purple-600
+    shadow-[inset_2px_2px_5px_rgba(255,255,255,0.3),_4px_4px_10px_rgba(0,0,0,0.6)]
+    hover:scale-[1.1]
+    hover:shadow-[0_0_10px_rgba(168,85,247,0.6)]
+{% endif %}
+
+transition-all duration-200">
+
+    <i class="fa-solid fa-clock-rotate-left text-white text-xs"></i>
+
+</button>
                         <!-- EDIT -->
                         {% if p.payment_mode == "credit" and p.paid_amount == 0 %}
                         <!-- EDIT -->
@@ -203,18 +229,16 @@ hover:bg-white/5 hover:scale-[1.01]">
 
                     <div>
 
-                        <h2 class="text-lg font-bold text-white tracking-wide">
-                            {{ p.invoice_number }}
+                        <h2 class="text-lg font-bold text-white tracking-wide ">
+                            {{ p.invoice_number }} <span class="text-sm font-bold 
+{% if p.payment_mode == 'cash' %} text-green-400 
+{% elif p.payment_mode == 'credit' %} text-yellow-400 
+{% else %} text-blue-400 {% endif %}">- ({{ p.payment_mode|upper }})</span>
                         </h2>
 
                         <p class="text-gray-400 text-sm">
                             {{ p.date|date:"d M Y" }}
                         </p>
-
-                        <!-- <p class="text-gray-300 mt-1">
-                            {{ p.supplier.name }}
-                        </p> -->
-
                     </div>
 
                     <div class="text-blue-400 text-lg font-bold
@@ -238,7 +262,26 @@ hover:bg-white/5 hover:scale-[1.01]">
 
                     <i class="fa-solid fa-eye"></i> View
                 </a>
+<!-- RETURN -->
+<button onclick="openReturnHistory('{{ p.id }}')"
 
+class="flex-1 text-center py-2 rounded-xl text-white
+
+{% if p.is_fully_returned %}
+    bg-gray-600 opacity-60 cursor-not-allowed
+{% else %}
+    bg-gradient-to-br from-purple-500 to-purple-600
+    shadow-[inset_2px_2px_5px_rgba(255,255,255,0.3),_4px_4px_12px_rgba(0,0,0,0.6)]
+    hover:scale-[1.03]
+    hover:shadow-[0_0_10px_rgba(168,85,247,0.6)]
+{% endif %}
+
+text-sm font-semibold
+transition-all duration-200">
+
+    <i class="fa-solid fa-clock-rotate-left mr-1"></i>Return
+
+</button>
                 <!-- EDIT -->
                 {% if p.payment_mode == "credit" and p.paid_amount == 0 %}
                 <a href="/purchase/edit/{{ p.id }}/" class="flex-1 text-center py-2 rounded-xl
@@ -376,7 +419,169 @@ bg-gray-600 text-white opacity-60 cursor-not-allowed" title="Payment Done - Lock
 
     </div>
 </div>
+<div id="returnModal"
+class="fixed inset-0 bg-black/70 hidden flex items-center justify-center z-50">
+
+<div class="bg-slate-900 p-5 rounded-2xl w-80 text-white">
+
+    <!-- 🔙 BACK BUTTON -->
+    <div class="flex items-center justify-between mb-2">
+        
+        <button 
+        id="backBtn"
+    onclick="goBackToList()"
+       class="flex items-center justify-center
+
+        w-10 h-10
+
+        rounded-xl
+
+        bg-gradient-to-br from-slate-700 to-slate-900
+
+        shadow-[inset_2px_2px_5px_rgba(255,255,255,0.1),_6px_6px_15px_rgba(0,0,0,0.8)]
+
+        border border-white/10
+
+        cursor-pointer
+
+        transition-all duration-200
+
+        hover:scale-110 hover:shadow-[0_0_15px_rgba(250,204,21,0.6)]
+
+        active:scale-90">
+        
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <h2 class="font-bold mb-3" id="returnTitle">Return History</h2>
+
+</div>
+
+    <div id="returnHistory" class="space-y-2 max-h-60 overflow-y-auto"></div>
+
+    <button onclick="closeReturnModal()"
+    class="mt-4 w-full bg-red-500 py-2 rounded-lg">
+        Close
+    </button>
+
+</div>
+</div>
 <script>
+    function closeReturnModal(){
+    document.getElementById("returnModal").classList.add("hidden");
+}
+    function viewReturn(purchaseId, productId){
+ currentPurchaseId = purchaseId;
+    fetch(`/get-return-info/?purchase_id=${purchaseId}&product_id=${productId}`)
+    .then(res => res.json())
+    .then(data => {
+
+        let html = "";
+
+     data.history.forEach(i => {
+    html += `
+
+<!-- 📦 RETURN ITEM -->
+<div class="flex justify-between bg-black/20 p-2 rounded-xl">
+
+    <div>
+        <div class="font-semibold">${i.date}</div>
+        <div class="text-xs text-gray-400">
+            Qty: ${i.qty}
+        </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+
+        <!-- 👁 VIEW INVOICE -->
+        <button 
+        onclick="event.stopPropagation(); openReturnInvoice(${purchaseId}, ${i.product_id})"
+
+        class="w-8 h-8 flex items-center justify-center rounded-lg
+
+        bg-gradient-to-br from-blue-500 to-blue-600
+
+        shadow-[inset_2px_2px_5px_rgba(255,255,255,0.3),_4px_4px_10px_rgba(0,0,0,0.6)]
+
+        hover:scale-110
+        hover:shadow-[0_0_10px_rgba(59,130,246,0.6)]
+
+        transition-all duration-200">
+
+            <i class="fa-solid fa-eye text-white text-xs"></i>
+        </button>
+
+        <!-- 💰 AMOUNT -->
+        <div class="text-yellow-400 font-bold">
+            ₹ ${i.amount}
+        </div>
+
+    </div>
+
+</div>
+`;
+});
+
+        document.getElementById("returnHistory").innerHTML = html;
+            document.getElementById("backBtn").classList.remove("hidden");
+    });
+}
+    function openReturnHistory(purchaseId){
+         currentPurchaseId = purchaseId;
+    fetch(`/get-return-info/?purchase_id=${purchaseId}`)
+    .then(res => res.json())
+    .then(data => {
+
+        document.getElementById("returnTitle").innerText =
+            `Return History - ${data.invoice}`;
+
+
+        let html = "";
+
+        data.items.forEach(i => {
+
+ html += `
+<div class="flex justify-between items-center bg-black/20 p-2 rounded">
+
+    <div>
+        <div class="cursor-pointer font-semibold" onclick="viewReturn(${purchaseId}, ${i.product_id})">${i.name}</div>
+        <div class="text-xs text-gray-400">
+            Total: ${i.qty} | Returned: ${i.returned} | Remaining: ${i.remaining}
+        </div>
+    </div>
+
+    <div class="flex gap-2">
+
+       ${i.has_return ? `
+<button 
+onclick="event.stopPropagation(); openReturnInvoice(${purchaseId}, ${i.product_id})"
+
+class="w-8 h-8 flex items-center justify-center rounded-lg
+
+bg-gradient-to-br from-blue-500 to-blue-600
+
+shadow-[inset_2px_2px_5px_rgba(255,255,255,0.3),_4px_4px_10px_rgba(0,0,0,0.6)]
+
+hover:scale-110
+hover:shadow-[0_0_10px_rgba(59,130,246,0.6)]
+
+transition-all duration-200">
+
+    <i class="fa-solid fa-eye text-white text-xs"></i>
+</button>
+` : ''}
+
+    </div>
+
+</div>
+`;
+        });
+
+        document.getElementById("returnHistory").innerHTML = html;
+        document.getElementById("returnModal").classList.remove("hidden");
+         // ❌ HIDE BACK BUTTON
+    document.getElementById("backBtn").classList.add("hidden");
+    });
+}
     function openLedger(id) {
 
         fetch(`/api/purchase-ledger/${id}/`)
@@ -431,8 +636,34 @@ bg-gray-600 text-white opacity-60 cursor-not-allowed" title="Payment Done - Lock
     function openPaymentVoucher(id) {
         window.open(`/payment-voucher/${id}/`, "_blank");
     }
-    function goBack(){
-    window.location.href = "/supplier-summary/";
+    function goBack() {
+        window.location.href = "/supplier-summary/";
+    }
+    function openReturnInvoice(purchaseId, productId){
+
+    fetch(`/get-return-info/?purchase_id=${purchaseId}&product_id=${productId}`)
+    .then(res => res.json())
+    .then(data => {
+
+        if(!data.history || data.history.length === 0){
+            alert("No return invoice found ❌");
+            return;
+        }
+
+        // 🔥 latest return
+        let last = data.history[data.history.length - 1];
+
+        // ✅ OPEN CORRECT RETURN INVOICE
+        window.open(`/purchase-return/print/${last.return_id}/`, "_blank");
+
+    });
+}
+let currentPurchaseId = null;
+
+function goBackToList(){
+    if(currentPurchaseId){
+        openReturnHistory(currentPurchaseId);
+    }
 }
 </script>
 {% endblock %}
