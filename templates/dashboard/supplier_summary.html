@@ -28,6 +28,7 @@
                     <th>Payment</th>
                     <th>Return</th>
                     <th>Outstanding</th>
+                    <th>Receivable</th>
                 </tr>
             </thead>
 
@@ -62,7 +63,14 @@
                     {% endif %}">
                         ₹ {{ s.outstanding|default:0 }}
                     </td>
-
+<!-- ✅ RECEIVABLE -->
+<td class="text-green-400 font-bold">
+    {% if s.receivable > 0 %}
+        ₹ {{ s.receivable|floatformat:2 }}
+    {% else %}
+        -
+    {% endif %}
+</td>
                 </tr>
 
                 {% empty %}
@@ -116,7 +124,16 @@
             <span class="text-gray-400">Return</span>
             <span class="text-red-400">(-) ₹ {{ s.return|default:0 }}</span>
         </div>
-
+<div class="flex justify-between">
+    <span class="text-gray-400">Receivable</span>
+    <span class="text-green-400 font-semibold">
+        {% if s.receivable > 0 %}
+            ₹ {{ s.receivable|floatformat:2 }}
+        {% else %}
+            -
+        {% endif %}
+    </span>
+</div>
     </div>
                 </div>
 

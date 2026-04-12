@@ -250,6 +250,25 @@ hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0
 Sales Returns (Debit Note)
 </a>
 </li>
+<li>
+<a href="/sales-return/"
+class="block px-3 py-2 rounded-lg whitespace-nowrap transition-all duration-300 relative overflow-hidden
+
+{% if '/sales-return' in request.path %}
+bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.5),_4px_4px_12px_rgba(0,0,0,0.3)]
+before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/30 before:to-transparent before:opacity-60
+{% else %}
+bg-slate-800 text-white
+shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.05),_4px_4px_12px_rgba(0,0,0,0.6)]
+
+hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-amber-600 hover:text-black
+hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
+{% endif %}
+">
+Payables
+</a>
+</li>
 
 </ul>
 
@@ -406,6 +425,25 @@ hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0
 {% endif %}
 ">
 Purchase Returns (Credit Note)
+</a>
+</li>
+<li>
+<a href="/debit-note/" 
+class="block px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden
+
+{% if request.path == '/debit-note/' %}
+bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black font-semibold
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.5),_4px_4px_12px_rgba(0,0,0,0.3)]
+before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/30 before:to-transparent before:opacity-60
+{% else %}
+bg-slate-800 text-white
+shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.05),_4px_4px_12px_rgba(0,0,0,0.6)]
+
+hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-amber-600 hover:text-black
+hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
+{% endif %}
+">
+Receivables
 </a>
 </li>
 

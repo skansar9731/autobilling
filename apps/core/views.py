@@ -200,7 +200,7 @@ def purchase_invoices(request):
     supplier_id = request.GET.get("supplier_id")
     supplier = None
 
-    # ✅ FIRST get purchases
+    # ✅ GET PURCHASES
     if supplier_id:
         purchases = Purchase.objects.filter(
             supplier_id=supplier_id
@@ -211,17 +211,66 @@ def purchase_invoices(request):
     else:
         purchases = Purchase.objects.all().order_by("-date")
 
-    # ✅ NOW loop (IMPORTANT)
+    # ✅ LOOP
     for p in purchases:
 
+        # =========================
+        # 🔁 RETURN CHECK (UNCHANGED)
+        # =========================
         total_qty = p.items.aggregate(total=Sum("qty"))["total"] or 0
 
         returned_qty = PurchaseReturnItem.objects.filter(
             purchase_return__purchase=p
         ).aggregate(total=Sum("qty"))["total"] or 0
 
-        # ✅ FULL RETURN FLAG
         p.is_fully_returned = returned_qty >= total_qty and total_qty > 0
+
+        # =========================
+        # 💰 RETURN AMOUNT (FIXED 🔥)
+        # =========================
+        total_return = Decimal("0.00")  # ✅ IMPORTANT FIX
+
+        returns = PurchaseReturnItem.objects.filter(
+            purchase_return__purchase=p
+        )
+
+        for r in returns:
+            line_total = Decimal(r.qty) * Decimal(r.price)
+            gst = line_total * Decimal("0.18")
+            total_return += line_total + gst
+
+        # =========================
+        # 💰 CORRECT BALANCE
+        # =========================
+        correct_balance = p.total - p.paid_amount - total_return
+
+        # =========================
+        # 💚 RECEIVABLE
+        # =========================
+        if correct_balance < 0:
+            p.receivable = abs(correct_balance)
+        else:
+            p.receivable = 0
+
+        # =========================
+        # 💰 PAYMENT STATUS (ONLY CREDIT)
+        # =========================
+        if p.payment_mode == "credit":
+
+            paid = p.paid_amount
+
+            if paid == 0:
+                p.status = "CREDIT"
+
+            elif correct_balance > 0:
+                p.status = "PARTIAL"
+
+            else:
+                p.status = "PAID"
+
+        else:
+            # ✅ CASH / BANK SAME
+            p.status = p.payment_mode.upper()
 
     return render(request, "dashboard/purchase_invoices.html", {
         "purchases": purchases,
@@ -1678,12 +1727,20 @@ def purchase_ledger(request, id):
             "amount": float(a.amount)
         })
 
+    # ✅ 🔥 MAIN FIX (NO SIDE EFFECT)
+    if purchase.payment_mode in ["cash", "bank"]:
+        paid = purchase.total
+        balance = 0
+    else:
+        paid = purchase.paid_amount
+        balance = purchase.balance
+
     return JsonResponse({
         "invoice": purchase.invoice_number,
         "total": float(purchase.total),
-        "paid": float(purchase.paid_amount),
-        "balance": float(purchase.balance),
-        "payment_mode": purchase.payment_mode,   
+        "paid": float(paid),
+        "balance": float(balance),
+        "payment_mode": purchase.payment_mode,
         "payments": data
     })
 
@@ -1758,29 +1815,51 @@ def supplier_summary(request):
 
             purchases = Purchase.objects.filter(supplier=s)
 
-            total_purchase = purchases.aggregate(total=Sum("total"))["total"] or 0
+            # =========================
+            # 💰 TOTAL PURCHASE
+            # =========================
+            total_purchase = purchases.aggregate(
+                total=Sum("total")
+            )["total"] or Decimal("0.00")
 
-            # ✅ CORRECT OUTSTANDING CALCULATION
-            outstanding = 0
-            for p in purchases:
-                outstanding += p.balance   # ✅ use property
-
-            # optional (display only)
+            # =========================
+            # 💰 TOTAL PAYMENT
+            # =========================
             total_payment = PaymentAllocation.objects.filter(
                 purchase__supplier=s
-            ).aggregate(total=Sum("amount"))["total"] or 0
+            ).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
 
-            total_return = PurchaseReturn.objects.filter(
-                purchase__supplier=s
-            ).aggregate(total=Sum("total"))["total"] or 0
+            # =========================
+            # 🔁 TOTAL RETURN (FIXED 🔥)
+            # =========================
+            total_return = Decimal("0.00")
 
+            returns = PurchaseReturnItem.objects.filter(
+                purchase_return__purchase__supplier=s
+            )
+
+            for r in returns:
+                line_total = Decimal(r.qty) * Decimal(r.price)
+                gst = line_total * Decimal("0.18")
+                total_return += line_total + gst
+
+            # =========================
+            # 📊 OUTSTANDING
+            # =========================
+            outstanding = total_purchase - total_payment - total_return
+            if outstanding < 0:
+                receivable = abs(outstanding)
+                outstanding = Decimal("0.00")
+            else:
+                receivable = Decimal("0.00")
             data.append({
                 "id": s.id,
                 "name": s.name,
                 "total": round(total_purchase, 2),
                 "payment": round(total_payment, 2),
                 "return": round(total_return, 2),
-                "outstanding": round(outstanding, 2)
+                "outstanding": round(outstanding, 2),
+                "receivable": round(receivable, 2)   
             })
 
         return render(request, "dashboard/supplier_summary.html", {
@@ -1791,6 +1870,7 @@ def supplier_summary(request):
         return JsonResponse({
             "error": str(e)
         })
+    
 @login_required
 def get_return_info(request):
 
