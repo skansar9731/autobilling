@@ -1829,7 +1829,7 @@ def supplier_summary(request):
 
             for p in purchases:
 
-                total_purchase += p.total
+                total_purchase += Decimal(p.total)
 
                 # =========================
                 # 💰 RETURN CALC
@@ -1848,33 +1848,38 @@ def supplier_summary(request):
                 # =========================
                 # 💰 PAYMENT
                 # =========================
-                if p.payment_mode in ["cash", "bank"]:
-                    paid = p.total
+                mode = (p.payment_mode or "").lower()
+
+                if mode in ["cash", "bank"]:
+                    paid = Decimal(p.total)
                 else:
-                    paid = p.paid_amount or Decimal("0.00")
+                    paid = Decimal(p.paid_amount or 0)
 
                 total_payment += paid
 
                 # =========================
-                # 🔥 FINAL FIX LOGIC
+                # 🔥 FINAL CORRECT LOGIC
                 # =========================
-                if p.payment_mode == "credit":
 
-                    # ✔ CREDIT → return stays in RETURN column
+                # ✅ CASE 1: CREDIT + PARTIAL
+                if mode in ["credit", "partial"] and paid < Decimal(p.total):
+
                     total_return += return_amount
 
-                    balance = p.total - paid - return_amount
+                    balance = Decimal(p.total) - paid - return_amount
 
-                    if balance < 0:
-                        total_receivable += abs(balance)
-                    else:
+                    if balance > 0:
                         total_outstanding += balance
 
-                else:
-                    # ✔ CASH/BANK → return only receivable
-                    total_receivable += return_amount
+                    elif balance < 0:
+                        total_receivable += abs(balance)
 
-                    # ❌ IMPORTANT: NO balance calculation for cash/bank
+                # ✅ CASE 2: CASH / BANK
+                else:
+                    if return_amount > 0:
+                        total_receivable += return_amount
+
+                # ❗ NOTHING ELSE
 
             data.append({
                 "id": s.id,
