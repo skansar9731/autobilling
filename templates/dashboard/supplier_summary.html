@@ -4,8 +4,9 @@
 <div class="max-w-7xl mx-auto px-3 mt-2">
 
     <!-- TITLE -->
-    <h1 class="text-2xl font-bold mb-6 text-white tracking-wide
-    drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+    <h1 class=" sticky top-[50px] md:top-[10px] z-40
+bg-slate-900/95 backdrop-blur-sm
+py-3 rounded-2xl text-2xl font-bold mb-6 text-white tracking-wide rounded-2xl">
         <i class="fa-solid fa-truck text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
         Supplier Summary
     </h1>
@@ -63,14 +64,14 @@
                     {% endif %}">
                         ₹ {{ s.outstanding|default:0 }}
                     </td>
-<!-- ✅ RECEIVABLE -->
-<td class="text-green-400 font-bold">
-    {% if s.receivable > 0 %}
-        ₹ {{ s.receivable|floatformat:2 }}
-    {% else %}
-        -
-    {% endif %}
-</td>
+                    <!-- ✅ RECEIVABLE -->
+                    <td class="text-green-400 font-bold">
+                        {% if s.receivable > 0 %}
+                        ₹ {{ s.receivable|floatformat:2 }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
                 </tr>
 
                 {% empty %}
@@ -108,33 +109,33 @@
                         {{ s.name }}
                     </h2>
 
-                   <div class="space-y-2 text-sm">
+                    <div class="space-y-2 text-sm">
 
-        <div class="flex justify-between">
-            <span class="text-gray-400">Total</span>
-            <span class="font-semibold">₹ {{ s.total }}</span>
-        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Total</span>
+                            <span class="font-semibold">₹ {{ s.total }}</span>
+                        </div>
 
-        <div class="flex justify-between">
-            <span class="text-gray-400">Payment</span>
-            <span class="text-red-400">(-) ₹ {{ s.payment|default:0 }}</span>
-        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Payment</span>
+                            <span class="text-red-400">(-) ₹ {{ s.payment|default:0 }}</span>
+                        </div>
 
-        <div class="flex justify-between">
-            <span class="text-gray-400">Return</span>
-            <span class="text-red-400">(-) ₹ {{ s.return|default:0 }}</span>
-        </div>
-<div class="flex justify-between">
-    <span class="text-gray-400">Receivable</span>
-    <span class="text-green-400 font-semibold">
-        {% if s.receivable > 0 %}
-            ₹ {{ s.receivable|floatformat:2 }}
-        {% else %}
-            -
-        {% endif %}
-    </span>
-</div>
-    </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Return</span>
+                            <span class="text-red-400">(-) ₹ {{ s.return|default:0 }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Receivable</span>
+                            <span class="text-green-400 font-semibold">
+                                {% if s.receivable > 0 %}
+                                ₹ {{ s.receivable|floatformat:2 }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="text-right">
