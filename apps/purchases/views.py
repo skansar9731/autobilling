@@ -1,5 +1,3 @@
-from turtle import mode
-
 from apps.core.models import BillItem
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
