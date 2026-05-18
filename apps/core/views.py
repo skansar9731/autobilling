@@ -198,8 +198,15 @@ def save_bill(request):
 @login_required
 def sales_invoices(request):
 
+    from decimal import Decimal
+
     customer_id = request.GET.get("customer_id")
+
     customer = None
+
+    # =====================================
+    # FILTER CUSTOMER
+    # =====================================
 
     if customer_id:
 
@@ -207,87 +214,127 @@ def sales_invoices(request):
             customer_id=customer_id
         ).order_by("-date")
 
-        customer = get_object_or_404(Customer, id=customer_id)
+        customer = get_object_or_404(
+            Customer,
+            id=customer_id
+        )
 
     else:
 
         bills = Bill.objects.all().order_by("-date")
 
     # =====================================
-    # PAYMENT STATUS
+    # LOOP ALL BILLS
     # =====================================
 
     for p in bills:
 
-        paid = Decimal(p.paid_amount or 0)
-        balance = Decimal(p.balance or 0)
+        paid = Decimal(
+            p.paid_amount or 0
+        )
 
-        # CASH / BANK
-        if (p.payment_mode or "").lower() in ["cash", "bank"]:
+        balance = Decimal(
+            p.balance or 0
+        )
 
-            p.status = p.payment_mode.upper()
-            p.receivable = 0
+        mode = (
+            p.payment_mode or ""
+        ).lower()
 
-       # CREDIT
-    else:
+        # =====================================
+        # STATUS
+        # =====================================
 
-        if paid <= 0:
+        if mode in ["cash", "bank"]:
 
-            p.status = "CREDIT"
-
-        elif balance > 0:
-
-            p.status = "PARTIAL"
+            p.status = mode.upper()
 
         else:
 
-            p.status = "PAID"
+            if paid <= 0:
 
-    # =========================
-    # SALES RETURN RECEIVABLE
-    # ONLY CASH/BANK/PAID
-    # =========================
+                p.status = "CREDIT"
 
-    return_amount = Decimal("0.00")
+            elif balance > 0:
 
-    returns = PurchaseReturnItem.objects.filter(
-        purchase_return__bill=p
+                p.status = "PARTIAL"
+
+            else:
+
+                p.status = "PAID"
+
+        # =====================================
+        # RETURN TOTAL
+        # =====================================
+
+        return_amount = Decimal("0.00")
+
+        returns = PurchaseReturnItem.objects.filter(
+            purchase_return__bill=p
+        )
+
+        for r in returns:
+
+            line_total = (
+                Decimal(r.qty) *
+                Decimal(r.price)
+            )
+
+            gst = (
+                line_total *
+                Decimal("0.18")
+            )
+
+            return_amount += (
+                line_total + gst
+            )
+
+        # =====================================
+        # DEFAULT PAYABLE
+        # =====================================
+
+        p.receivable = Decimal("0.00")
+
+        # =====================================
+        # CASH / BANK / PAID
+        # RETURN = PAYABLE
+        # =====================================
+
+        if mode in ["cash", "bank", "paid"]:
+
+            if return_amount > 0:
+
+                p.receivable = return_amount
+
+        # =====================================
+        # CREDIT / PARTIAL
+        # ONLY EXTRA RETURN PAYABLE
+        # =====================================
+
+        else:
+
+            extra_return = (
+                return_amount -
+                balance
+            )
+
+            if extra_return > 0:
+
+                p.receivable = extra_return
+
+    # =====================================
+    # RENDER
+    # =====================================
+
+    return render(
+        request,
+        "purchases/purchase_invoices.html",
+        {
+            "purchases": bills,
+            "party": customer,
+            "mode": "sales"
+        }
     )
-
-    for r in returns:
-
-        line_total = (
-            Decimal(r.qty) *
-            Decimal(r.price)
-        )
-
-        gst = (
-            line_total *
-            Decimal("0.18")
-        )
-
-        return_amount += (
-            line_total + gst
-        )
-
-    # CREDIT/PARTIAL
-    # 👉 DO NOT SHOW PAYABLE
-    p.receivable = Decimal("0.00")
-
-    # FULLY PAID AFTER CREDIT
-    if (
-        p.status == "PAID"
-        and return_amount > 0
-    ):
-
-        p.receivable = return_amount
-
-    return render(request, "purchases/purchase_invoices.html", {
-        "purchases": bills,
-        "party": customer,
-        "mode": "sales"
-    })
-
 # ---------------- PRODUCTS ----------------
 
 
