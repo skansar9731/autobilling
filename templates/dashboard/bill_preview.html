@@ -1,4 +1,4 @@
-{% extends "dashboard/base.html" %}
+{% extends "base.html" %}
 {% block content %}
 
 <style>
@@ -62,14 +62,34 @@
         </div>
 
         <div class="text-right">
-            {% if bill %}
-            <p><strong>Invoice No:</strong> {{ bill.invoice_no }}</p>
-            <p><strong>Date:</strong> {{ bill.date|date:"d-m-Y H:i" }}</p>
-            {% else %}
-            <p><strong>Invoice No:</strong> {{ purchase.invoice_number }}</p>
-            <p><strong>Date:</strong> {{ purchase.date|date:"d-m-Y" }}</p>
-            {% endif %}
-        </div>
+
+    {% if bill %}
+
+        <p>
+            <strong>Invoice No:</strong>
+            {{ bill.invoice_no }}
+        </p>
+
+        <p>
+            <strong>Date:</strong>
+            {{ bill.date|date:"d-m-Y H:i" }}
+        </p>
+
+    {% elif purchase %}
+
+        <p>
+            <strong>Invoice No:</strong>
+            {{ purchase.invoice_number }}
+        </p>
+
+        <p>
+            <strong>Date:</strong>
+            {{ purchase.date|date:"d-m-Y H:i" }}
+        </p>
+
+    {% endif %}
+
+</div>
     </div>
 
     <h1 class="text-2xl font-bold text-center mb-6">
@@ -77,139 +97,322 @@
     </h1>
 
     <!-- CUSTOMER -->
-    <div class="mb-6">
-        {% if bill %}
-        <p><strong>Party Name:</strong> {{ bill.customer.name }}</p>
-        {% else %}
-        <p><strong>Supplier:</strong> {{ purchase.supplier.name }}</p>
-        {% endif %}
+   <div class="mb-6">
 
-        {% if bill.customer.phone %}
-        <p><strong>Mobile:</strong> {{ bill.customer.phone }}</p>
-        {% endif %}
+{% if bill %}
 
-        {% if bill.customer.address %}
-        <p><strong>Address:</strong> {{ bill.customer.address }}</p>
-        {% endif %}
+    <p>
+        <strong>Party Name:</strong>
+        {{ bill.customer.name }}
+    </p>
 
-        <p>State: Maharashtra (27)</p>
-    </div>
+    {% if bill.customer.phone %}
+    <p>
+        <strong>Mobile:</strong>
+        {{ bill.customer.phone }}
+    </p>
+    {% endif %}
+
+    {% if bill.customer.address %}
+    <p>
+        <strong>Address:</strong>
+        {{ bill.customer.address }}
+    </p>
+    {% endif %}
+
+{% else %}
+
+    <p>
+        <strong>Supplier:</strong>
+        {{ purchase.supplier.name }}
+    </p>
+
+    {% if purchase.supplier.phone %}
+    <p>
+        <strong>Mobile:</strong>
+        {{ purchase.supplier.phone }}
+    </p>
+    {% endif %}
+
+    {% if purchase.supplier.address %}
+    <p>
+        <strong>Address:</strong>
+        {{ purchase.supplier.address }}
+    </p>
+    {% endif %}
+
+{% endif %}
+
+<p>State: Maharashtra (27)</p>
+
+</div>
     <table class="w-full border border-black text-sm">
 
-        <thead>
-            <tr class="bg-gray-200">
-                <th class="border border-black p-2">Sl</th>
-                <th class="border border-black p-2 text-left">Description</th>
-                <th class="border border-black p-2">HSN</th>
-                <th class="border border-black p-2">Qty</th>
-                <th class="border border-black p-2">Rate</th>
-                <th class="border border-black p-2">Amount</th>
-            </tr>
-        </thead>
+    <thead>
+        <tr class="bg-gray-200">
+            <th class="border border-black p-2">Sl</th>
+            <th class="border border-black p-2 text-left">Description</th>
+            <th class="border border-black p-2">HSN</th>
+            <th class="border border-black p-2">Qty</th>
+            <th class="border border-black p-2">Rate</th>
+            <th class="border border-black p-2">Amount</th>
+        </tr>
+    </thead>
 
-        <tbody>
+    <tbody>
 
-            {% if bill %}
+        <!-- SALES ITEMS -->
+        {% if bill %}
 
             {% for item in bill.items.all %}
 
             <tr>
-                <td class="border p-2 text-center">{{ forloop.counter }}</td>
-                <td class="border p-2">{{ item.product.name }}</td>
-                <td class="border p-2 text-center">{{ item.product.hsn }}</td>
-                <td class="border p-2 text-center">{{ item.qty }}</td>
-                <td class="border p-2 text-right">₹ {{ item.price }}</td>
-                <td class="border p-2 text-right">₹ {{ item.amount }}</td>
+                <td class="border p-2 text-center">
+                    {{ forloop.counter }}
+                </td>
+
+                <td class="border p-2">
+                    {{ item.product.name }}
+                </td>
+
+                <td class="border p-2 text-center">
+                    {{ item.product.hsn }}
+                </td>
+
+                <td class="border p-2 text-center">
+                    {{ item.qty }}
+                </td>
+
+                <td class="border p-2 text-right">
+                    ₹ {{ item.price }}
+                </td>
+
+                <td class="border p-2 text-right">
+                    ₹ {{ item.amount }}
+                </td>
             </tr>
 
             {% endfor %}
 
-            {% elif purchase %}
+        <!-- PURCHASE ITEMS -->
+        {% elif purchase %}
 
             {% for item in purchase.items.all %}
 
             <tr>
-                <td class="border p-2 text-center">{{ forloop.counter }}</td>
-                <td class="border p-2">{{ item.product.name }}</td>
-                <td class="border p-2 text-center">{{ item.product.hsn }}</td>
-                <td class="border p-2 text-center">{{ item.qty }}</td>
-                <td class="border p-2 text-right">₹ {{ item.price }}</td>
-                <td class="border p-2 text-right">₹ {{ item.amount }}</td>
+                <td class="border p-2 text-center">
+                    {{ forloop.counter }}
+                </td>
+
+                <td class="border p-2">
+                    {{ item.product.name }}
+                </td>
+
+                <td class="border p-2 text-center">
+                    {{ item.product.hsn }}
+                </td>
+
+                <td class="border p-2 text-center">
+                    {{ item.qty }}
+                </td>
+
+                <td class="border p-2 text-right">
+                    ₹ {{ item.price }}
+                </td>
+
+                <td class="border p-2 text-right">
+                    ₹ {{ item.amount }}
+                </td>
             </tr>
 
             {% endfor %}
 
-            {% endif %}
+        {% endif %}
 
-            <!-- TOTAL SECTION -->
+        <!-- SUBTOTAL -->
+        <tr>
 
-            <tr>
-                <td colspan="5" class="border p-2 text-right font-semibold">
-                    Subtotal
-                </td>
+            <td colspan="5"
+                class="border p-2 text-right font-semibold">
 
-                <td class="border p-2 text-right">
-                    ₹ {% if bill %}{{ bill.subtotal }}{% else %}{{ purchase.subtotal }}{% endif %}
-                </td>
+                Subtotal
 
-            </tr>
+            </td>
 
-            <tr>
-                <td colspan="5" class="border p-2 text-right">
-                    CGST (9%)
-                </td>
+            <td class="border p-2 text-right font-semibold">
 
-                <td class="border p-2 text-right">
-                    ₹ {% if bill %}{{ bill.cgst }}{% else %}{{ purchase.cgst }}{% endif %}
-                </td>
+                ₹
+                {% if bill %}
+                    {{ bill.subtotal }}
+                {% else %}
+                    {{ purchase.subtotal }}
+                {% endif %}
 
-            </tr>
+            </td>
 
-            <tr>
-                <td colspan="5" class="border p-2 text-right">
-                    SGST (9%)
-                </td>
+        </tr>
 
-                <td class="border p-2 text-right">
-                    ₹ {% if bill %}{{ bill.sgst }}{% else %}{{ purchase.sgst }}{% endif %}
-                </td>
+        <!-- CGST -->
+        <tr>
 
-            </tr>
+            <td colspan="5"
+                class="border p-2 text-right font-semibold">
 
-            <tr>
-                <td colspan="5" class="border p-2 text-right">
-                    Round Off
-                </td>
+                CGST (9%)
 
-                <td class="border p-2 text-right">
-                    ₹ {% if bill %}{{ bill.roundoff }}{% else %}{{ purchase.roundoff }}{% endif %}
-                </td>
+            </td>
 
-            </tr>
+            <td class="border p-2 text-right font-semibold">
 
-            <tr class="bg-gray-200 font-bold">
+                ₹
+                {% if bill %}
+                    {{ bill.cgst }}
+                {% else %}
+                    {{ purchase.cgst }}
+                {% endif %}
 
-                <td colspan="5" class="border p-2 text-right">
-                    Total
-                </td>
+            </td>
 
-                <td class="border p-2 text-right">
-                    ₹ {% if bill %}{{ bill.total }}{% else %}{{ purchase.total }}{% endif %}
-                </td>
+        </tr>
 
-            </tr>
+        <!-- SGST -->
+        <tr>
 
-        </tbody>
+            <td colspan="5"
+                class="border p-2 text-right font-semibold">
 
-    </table>
+                SGST (9%)
+
+            </td>
+
+            <td class="border p-2 text-right font-semibold">
+
+                ₹
+                {% if bill %}
+                    {{ bill.sgst }}
+                {% else %}
+                    {{ purchase.sgst }}
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+        <!-- DISCOUNT -->
+        <tr>
+
+            <td colspan="5"
+                class="border p-2 text-right font-semibold">
+
+                Discount
+
+            </td>
+
+            <td class="border p-2 text-right font-semibold">
+
+                ₹
+                {% if bill %}
+                    {{ bill.discount }}
+                {% else %}
+                    {{ purchase.discount }}
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+        <!-- ROUND OFF -->
+        <tr>
+
+            <td colspan="5"
+                class="border p-2 text-right font-semibold">
+
+                Round Off
+
+            </td>
+
+            <td class="border p-2 text-right font-semibold">
+
+                ₹
+                {% if bill %}
+                    {{ bill.roundoff }}
+                {% else %}
+                    {{ purchase.roundoff }}
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+        <!-- TOTAL -->
+        <tr class="bg-gray-200 font-bold font-semibold">
+
+            <td colspan="5"
+                class="border p-2 text-right font-semibold">
+
+                Total
+
+            </td>
+
+            <td class="border p-2 text-right font-semibold">
+
+                ₹
+                {% if bill %}
+                    {{ bill.total }}
+                {% else %}
+                    {{ purchase.total }}
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+    </tbody>
+
+</table>
 
     <!-- AMOUNT IN WORDS -->
     <div class="mt-4 text-sm">
-        <strong>Amount Chargeable (in words):</strong><br>
-        INR {{ amount_words }} Only
+        <strong>Amount Chargeable (in words): ₹ {{ amount_words }} Only</strong><br>
+        
+    </div>
+   
+  
+
+ <!-- SIGN + QR -->
+<div class="flex justify-between items-end mt-6">
+
+    {% if mode == "sales" %}
+    <div class="text-center">
+
+        
+
+        <img src="/static/images/payment_qr.jpg"
+             alt="Payment QR"
+             class="w-40 rounded-lg border shadow mx-auto">
+
+        <p class="mt-2 font-semibold">
+            Scan & Pay via UPI
+        </p>
+        <h3 class="text-red-600 font-bold mb-2">
+            Pay Your Remaining Balance Now
+        </h3>
+
+    </div>
+    {% endif %}
+
+    <div class="text-center">
+        <p>for MAHARASHTRA AUTOMOBILES</p>
+
+        <br><br><br>
+
+        <p class="font-semibold mb-10">
+            Authorised Signatory
+        </p>
     </div>
 
-    <!-- DECLARATION -->
+</div>
+  <!-- DECLARATION -->
     <div class="mt-10 text-sm">
         <p class="font-bold">Declaration</p>
         <p>
@@ -217,21 +420,12 @@
             and that all particulars are true and correct.
         </p>
     </div>
-
-    <!-- SIGN -->
-    <div class="flex justify-end mt-16">
-        <div class="text-center">
-            <p>for MAHARASHTRA AUTOMOBILES</p>
-            <br><br>
-            <p class="font-semibold">Authorised Signatory</p>
-        </div>
-    </div>
-
 </div>
 <script>
 
 // ✅ Django se values safely lo
-let name = "{% if bill %}{{ bill.customer.name }}{% else %}{{ purchase.supplier.name }}{% endif %}";
+let name =
+"{% if bill %}{{ bill.customer.name }}{% else %}{{ purchase.supplier.name }}{% endif %}";
 let amount = "{% if bill %}{{ bill.total }}{% else %}{{ purchase.total }}{% endif %}";
 
 // fallback

@@ -1,4 +1,4 @@
-{% extends "dashboard/base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 
@@ -9,12 +9,9 @@
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <input type="file" name="file"
-               class="bg-gray-700 text-white p-3 rounded-lg"
-               accept=".csv" required>
+        <input type="file" name="file" class="bg-gray-700 text-white p-3 rounded-lg" accept=".csv" required>
 
-        <button type="submit"
-                class="bg-green-600 text-white px-4 py-2 rounded-lg ml-4">
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg ml-4">
             Upload
         </button>
     </form>

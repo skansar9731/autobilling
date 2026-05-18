@@ -7,20 +7,18 @@ from django.http import JsonResponse
 from django.db import transaction
 from .models import Company
 from django.views.decorators.http import require_http_methods
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from .models import Product, Bill, BillItem, Customer
 import json
 from .models import Expense, ExpenseCategory
-from .models import SupplierPayment
 from .models import BankAccount, BankTransaction
 import math
-from .models import Supplier, Purchase, PurchaseItem
+
 from decimal import ROUND_HALF_UP
 import csv
 from io import TextIOWrapper
 import openpyxl
 from django.contrib import messages
-from .models import PurchaseReturn, PurchaseReturnItem
 from django.db.models import Sum
 from datetime import date
 from django.db.models import Q
@@ -37,9 +35,24 @@ from reportlab.platypus import Paragraph
 from reportlab.lib.pagesizes import A4
 from num2words import num2words
 import pandas as pd
-from django.http import JsonResponse
-from .models import Product
-from .models import PaymentAllocation, Purchase
+from apps.purchases.models import Supplier
+from apps.core.models import Customer
+from decimal import Decimal
+from apps.core.models import Bill
+from apps.purchases.models import PaymentAllocation
+# core models
+from .models import (
+    Product, Bill, BillItem, Customer,
+    Supplier, Company,
+    Expense, ExpenseCategory,
+    BankAccount, BankTransaction
+)
+
+# purchases models
+from apps.purchases.models import (
+    Purchase, PurchaseItem,
+    PurchaseReturn, PurchaseReturnItem,
+)
 
 def number_to_words(n):
     from num2words import num2words
@@ -90,11 +103,11 @@ def logout_view(request):
 @login_required
 @transaction.atomic
 def save_bill(request):
-
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request"}, status=400)
 
     data = json.loads(request.body)
+    payment_mode = data.get("payment_mode", "CASH").upper()
 
     items = data.get("items", [])
     discount = Decimal(data.get("discount", 0))
@@ -113,9 +126,11 @@ def save_bill(request):
         customer, _ = Customer.objects.get_or_create(name="Walk-in Customer")
 
     bill = Bill.objects.create(
-        customer=customer,
-        created_by=request.user
-    )
+    customer=customer,
+    created_by=request.user,
+    payment_mode=payment_mode.lower(),
+    status=payment_mode.upper()
+)
 
     subtotal = Decimal("0.00")
 
@@ -182,106 +197,99 @@ def save_bill(request):
 
 @login_required
 def sales_invoices(request):
-    bills = Bill.objects.all().order_by("-date")
-    return render(request, "dashboard/sales_invoices.html", {
-        "bills": bills
-    })
 
+    customer_id = request.GET.get("customer_id")
+    customer = None
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
-from django.db.models import Sum
-from .models import Purchase, Supplier, PurchaseReturnItem
+    if customer_id:
 
-
-@login_required
-def purchase_invoices(request):
-
-    supplier_id = request.GET.get("supplier_id")
-    supplier = None
-
-    if supplier_id:
-        purchases = Purchase.objects.filter(
-            supplier_id=supplier_id
+        bills = Bill.objects.filter(
+            customer_id=customer_id
         ).order_by("-date")
 
-        supplier = get_object_or_404(Supplier, id=supplier_id)
+        customer = get_object_or_404(Customer, id=customer_id)
 
     else:
-        purchases = Purchase.objects.all().order_by("-date")
 
-    for p in purchases:
+        bills = Bill.objects.all().order_by("-date")
 
-        # =========================
-        # 🔁 RETURN CHECK
-        # =========================
-        total_qty = p.items.aggregate(total=Sum("qty"))["total"] or 0
+    # =====================================
+    # PAYMENT STATUS
+    # =====================================
 
-        returned_qty = PurchaseReturnItem.objects.filter(
-            purchase_return__purchase=p
-        ).aggregate(total=Sum("qty"))["total"] or 0
+    for p in bills:
 
-        p.is_fully_returned = returned_qty >= total_qty and total_qty > 0
+        paid = Decimal(p.paid_amount or 0)
+        balance = Decimal(p.balance or 0)
 
-        # =========================
-        # 💰 RETURN AMOUNT
-        # =========================
-        total_return = Decimal("0.00")
+        # CASH / BANK
+        if (p.payment_mode or "").lower() in ["cash", "bank"]:
 
-        returns = PurchaseReturnItem.objects.filter(
-            purchase_return__purchase=p
-        )
-
-        for r in returns:
-            line_total = Decimal(r.qty) * Decimal(r.price)
-            gst = line_total * Decimal("0.18")
-            total_return += line_total + gst
-
-        # =========================
-        # 💰 FIXED PAYMENT LOGIC
-        # =========================
-        if p.payment_mode in ["cash", "bank"]:
-            paid = p.total   # 🔥 FIX
-        else:
-            paid = p.paid_amount or Decimal("0.00")
-
-        # =========================
-        # 💰 CORRECT BALANCE
-        # =========================
-        correct_balance = p.total - paid - total_return
-
-        # =========================
-        # 💚 RECEIVABLE
-        # =========================
-        if correct_balance < 0:
-            p.receivable = abs(correct_balance)
-        else:
+            p.status = p.payment_mode.upper()
             p.receivable = 0
 
-        # =========================
-        # 💰 STATUS
-        # =========================
-        if p.payment_mode == "credit":
+       # CREDIT
+    else:
 
-            if paid == 0:
-                p.status = "CREDIT"
+        if paid <= 0:
 
-            elif correct_balance > 0:
-                p.status = "PARTIAL"
+            p.status = "CREDIT"
 
-            else:
-                p.status = "PAID"
+        elif balance > 0:
+
+            p.status = "PARTIAL"
 
         else:
-            p.status = p.payment_mode.upper()
 
-    return render(request, "dashboard/purchase_invoices.html", {
-        "purchases": purchases,
-        "supplier": supplier
+            p.status = "PAID"
+
+    # =========================
+    # SALES RETURN RECEIVABLE
+    # ONLY CASH/BANK/PAID
+    # =========================
+
+    return_amount = Decimal("0.00")
+
+    returns = PurchaseReturnItem.objects.filter(
+        purchase_return__bill=p
+    )
+
+    for r in returns:
+
+        line_total = (
+            Decimal(r.qty) *
+            Decimal(r.price)
+        )
+
+        gst = (
+            line_total *
+            Decimal("0.18")
+        )
+
+        return_amount += (
+            line_total + gst
+        )
+
+    # CREDIT/PARTIAL
+    # 👉 DO NOT SHOW PAYABLE
+    p.receivable = Decimal("0.00")
+
+    # FULLY PAID AFTER CREDIT
+    if (
+        p.status == "PAID"
+        and return_amount > 0
+    ):
+
+        p.receivable = return_amount
+
+    return render(request, "purchases/purchase_invoices.html", {
+        "purchases": bills,
+        "party": customer,
+        "mode": "sales"
     })
+
 # ---------------- PRODUCTS ----------------
 
-from django.db import IntegrityError
 
 @login_required
 def product_view(request):
@@ -391,40 +399,17 @@ def user_view(request):
 
 @login_required
 def generate_invoice(request, bill_id):
+
     bill = get_object_or_404(Bill, id=bill_id)
-    return render(request, "dashboard/invoice.html", {
-        "bill": bill
+
+    amount_words = number_to_words(int(bill.total))
+
+    return render(request, "dashboard/bill_preview.html", {
+        "bill": bill,
+        "amount_words": amount_words,
+        "mode": "sales"
     })
 
-
-# ---------------- SCAN PRODUCT (FIXED) ----------------
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.contrib import messages
-from django.http import JsonResponse
-from django.db import transaction
-from django.views.decorators.http import require_http_methods
-from decimal import Decimal, ROUND_HALF_UP
-import json
-import csv
-from io import TextIOWrapper
-import openpyxl
-
-
-# ---------------- BILLING ----------------
-
-@login_required
-def billing(request):
-    customers = Customer.objects.all().order_by("name")
-    suppliers = Supplier.objects.all().order_by("name")
-
-    return render(request, "dashboard/billing.html", {
-        "customers": customers,
-        "suppliers": suppliers
-    })
 
 # ---------------- BULK UPLOAD ----------------
 
@@ -648,22 +633,26 @@ def bill_preview(request, bill_id):
     amount_words = number_to_words(int(bill.total))
 
     return render(request, "dashboard/bill_preview.html", {
-        "bill": bill,
-        "amount_words": amount_words
-    })
+    "bill": bill,
+    "amount_words": amount_words,
+    "mode": "sales"
+})
 
 @login_required
 def edit_bill(request, bill_id):
+
     bill = get_object_or_404(Bill, id=bill_id)
 
-    if bill.status != "active":
-        return redirect("sales")
+    # ✅ ONLY CREDIT EDIT ALLOWED
+    if bill.status != "CREDIT":
+        return redirect("sales_invoices")
 
     customers = Customer.objects.all()
 
-    return render(request, "dashboard/billing.html", {
+    return render(request, "transactions/transaction.html", {
         "customers": customers,
-        "edit_bill": bill
+        "edit_bill": bill,
+        "mode": "sales"
     })
 
 @login_required
@@ -676,9 +665,16 @@ def update_bill(request, bill_id):
         return JsonResponse({"error": "Invalid request"}, status=400)
 
     data = json.loads(request.body)
+
     items = data.get("items", [])
+
     discount = Decimal(data.get("discount", 0))
+
     apply_gst = data.get("apply_gst", True)
+    payment_mode = data.get(
+        "payment_mode",
+        "CASH"
+    ).upper()
 
     # 🔥 Restore previous stock
     for item in bill.items.all():
@@ -724,6 +720,8 @@ def update_bill(request, bill_id):
     bill.discount = discount
     bill.roundoff = roundoff
     bill.total = rounded_total
+    bill.payment_mode = payment_mode.lower()
+    bill.status = payment_mode.upper()
     bill.save()
 
     return JsonResponse({"status": "success", "bill_id": bill.id})
@@ -735,7 +733,7 @@ def delete_bill(request, bill_id):
     bill.status = "cancelled"
     bill.save()
 
-    return redirect("sales")
+    return redirect("sales_invoices")
 
 @login_required
 @transaction.atomic
@@ -744,7 +742,7 @@ def return_bill(request, bill_id):
     bill = get_object_or_404(Bill, id=bill_id)
 
     if bill.status != "active":
-        return redirect("sales")
+        return redirect("sales_invoices")
 
     # Restore stock
     for item in bill.items.all():
@@ -755,7 +753,7 @@ def return_bill(request, bill_id):
     bill.status = "returned"
     bill.save()
 
-    return redirect("sales")
+    return redirect("sales_invoices")
 
 def create_product_stock(request):
     import json
@@ -769,10 +767,6 @@ def create_product_stock(request):
     )
 
     return JsonResponse({"status": "created"})
-
-import json
-from django.http import JsonResponse
-from .models import Product
 
 def check_product_exists(request):
     import json
@@ -806,28 +800,6 @@ def get_customer_balance(request):
         "balance": float(customer.balance)
     })
 
-def supplier_balance(request):
-    supplier_id = request.GET.get("supplier_id")
-
-    if not supplier_id:
-        return JsonResponse({"balance": 0})
-
-    supplier = Supplier.objects.get(id=supplier_id)
-
-    # ✅ ONLY CREDIT PURCHASES
-    purchases = Purchase.objects.filter(
-        supplier=supplier,
-        payment_mode="credit"
-    )
-
-    total_balance = 0
-
-    for p in purchases:
-        total_balance += p.balance
-
-    return JsonResponse({
-        "balance": float(total_balance)
-    })
 
 @login_required
 def debtor_detail(request, id):
@@ -853,298 +825,100 @@ def debtor_detail(request, id):
     "sales": data
 })
 
-def creditor_detail(request, id):
-
-    supplier = Supplier.objects.get(id=id)
-
-    purchases = Purchase.objects.filter(supplier=supplier,payment_mode="credit")
-
-    data = []
-    total_balance = 0
-
-    for p in purchases:
-        balance = p.balance
-        if balance > 0:
-            data.append({
-            "id": p.id,
-            "invoice": p.invoice_number,
-            "total": float(p.total),
-            "paid": 0,
-            "balance": float(p.total)
-        })
-        total_balance += balance
-    return JsonResponse({
-        "supplier": supplier.name,
-        "balance": float(total_balance),
-        "purchase": data
-    })
-
-@login_required
-def creditors(request):
-
-    if request.method == "POST":
-
-        name = request.POST.get("name")
-        phone = request.POST.get("phone")
-        gst = request.POST.get("gst")
-        address = request.POST.get("address")
-
-        Supplier.objects.create(
-            name=name,
-            phone=phone,
-            gst=gst,
-            address=address
-        )
-
-        return redirect("creditors")
-
-    suppliers = Supplier.objects.all().order_by("-id")
-
-    return render(request, "dashboard/creditors.html", {
-        "suppliers": suppliers
-    })
-
-@login_required
-def purchase(request):
-
-    suppliers = Supplier.objects.all().order_by("name")
-
-    return render(request,"dashboard/purchase.html",{
-        "suppliers": suppliers
-    })
-
 @login_required
 @transaction.atomic
-def save_purchase(request):
-
-    try:
-        data = json.loads(request.body)
-
-        items = data.get("items", [])
-        supplier_id = data.get("supplier_id")
-        payment_mode = data.get("payment_mode", "cash")
-
-        if not items:
-            return JsonResponse({"status": "error", "message": "Cart empty"})
-
-        if not supplier_id:
-            return JsonResponse({"status": "error", "message": "Supplier required"})
-
-        supplier = Supplier.objects.get(id=supplier_id)
-
-        # ==============================
-        # CREATE PURCHASE
-        # ==============================
-        purchase = Purchase.objects.create(
-            supplier=supplier,
-            invoice_number="PUR" + str(Purchase.objects.count() + 1),
-            payment_mode=payment_mode
-        )
-
-        subtotal = Decimal("0.00")
-
-        # ==============================
-        # ITEMS LOOP
-        # ==============================
-        for item in items:
-
-            product = Product.objects.get(id=item["product_id"])
-            qty = int(item["qty"])
-            price = product.price
-
-            if qty <= 0:
-                continue
-
-            PurchaseItem.objects.create(
-                purchase=purchase,
-                product=product,
-                qty=qty,
-                price=price
-            )
-
-            product.stock += qty
-            product.save()
-
-            subtotal += Decimal(qty) * price
-
-        # ==============================
-        # GST CALCULATION
-        # ==============================
-        gst = subtotal * Decimal("0.18")
-        total_before_round = subtotal + gst
-
-        rounded_total = total_before_round.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
-        roundoff = rounded_total - total_before_round
-
-        # SAVE PURCHASE
-        purchase.subtotal = subtotal
-        purchase.cgst = gst / 2
-        purchase.sgst = gst / 2
-        purchase.roundoff = roundoff
-        purchase.total = rounded_total
-        purchase.save()
-
-        # ==============================
-        # 🔥 PAYMENT LOGIC (FINAL FIX)
-        # ==============================
-
-        if payment_mode == "credit":
-            supplier.balance += purchase.total
-            supplier.save()
-
-        elif payment_mode in ["cash", "bank"]:
-
-            # 🔥 CREATE PAYMENT (AUTO)
-            payment = SupplierPayment.objects.create(
-                supplier=supplier,
-                amount=purchase.total,
-                note=f"Auto payment for {purchase.invoice_number}"
-            )
-
-            # 🔥 LINK TO PURCHASE
-            PaymentAllocation.objects.create(
-                payment=payment,
-                purchase=purchase,
-                amount=purchase.total
-            )
-
-            # BANK ENTRY
-            if payment_mode == "bank":
-                bank = BankAccount.objects.first()
-
-                if bank:
-                    BankTransaction.objects.create(
-                        bank=bank,
-                        amount=purchase.total,
-                        type="debit",
-                        description=f"Purchase {purchase.invoice_number}"
-                    )
-
-                    bank.balance -= purchase.total
-                    bank.save()
-
-        return JsonResponse({
-            "status": "success",
-            "purchase_id": purchase.id
-        })
-
-    except Exception as e:
-        return JsonResponse({
-            "status": "error",
-            "message": str(e)
-        })
-
-@login_required
-@transaction.atomic
-def update_purchase(request, id):
-
-    purchase = Purchase.objects.get(id=id)
-
-    data = json.loads(request.body)
-    items = data.get("items", [])
-
-    # 🔥 OLD STOCK REVERT
-    for item in purchase.items.all():
-        product = item.product
-        product.stock -= item.qty
-        product.save()
-
-    purchase.items.all().delete()
-
-    subtotal = Decimal("0.00")
-
-    for item in items:
-        product = Product.objects.get(id=item["product_id"])
-        qty = int(item["qty"])
-
-        PurchaseItem.objects.create(
-            purchase=purchase,
-            product=product,
-            qty=qty,
-            price=product.price
-        )
-
-        product.stock += qty
-        product.save()
-
-        subtotal += Decimal(qty) * product.price
-
-    gst = subtotal * Decimal("0.18")
-    total = subtotal + gst
-
-    purchase.subtotal = subtotal
-    purchase.cgst = gst / 2
-    purchase.sgst = gst / 2
-    purchase.total = total
-    purchase.save()
-
-    return JsonResponse({
-        "status": "success",
-        "purchase_id": purchase.id
-    })
-
-@login_required
-def purchase_preview(request, id):
-
-    purchase = Purchase.objects.get(id=id)
-
-    amount_words = number_to_words(int(purchase.total))
-
-    return render(request, "dashboard/bill_preview.html", {
-        "purchase": purchase,
-        "amount_words": amount_words
-    })
-
-@login_required
-def purchase_delete(request, id):
-
-    purchase = Purchase.objects.get(id=id)
-    if purchase.payment_mode != "credit" or purchase.balance <= 0:
-     return redirect("purchase_invoices")
-    supplier = purchase.supplier
-    if purchase.payment_mode == "credit":
-     supplier.balance -= purchase.total
-     supplier.save()
-
-    purchase.delete()
-
-    return redirect("purchase_invoices")
-
-@login_required
-def purchase_edit(request,id):
-    purchase = Purchase.objects.get(id=id)
-
-    if purchase.payment_mode != "credit" or purchase.balance <= 0:
-     return redirect("purchase_invoices")
-    purchase = Purchase.objects.get(id=id)
-    suppliers = Supplier.objects.all()
-
-    return render(request,"dashboard/purchase.html",{
-        "edit_purchase":purchase,
-        "suppliers":suppliers
-    })
-
-@login_required
 def receipt_voucher(request):
 
+    from apps.core.models import Customer, Bill
+    from apps.purchases.models import SupplierPayment, PaymentAllocation
+    from decimal import Decimal
+
+    allocations = None
+
     if request.method == "POST":
 
-        customer_id = request.POST.get("customer_id")
+        customer_id = request.POST.get("customer")
         amount = Decimal(request.POST.get("amount"))
+        note = request.POST.get("note")
 
         customer = Customer.objects.get(id=customer_id)
+
+        # =========================
+        # CREATE RECEIPT
+        # =========================
+
+        payment = SupplierPayment.objects.create(
+            supplier=None,
+            amount=amount,
+            note=note,
+            payment_type="receive"
+        )
+
+        remaining = amount
+
+        # =========================
+        # CUSTOMER CREDIT BILLS
+        # =========================
+
+        bills = Bill.objects.filter(
+            customer=customer,
+            payment_mode__iexact="credit"
+        ).order_by("date")
+
+        for bill in bills:
+
+            if remaining <= 0:
+                break
+
+            paid = PaymentAllocation.objects.filter(
+            bill=bill
+            ).aggregate(
+            total=Sum("amount")
+            )["total"] or 0
+
+            balance = bill.total - paid
+
+            if balance <= 0:
+                continue
+
+        allocate_amount = min(balance, remaining)
+
+        PaymentAllocation.objects.create(
+        payment=payment,
+        bill=bill,
+        amount=allocate_amount
+    )
+
+        remaining -= allocate_amount
+
+        allocations = PaymentAllocation.objects.filter(
+            payment=payment
+        )
 
         customer.balance -= amount
         customer.save()
 
-        messages.success(request,"Payment received successfully")
+        messages.success(
+            request,
+            "Receipt saved successfully"
+        )
 
-        return redirect("receipt")
+        return render(request, "purchases/payment.html", {
+
+            "customers": Customer.objects.filter(balance__gt=0),
+            "receipt_mode": True,
+            "allocations": allocations
+
+        })
 
     customers = Customer.objects.filter(balance__gt=0)
 
-    return render(request,"dashboard/receipt_voucher.html",{
-        "customers": customers
+    return render(request, "purchases/payment.html", {
+
+        "customers": customers,
+        "receipt_mode": True,
+        "allocations": allocations
+
     })
 
 @login_required
@@ -1154,194 +928,6 @@ def sales_return(request):
 
     return render(request,"dashboard/sales_return.html",{
         "bills": bills
-    })
-@transaction.atomic
-def supplier_payment(request):
-
-    suppliers = Supplier.objects.all()
-    allocations = None
-
-    if request.method == "POST":
-        supplier_id = request.POST.get("supplier")
-        amount = Decimal(request.POST.get("amount"))
-        note = request.POST.get("note")
-
-        supplier = Supplier.objects.get(id=supplier_id)
-
-        payment = SupplierPayment.objects.create(
-            supplier=supplier,
-            amount=amount,
-            note=note
-        )
-
-        # 🔥 AUTO ALLOCATION
-        remaining = amount
-
-        purchases = Purchase.objects.filter(
-            supplier=supplier,
-            payment_mode="credit"
-        ).order_by("date")
-
-        for p in purchases:
-
-            balance = p.balance
-
-            if balance <= 0:
-                continue
-
-            if remaining <= 0:
-                break
-
-            pay_amount = min(balance, remaining)
-
-            PaymentAllocation.objects.create(
-                payment=payment,
-                purchase=p,
-                amount=pay_amount
-            )
-
-            remaining -= pay_amount
-
-        # 🔥 IMPORTANT: allocations fetch karo
-        allocations = PaymentAllocation.objects.filter(payment=payment)
-
-    return render(request, "dashboard/supplier_payment.html", {
-        "suppliers": suppliers,
-        "allocations": allocations
-    })
-
-
-@login_required
-@transaction.atomic
-def purchase_return(request):
-
-    suppliers = Supplier.objects.all().order_by("name")
-
-    # ================= SAVE RETURN =================
-    if request.method == "POST":
-
-        purchase_id = request.POST.get("purchase_id")
-        items_data = request.POST.get("items_data")
-
-        # ❌ safety
-        if not purchase_id or not items_data:
-            messages.error(request, "Invalid data ❌")
-            return redirect("purchase_return")
-
-        purchase = Purchase.objects.get(id=purchase_id)
-
-        import json
-        items = json.loads(items_data)
-        # ❌ extra safety (empty or all zero qty)
-        valid_items = [i for i in items if int(i.get("qty", 0)) > 0]
-        if not items:
-            messages.error(request, "No items selected ❌")
-            return redirect("purchase_return")
-
-        # ================= CREATE RETURN =================
-        pr = PurchaseReturn.objects.create(purchase=purchase)
-
-        total_return = Decimal("0.00")
-        total_gst = Decimal("0.00")
-
-        for item in items:
-
-            product = Product.objects.get(id=item["product_id"])
-            qty = int(item["qty"])
-
-            if qty <= 0:
-                continue
-
-            purchase_item = PurchaseItem.objects.get(
-                purchase=purchase,
-                product=product
-            )
-
-            # ================= CHECK REMAINING =================
-            returned = PurchaseReturnItem.objects.filter(
-                purchase_return__purchase=purchase,
-                product=product
-            ).aggregate(total=Sum("qty"))["total"] or 0
-
-            remaining = purchase_item.qty - returned
-
-            if qty > remaining:
-                messages.error(request, f"{product.name} exceeds remaining qty ❌")
-                return redirect("purchase_return")
-
-             # ================= CALCULATION =================
-            line_total = Decimal(qty) * purchase_item.price
-
-            gst = line_total * Decimal("0.18")   # 🔥 GST
-            cgst = gst / 2
-            sgst = gst / 2
-
-            # ================= SAVE ITEM =================
-            PurchaseReturnItem.objects.create(
-                purchase_return=pr,
-                product=product,
-                qty=qty,
-                price=purchase_item.price
-            )
-
-            # ================= STOCK UPDATE =================
-            product.stock -= qty
-            product.save()
-
-            total_return += line_total
-            total_gst += gst
-
-        # ================= TOTAL =================
-        grand_total = total_return + total_gst
-
-        pr.subtotal = total_return
-        pr.cgst = total_gst / 2
-        pr.sgst = total_gst / 2
-        pr.total = grand_total
-        pr.save()
-
-        # ================= SUPPLIER BALANCE =================
-        purchase.supplier.balance -= total_return
-        purchase.supplier.save()
-
-        # messages.success(request, "Purchase Return Saved Successfully")
-
-        return redirect(f"/purchase-return/print/{pr.id}/")
-
-    # ================= NORMAL LOAD =================
-    return render(request, "dashboard/purchase_return.html", {
-        "suppliers": suppliers
-    })
-
-@login_required
-def purchase_return_print(request, id):
-    
-    pr = PurchaseReturn.objects.get(id=id)
-    company = Company.objects.first()
-
-    total = Decimal("0.00")
-
-    # 🔥 RECALCULATE FROM ITEMS
-    for item in pr.items.all():
-        total += item.qty * item.price
-
-    gst = (total * Decimal("0.18")).quantize(Decimal("0.01"))
-    cgst = (gst / 2).quantize(Decimal("0.01"))
-    sgst = (gst / 2).quantize(Decimal("0.01"))
-
-    grand_total = total + gst
-
-    amount_words = number_to_words(int(grand_total))
-
-    return render(request, "dashboard/purchase_return_invoice.html", {
-        "return": pr,
-        "purchase": pr.purchase,
-        "company": company,
-        "subtotal": total,
-        "cgst": cgst,
-        "sgst": sgst,
-        "total": grand_total,
-        "amount_words": amount_words
     })
 
 def add_expense(request):
@@ -1593,233 +1179,43 @@ def dashboard(request):
         "bank_total": total_bank,
     }
 
-    return render(request, "dashboard/dashboard.html", context)
+    return render(request, "core/dashboard.html", context)
 
-from django.http import JsonResponse
-from .models import Product
-import pandas as pd
+from apps.purchases.models import Supplier
 
-
-def bulk_purchase_upload(request):
-
-    if request.method != "POST":
-        return JsonResponse({"status": "error", "message": "Invalid request"})
-
-    file = request.FILES.get("file")
-
-    if not file:
-        return JsonResponse({"status": "error", "message": "No file uploaded"})
+@login_required
+def party_summary(request, mode="purchase"):
 
     try:
-        # ================= READ FILE =================
-        if file.name.endswith(".csv"):
-            df = pd.read_csv(file)
+
+        # ====================================
+        # PARTY LIST
+        # ====================================
+
+        if mode == "purchase":
+            parties = Supplier.objects.all()
         else:
-            df = pd.read_excel(file)
+            parties = Customer.objects.all()
 
-        df.columns = df.columns.str.strip().str.lower()
-
-        print("Columns:", df.columns)
-
-        items = []
-
-        # ================= LOOP =================
-        for _, row in df.iterrows():
-
-            try:
-                part_no = str(row.get("part #", "")).strip()
-                name = str(row.get("part description", "")).strip()
-                qty = int(float(row.get("quantity", 0)))
-                price = float(row.get("mrp", 0))
-
-                # skip empty rows
-                if not part_no and not name:
-                    continue
-
-                # ================= FIND PRODUCT =================
-                product = Product.objects.filter(barcode=part_no).first()
-
-                if not product:
-                    product = Product.objects.filter(name__icontains=name).first()
-
-                # ================= CREATE IF NOT FOUND =================
-                if not product:
-                    product = Product.objects.create(
-                        name=name,
-                        barcode=part_no,
-                        price=price,   # store MRP
-                        stock=0
-                    )
-
-                # ================= DUPLICATE MERGE =================
-                existing = next((i for i in items if i["product_id"] == product.id), None)
-
-                if existing:
-                    existing["qty"] += qty
-                    existing["value"] = existing["qty"] * existing["price"]
-                else:
-                    items.append({
-                        "product_id": product.id,
-                        "name": product.name,
-                        "qty": qty,
-                        "price": price,                # MRP
-                        "value": qty * price           # total
-                    })
-
-            except Exception as e:
-                print("Row Error:", e)
-                continue
-
-        # ================= RESPONSE =================
-        return JsonResponse({
-            "status": "success",
-            "items": items
-        })
-
-    except Exception as e:
-        return JsonResponse({
-            "status": "error",
-            "message": str(e)
-        })
-    
-from django.http import JsonResponse
-
-@login_required
-def supplier_invoices_api(request, id):
-
-    supplier = Supplier.objects.get(id=id)
-
-    purchases = Purchase.objects.filter(
-        supplier=supplier,
-        payment_mode="credit"
-    )
-
-    data = []
-
-    for p in purchases:
-        balance = p.balance
-
-        if balance > 0:  # 🔥 ONLY PENDING
-            data.append({
-                "invoice": p.invoice_number,
-                "total": float(p.total),
-                "paid": float(p.paid_amount),
-                "balance": float(balance),
-            })
-
-    return JsonResponse({
-        "bills": data
-    })
-
-@login_required
-def purchase_ledger(request, id):
-
-    purchase = Purchase.objects.get(id=id)
-
-    allocations = PaymentAllocation.objects.filter(
-        purchase=purchase
-    ).order_by("payment__date")
-
-    data = []
-
-    for a in allocations:
-        data.append({
-            "id": a.id,
-            "date": a.payment.date.strftime("%d %b %Y"),
-            "amount": float(a.amount)
-        })
-
-    # ✅ 🔥 MAIN FIX (NO SIDE EFFECT)
-    if purchase.payment_mode in ["cash", "bank"]:
-        paid = purchase.total
-        balance = 0
-    else:
-        paid = purchase.paid_amount
-        balance = purchase.balance
-
-    return JsonResponse({
-        "invoice": purchase.invoice_number,
-        "total": float(purchase.total),
-        "paid": float(paid),
-        "balance": float(balance),
-        "payment_mode": purchase.payment_mode,
-        "payments": data
-    })
-
-def payment_voucher(request, id):
-
-    allocation = PaymentAllocation.objects.get(id=id)
-    amount_words = num2words(int(allocation.amount), lang='en').title()
-    payment = allocation.payment
-    purchase = allocation.purchase
-    supplier = payment.supplier
-    company = Company.objects.first()
-
-    return render(request, "dashboard/payment_voucher.html", {
-        "payment": payment,
-        "purchase": purchase,
-        "supplier": supplier,
-        "amount": allocation.amount,
-        "company": company, 
-        "amount_words": amount_words
-    })
-
-def purchase_return_invoice(request, id):
-
-    purchase = Purchase.objects.get(id=id)
-    returns = PurchaseReturn.objects.filter(purchase=purchase).order_by("-date").first()
-
-    return render(request, "dashboard/purchase_return_invoice.html", {
-        "purchase": purchase,
-        "return": returns
-    })
-
-def get_purchases(request):
-    supplier_id = request.GET.get("supplier_id")
-
-    purchases = Purchase.objects.filter(supplier_id=supplier_id)
-
-    data = []
-    for p in purchases:
-        data.append({
-            "id": p.id,
-            "invoice_number": p.invoice_number,
-            "total": float(p.total)
-        })
-
-    return JsonResponse(data, safe=False)
-
-
-def get_items(request):
-    purchase_id = request.GET.get("purchase_id")
-
-    items = PurchaseItem.objects.filter(purchase_id=purchase_id)
-
-    data = []
-    for i in items:
-        data.append({
-            "id": i.product.id,
-            "name": i.product.name,
-            "price": float(i.price),
-            "qty": i.qty
-        })
-
-    return JsonResponse(data, safe=False)
-
-from decimal import Decimal
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-
-@login_required
-def supplier_summary(request):
-
-    try:
-        suppliers = Supplier.objects.all()
         data = []
 
-        for s in suppliers:
+        # ====================================
+        # LOOP PARTIES
+        # ====================================
 
-            purchases = Purchase.objects.filter(supplier=s)
+        for s in parties:
+
+            if mode == "purchase":
+
+                purchases = Purchase.objects.filter(
+                    supplier=s
+                )
+
+            else:
+
+                purchases = Bill.objects.filter(
+                    customer=s
+                )
 
             total_purchase = Decimal("0.00")
             total_payment = Decimal("0.00")
@@ -1827,155 +1223,597 @@ def supplier_summary(request):
             total_receivable = Decimal("0.00")
             total_outstanding = Decimal("0.00")
 
+            # ====================================
+            # LOOP INVOICES
+            # ====================================
+
             for p in purchases:
 
-                total_purchase += Decimal(p.total)
-
-                # =========================
-                # 💰 RETURN CALC
-                # =========================
-                return_amount = Decimal("0.00")
-
-                returns = PurchaseReturnItem.objects.filter(
-                    purchase_return__purchase=p
+                total_purchase += Decimal(
+                    p.total or 0
                 )
 
-                for r in returns:
-                    line_total = Decimal(r.qty) * Decimal(r.price)
-                    gst = line_total * Decimal("0.18")
-                    return_amount += line_total + gst
+                # ====================================
+                # RETURN CALCULATION
+                # ====================================
 
-                # =========================
-                # 💰 PAYMENT
-                # =========================
-                mode = (p.payment_mode or "").lower()
+                return_amount = Decimal("0.00")
 
-                if mode in ["cash", "bank"]:
-                    paid = Decimal(p.total)
+                if mode == "purchase":
+
+                    returns = PurchaseReturnItem.objects.filter(
+                        purchase_return__purchase=p
+                    )
+
+                    for r in returns:
+
+                        line_total = (
+                            Decimal(r.qty) *
+                            Decimal(r.price)
+                        )
+
+                        gst = (
+                            line_total *
+                            Decimal("0.18")
+                        )
+
+                        return_amount += (
+                            line_total + gst
+                        )
+
+                # ====================================
+                # PAYMENT MODE
+                # ====================================
+
+                payment_mode = (
+                    getattr(
+                        p,
+                        "payment_mode",
+                        ""
+                    ) or ""
+                ).lower()
+
+                # ====================================
+                # PAID CALCULATION
+                # ====================================
+
+                if payment_mode in ["cash", "bank"]:
+
+                    paid = Decimal(
+                        p.total or 0
+                    )
+
                 else:
-                    paid = Decimal(p.paid_amount or 0)
+
+                    from apps.purchases.models import PaymentAllocation
+
+                    paid = PaymentAllocation.objects.filter(
+                        purchase=p
+                    ).aggregate(
+                        total=Sum("amount")
+                    )["total"] or Decimal("0.00")
+
+                    paid = Decimal(paid)
 
                 total_payment += paid
 
-                # =========================
-                # 🔥 FINAL CORRECT LOGIC
-                # =========================
+                # ====================================
+                # PURCHASE SUMMARY LOGIC
+                # ====================================
 
-                # ✅ CASE 1: CREDIT + PARTIAL
-                if mode in ["credit", "partial"] and paid < Decimal(p.total):
+                if mode == "purchase":
 
-                    total_return += return_amount
+                    # =========================
+                    # CREDIT PURCHASE
+                    # =========================
 
-                    balance = Decimal(p.total) - paid - return_amount
+                    if payment_mode == "credit":
+
+                        balance_before_return = (
+                            Decimal(p.total) - paid
+                        )
+
+                        # -------------------------
+                        # PENDING CREDIT
+                        # -------------------------
+
+                        if balance_before_return > 0:
+
+                            total_return += return_amount
+
+                            balance = (
+                                Decimal(p.total)
+                                - paid
+                                - return_amount
+                            )
+
+                            if balance > 0:
+
+                                total_outstanding += balance
+
+                            elif balance < 0:
+
+                                total_receivable += abs(balance)
+
+                        # -------------------------
+                        # FULLY PAID CREDIT
+                        # -------------------------
+
+                        else:
+
+                            if return_amount > 0:
+
+                                total_receivable += return_amount
+
+                    # =========================
+                    # CASH / BANK
+                    # =========================
+
+                    else:
+
+                        if return_amount > 0:
+
+                            total_receivable += return_amount
+
+                # ====================================
+                # SALES SUMMARY LOGIC
+                # ====================================
+
+                else:
+
+                    balance = (
+                        Decimal(p.total) - paid
+                    )
 
                     if balance > 0:
+
                         total_outstanding += balance
 
-                    elif balance < 0:
-                        total_receivable += abs(balance)
+            # ====================================
+            # FINAL OUTSTANDING
+            # ====================================
 
-                # ✅ CASE 2: CASH / BANK
-                else:
-                    if return_amount > 0:
-                        total_receivable += return_amount
+            if mode == "purchase":
 
-                # ❗ NOTHING ELSE
+                final_outstanding = (
+                    total_outstanding
+                    - total_receivable
+                )
+
+                if final_outstanding < 0:
+
+                    final_outstanding = Decimal("0.00")
+
+            else:
+
+                final_outstanding = total_outstanding
+
+            # ====================================
+            # FINAL DATA
+            # ====================================
 
             data.append({
+
                 "id": s.id,
+
                 "name": s.name,
-                "total": round(total_purchase, 2),
-                "payment": round(total_payment, 2),
-                "return": round(total_return, 2),
-                "outstanding": round(total_outstanding, 2),
-                "receivable": round(total_receivable, 2)
+
+                "total": round(
+                    total_purchase,
+                    2
+                ),
+
+                "payment": round(
+                    total_payment,
+                    2
+                ),
+
+                "return": round(
+                    total_return,
+                    2
+                ),
+
+                "outstanding": round(
+                    final_outstanding,
+                    2
+                ),
+
+                "receivable": round(
+                    total_receivable,
+                    2
+                )
+
             })
 
-        return render(request, "dashboard/supplier_summary.html", {
-            "suppliers": data
-        })
+        # ====================================
+        # RENDER
+        # ====================================
+
+        return render(
+
+            request,
+
+            "transactions/summary.html",
+
+            {
+
+                "parties": data,
+
+                "title":
+                    "Supplier Summary"
+                    if mode == "purchase"
+                    else "Debtors Summary",
+
+                "party_label":
+                    "Supplier"
+                    if mode == "purchase"
+                    else "Customer",
+
+                "total_label":
+                    "Total Purchase"
+                    if mode == "purchase"
+                    else "Total Sales",
+
+                "detail_url":
+                    "/purchase-invoices/?supplier_id="
+                    if mode == "purchase"
+                    else "/sales-invoices/?customer_id="
+
+            }
+
+        )
 
     except Exception as e:
+
         return JsonResponse({
+
             "error": str(e)
+
         })
+
+ # ---------------- BILLING ----------------
 
 @login_required
-def get_return_info(request):
+def billing(request):
 
-    from django.http import JsonResponse
-    from django.db.models import Sum
+    customers = Customer.objects.all().order_by("name")
+
+    suppliers = Supplier.objects.all().order_by("name")
+
+    return render(
+        request,
+        "transactions/transaction.html",
+        {
+            "mode": "sales",
+            "customers": customers,
+            "suppliers": suppliers
+        }
+    )
+
+@login_required
+def supplier_summary(request):
+
+    return party_summary(
+        request,
+        mode="purchase"
+    )
+
+
+@login_required
+def debtor_summary(request):
+
     from decimal import Decimal
 
-    purchase_id = request.GET.get("purchase_id")
-    product_id = request.GET.get("product_id")
+    customers = Customer.objects.all()
 
-    purchase = Purchase.objects.get(id=purchase_id)
+    parties = []
 
-    # =========================================
-    # 🔥 CASE 1 → INVOICE LEVEL (RETURN ICON)
-    # =========================================
-    if not product_id:
+    for c in customers:
 
-        items = PurchaseItem.objects.filter(purchase=purchase)
+        bills = Bill.objects.filter(
+            customer=c
+        )
 
-        data = []
+        total_sales = Decimal("0.00")
 
-        for item in items:
+        total_receipt = Decimal("0.00")
 
-            returned = PurchaseReturnItem.objects.filter(
-                purchase_return__purchase=purchase,
-                product=item.product
-            ).aggregate(total=Sum("qty"))["total"] or 0
+        total_return = Decimal("0.00")
 
-            remaining = item.qty - returned
+        total_remaining = Decimal("0.00")
 
-            data.append({
-                "product_id": item.product.id,
-                "name": item.product.name,
-                "qty": item.qty,
-                "returned": returned,
-                "remaining": remaining,
-                "has_return": returned > 0
-            })
+        total_payable = Decimal("0.00")
 
-        return JsonResponse({
-            "items": data,
-            "invoice": purchase.invoice_number
+        # =====================================
+        # LOOP ALL BILLS
+        # =====================================
+
+        for b in bills:
+
+            bill_total = Decimal(
+                b.total or 0
+            )
+
+            total_sales += bill_total
+
+            mode = (
+                b.payment_mode or ""
+            ).lower()
+
+            # =====================================
+            # RETURN TOTAL FOR THIS BILL
+            # =====================================
+
+            bill_return = Decimal("0.00")
+
+            returns = PurchaseReturnItem.objects.filter(
+                purchase_return__bill=b
+            )
+
+            for r in returns:
+
+                line_total = (
+                    Decimal(r.qty) *
+                    Decimal(r.price)
+                )
+
+                gst = (
+                    line_total *
+                    Decimal("0.18")
+                )
+
+                bill_return += (
+                    line_total + gst
+                )
+
+            # =====================================
+            # CASH / BANK / PAID
+            # =====================================
+
+            if mode in ["cash", "bank", "paid"]:
+
+                paid = bill_total
+
+                balance = Decimal("0.00")
+
+                # RETURN → PAYABLE
+                total_payable += bill_return
+
+            # =====================================
+            # CREDIT / PARTIAL
+            # =====================================
+
+            else:
+
+                paid = Decimal(
+                    b.paid_amount or 0
+                )
+
+                # RETURN COLUMN
+                total_return += bill_return
+
+                balance = (
+                    bill_total -
+                    paid -
+                    bill_return
+                )
+
+                # REMAINING
+                if balance > 0:
+
+                    total_remaining += balance
+
+                # EXTRA RETURN
+                elif balance < 0:
+
+                    total_payable += abs(balance)
+
+            # =====================================
+            # RECEIPT
+            # =====================================
+
+            total_receipt += paid
+
+        # =====================================
+        # FINAL DATA
+        # =====================================
+
+        parties.append({
+
+            "id": c.id,
+
+            "name": c.name,
+
+            "total": round(total_sales, 2),
+
+            "payment": round(total_receipt, 2),
+
+            "return": round(total_return, 2),
+
+            "outstanding": round(
+                total_remaining,
+                2
+            ),
+
+            "receivable": round(
+                total_payable,
+                2
+            )
         })
 
-    # =========================================
-    # 🔥 CASE 2 → PRODUCT LEVEL (MODAL)
-    # =========================================
+    return render(
+        request,
+        "transactions/summary.html",
+        {
 
-    items = PurchaseReturnItem.objects.filter(
-        purchase_return__purchase=purchase,
-        product__id=product_id
-    ).select_related("purchase_return")
+            "title": "Debtors Summary",
 
-    total_qty = 0
-    total_amount = Decimal("0.00")
-    history = []
+            "parties": parties,
 
-    for i in items:
+            "party_label": "Customer",
 
-        line_total = i.qty * i.price
-        gst = line_total * Decimal("0.18")
-        grand = line_total + gst
+            "total_label": "Total Sales",
 
-        total_qty += i.qty
-        total_amount += grand
+            "detail_url": "/sales-invoices/?customer_id=",
 
-        history.append({
-            "date": i.purchase_return.date.strftime("%d %b %Y"),
-            "qty": i.qty,
-            "price": float(i.price),
-            "amount": float(grand),
-            "return_id": i.purchase_return.id
+            "mode": "sales"
+        }
+    )
+@login_required
+def sales_ledger(request, id):
+
+    from apps.core.models import Bill
+    from apps.purchases.models import PaymentAllocation
+
+    bill = get_object_or_404(Bill, id=id)
+
+    # =========================
+    # RECEIPT ALLOCATIONS
+    # =========================
+
+    allocations = PaymentAllocation.objects.filter(
+        bill=bill
+    ).select_related("payment")
+
+    payments = []
+
+   # =========================
+# CASH / BANK AUTO PAID
+# =========================
+
+    if (bill.payment_mode or "").lower() in ["cash", "bank"]:
+
+        paid = Decimal(bill.total)
+
+        balance = Decimal("0.00")
+
+    else:
+
+     paid = Decimal("0.00")
+
+    for a in allocations:
+
+        paid += a.amount
+
+        payments.append({
+            "id": a.payment.id,
+            "date": a.payment.date.strftime("%d %b %Y"),
+            "amount": float(a.amount)
+        })
+
+    balance = bill.total - paid
+    return JsonResponse({
+
+        "invoice": bill.invoice_no,
+
+        "total": float(bill.total),
+
+        "paid": float(paid),
+
+        "balance": float(balance),
+
+        "payment_mode": bill.status_display,
+
+        "payments": payments
+
+    })
+
+@login_required
+def customer_invoices(request, id):
+
+    bills = Bill.objects.filter(
+        customer_id=id
+    )
+
+    data = []
+
+    for b in bills:
+
+        # =========================
+        # CREDIT ONLY
+        # =========================
+
+        mode = (b.payment_mode or "").lower()
+
+        if mode != "credit":
+            continue
+
+        paid = PaymentAllocation.objects.filter(
+            bill=b
+        ).aggregate(
+            total=Sum("amount")
+        )["total"] or Decimal("0")
+
+        balance = Decimal(b.total) - Decimal(paid)
+
+        # FULLY PAID HIDE
+        if balance <= 0:
+            continue
+
+        data.append({
+            "invoice": b.invoice_no,
+            "paid": float(paid),
+            "balance": float(balance)
         })
 
     return JsonResponse({
-        "returned": total_qty,
-        "returned_amount": float(total_amount),
-        "history": history
+        "bills": data
     })
+
+@login_required
+def receipt_voucher_print(request, id):
+
+    from apps.purchases.models import (
+        SupplierPayment,
+        PaymentAllocation
+    )
+
+    payment = get_object_or_404(
+        SupplierPayment,
+        id=id
+    )
+
+    allocation = PaymentAllocation.objects.filter(
+        payment=payment
+    ).first()
+
+    bill = allocation.bill if allocation else None
+
+    company = Company.objects.first()
+
+    customer = bill.customer if bill else None
+
+    amount = payment.amount
+
+    amount_words = num2words(
+        amount,
+        lang="en_IN"
+    ).title()
+
+    return render(
+        request,
+        "purchases/payment_voucher.html",
+        {
+            "payment": payment,
+            "bill": bill,
+            "customer": customer,
+            "company": company,
+            "amount": amount,
+            "amount_words": amount_words,
+            "receipt_mode": True
+        }
+    )  
+
+@login_required
+def sales_return(request, mode="sales"):
+
+    customers = Customer.objects.all().order_by("name")
+
+    return render(
+        request,
+        "purchases/purchase_return.html",
+        {
+            "parties": customers,
+            "mode": "sales"
+        }
+    ) 

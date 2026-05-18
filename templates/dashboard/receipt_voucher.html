@@ -1,56 +1,53 @@
-{% extends "dashboard/base.html" %}
+{% extends "base.html" %}
 {% block content %}
 
 <div class="max-w-4xl mx-auto px-3 md:px-6">
 
-<h1 class="text-xl md:text-2xl font-bold mb-6 text-white">
-Balance Received
-</h1>
+    <h1 class="text-xl md:text-2xl font-bold mb-6 text-white">
+        Balance Received
+    </h1>
 
-<div class="bg-slate-800 p-4 md:p-6 rounded-2xl shadow-xl">
+    <div class="bg-slate-800 p-4 md:p-6 rounded-2xl shadow-xl">
 
-<form method="POST" class="space-y-4">
+        <form method="POST" class="space-y-4">
 
-{% csrf_token %}
+            {% csrf_token %}
 
-<div>
-<label class="text-gray-300 text-sm md:text-base">
-Customer
-</label>
+            <div>
+                <label class="text-gray-300 text-sm md:text-base">
+                    Customer
+                </label>
 
-<select name="customer_id"
-class="w-full mt-1 p-3 rounded-xl bg-slate-700 text-white focus:ring-2 focus:ring-green-400">
+                <select name="customer_id"
+                    class="w-full mt-1 p-3 rounded-xl bg-slate-700 text-white focus:ring-2 focus:ring-green-400">
 
-{% for c in customers %}
-<option value="{{ c.id }}">
-{{ c.name }} (₹{{ c.balance }})
-</option>
-{% endfor %}
+                    {% for c in customers %}
+                    <option value="{{ c.id }}">
+                        {{ c.name }} (₹{{ c.balance }})
+                    </option>
+                    {% endfor %}
 
-</select>
-</div>
+                </select>
+            </div>
 
-<div>
-<label class="text-gray-300 text-sm md:text-base">
-Amount Received
-</label>
+            <div>
+                <label class="text-gray-300 text-sm md:text-base">
+                    Amount Received
+                </label>
 
-<input
-name="amount"
-placeholder="Enter amount"
-class="w-full mt-1 p-3 rounded-xl bg-slate-700 text-white focus:ring-2 focus:ring-green-400">
-</div>
+                <input name="amount" placeholder="Enter amount"
+                    class="w-full mt-1 p-3 rounded-xl bg-slate-700 text-white focus:ring-2 focus:ring-green-400">
+            </div>
 
-<button
-class="w-full bg-green-500 hover:bg-green-600 p-3 rounded-xl font-bold text-lg transition">
+            <button class="w-full bg-green-500 hover:bg-green-600 p-3 rounded-xl font-bold text-lg transition">
 
-SAVE RECEIPT
+                SAVE RECEIPT
 
-</button>
+            </button>
 
-</form>
+        </form>
 
-</div>
+    </div>
 
 </div>
 

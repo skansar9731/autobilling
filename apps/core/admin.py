@@ -1,11 +1,17 @@
 from django.contrib import admin
-from .models import Product, Customer, Bill, BillItem, Supplier, Purchase
-from .models import Company, BankAccount, BankTransaction
+from .models import (
+    Product,
+    Customer,
+    Bill,
+    BillItem,
+    Supplier,
+    Company,
+    BankAccount,
+    BankTransaction
+)
 
 
-
-# ---------------- PRODUCT ADMIN ----------------
-
+# ================= PRODUCT =================
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ("name", "barcode", "hsn", "price", "stock")
@@ -13,8 +19,7 @@ class ProductAdmin(admin.ModelAdmin):
     ordering = ("name",)
 
 
-# ---------------- CUSTOMER ADMIN ----------------
-
+# ================= CUSTOMER =================
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ("name", "phone", "gst", "balance")
@@ -22,8 +27,7 @@ class CustomerAdmin(admin.ModelAdmin):
     ordering = ("name",)
 
 
-# ---------------- BILL ITEM INLINE ----------------
-
+# ================= BILL ITEM INLINE =================
 class BillItemInline(admin.TabularInline):
     model = BillItem
     extra = 0
@@ -31,8 +35,7 @@ class BillItemInline(admin.TabularInline):
     can_delete = False
 
 
-# ---------------- BILL ADMIN ----------------
-
+# ================= BILL =================
 @admin.register(Bill)
 class BillAdmin(admin.ModelAdmin):
 
@@ -66,14 +69,31 @@ class BillAdmin(admin.ModelAdmin):
     )
 
     def has_add_permission(self, request):
-        return False  # Bills should only be created via Billing UI
+        return False
 
     def has_delete_permission(self, request, obj=None):
-        return False  # Prevent accidental deletion
-    
-    # Register only new models
-admin.site.register(Supplier)
-admin.site.register(Purchase)
-admin.site.register(Company)
-admin.site.register(BankAccount)
-admin.site.register(BankTransaction)
+        return False
+
+
+# ================= SUPPLIER =================
+@admin.register(Supplier)
+class SupplierAdmin(admin.ModelAdmin):
+    list_display = ("name", "phone", "balance")
+    search_fields = ("name", "phone")
+
+
+# ================= COMPANY =================
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+
+
+# ================= BANK =================
+@admin.register(BankAccount)
+class BankAccountAdmin(admin.ModelAdmin):
+    list_display = ("name", "balance")
+
+
+@admin.register(BankTransaction)
+class BankTransactionAdmin(admin.ModelAdmin):
+    list_display = ("bank", "amount", "type", "date")

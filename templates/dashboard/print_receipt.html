@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Supplier Receipt Voucher</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @media print {
+            body {
+                margin: 0;
+                background: #fff;
+            }
+        }
+    </style>
+</head>
+
+<body onload="window.print()" class="bg-white p-4 md:p-8">
+
+    <div class="max-w-2xl mx-auto border-2 border-black p-6">
+
+        <!-- HEADER -->
+        <div class="text-center border-b border-black pb-3 mb-5">
+            <h2 class="text-xl font-bold tracking-wide">
+                SUPPLIER RECEIPT VOUCHER
+            </h2>
+            <p class="text-sm text-gray-600">Your Company Name</p>
+        </div>
+
+        <!-- DETAILS -->
+        <div class="flex justify-between text-sm mb-2">
+            <p><span class="font-semibold">Voucher No:</span> {{ payment.id }}</p>
+            <p><span class="font-semibold">Date:</span> {{ payment.created_at|date:"d M Y" }}</p>
+        </div>
+
+        <div class="text-sm mb-4">
+            <p><span class="font-semibold">Received From:</span> {{ payment.supplier.name }}</p>
+        </div>
+
+        <!-- TABLE -->
+        <div class="mt-4">
+            <table class="w-full border border-black text-sm">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border border-black p-2 text-left">Particulars</th>
+                        <th class="border border-black p-2 text-right">Amount</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td class="border border-black p-2">
+                            Being amount received from supplier {{ payment.supplier.name }}
+                        </td>
+                        <td class="border border-black p-2 text-right font-semibold">
+                            ₹ {{ payment.amount }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TOTAL -->
+        <div class="flex justify-between mt-5 text-sm font-bold">
+            <span>Total</span>
+            <span>₹ {{ payment.amount }}</span>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="flex justify-between mt-10 text-xs">
+            <span>Mode: {{ payment.mode|default:"Cash / Bank" }}</span>
+            <span>Authorized Signatory</span>
+        </div>
+
+        <div class="mt-12 text-center">
+            <div class="border-t border-black w-40 mx-auto pt-1 text-xs">
+                Signature
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
+{% endblock %}

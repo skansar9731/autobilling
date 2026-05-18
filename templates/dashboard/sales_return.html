@@ -1,108 +1,108 @@
-{% extends "dashboard/base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 
 <div class="max-w-7xl mx-auto px-3 md:px-6">
 
-<h1 class="text-xl md:text-2xl font-bold mb-6 text-white">
-Sales Return (Credit Note)
-</h1>
+    <h1 class="text-xl md:text-2xl font-bold mb-6 text-white">
+        Sales Return (Credit Note)
+    </h1>
 
-<!-- DESKTOP TABLE -->
+    <!-- DESKTOP TABLE -->
 
-<div class="hidden md:block bg-slate-800 p-4 rounded-2xl shadow-xl overflow-x-auto">
+    <div class="hidden md:block bg-slate-800 p-4 rounded-2xl shadow-xl overflow-x-auto">
 
-<table class="w-full text-white text-sm">
+        <table class="w-full text-white text-sm">
 
-<thead>
-<tr class="border-b border-gray-600 text-left">
-<th class="py-3">Invoice</th>
-<th>Customer</th>
-<th>Total</th>
-<th>Return</th>
-</tr>
-</thead>
+            <thead>
+                <tr class="border-b border-gray-600 text-left">
+                    <th class="py-3">Invoice</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Return</th>
+                </tr>
+            </thead>
 
-<tbody>
+            <tbody>
 
-{% for bill in bills %}
+                {% for bill in bills %}
 
-<tr class="border-b border-gray-700 hover:bg-slate-700">
+                <tr class="border-b border-gray-700 hover:bg-slate-700">
 
-<td class="py-3 font-semibold">
-{{ bill.invoice_no }}
-</td>
+                    <td class="py-3 font-semibold">
+                        {{ bill.invoice_no }}
+                    </td>
 
-<td>
-{{ bill.customer.name }}
-</td>
+                    <td>
+                        {{ bill.customer.name }}
+                    </td>
 
-<td class="text-green-400 font-bold">
-₹ {{ bill.total }}
-</td>
+                    <td class="text-green-400 font-bold">
+                        ₹ {{ bill.total }}
+                    </td>
 
-<td>
+                    <td>
 
-<a href="/bill/return/{{ bill.id }}/"
-class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm">
+                        <a href="/bill/return/{{ bill.id }}/"
+                            class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm">
 
-Return
+                            Return
 
-</a>
+                        </a>
 
-</td>
+                    </td>
 
-</tr>
+                </tr>
 
-{% endfor %}
+                {% endfor %}
 
-</tbody>
+            </tbody>
 
-</table>
+        </table>
 
-</div>
+    </div>
 
 
-<!-- MOBILE CARD VIEW -->
+    <!-- MOBILE CARD VIEW -->
 
-<div class="md:hidden space-y-4">
+    <div class="md:hidden space-y-4">
 
-{% for bill in bills %}
+        {% for bill in bills %}
 
-<div class="bg-slate-800 rounded-2xl p-4 shadow-lg">
+        <div class="bg-slate-800 rounded-2xl p-4 shadow-lg">
 
-<div class="flex justify-between items-start">
+            <div class="flex justify-between items-start">
 
-<div>
+                <div>
 
-<h2 class="text-lg font-bold text-white">
-{{ bill.invoice_no }}
-</h2>
+                    <h2 class="text-lg font-bold text-white">
+                        {{ bill.invoice_no }}
+                    </h2>
 
-<p class="text-gray-400 text-sm">
-{{ bill.customer.name }}
-</p>
+                    <p class="text-gray-400 text-sm">
+                        {{ bill.customer.name }}
+                    </p>
 
-</div>
+                </div>
 
-<div class="text-green-400 font-bold text-lg">
-₹ {{ bill.total }}
-</div>
+                <div class="text-green-400 font-bold text-lg">
+                    ₹ {{ bill.total }}
+                </div>
 
-</div>
+            </div>
 
-<a href="/bill/return/{{ bill.id }}/"
-class="inline-block mt-4 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm">
+            <a href="/bill/return/{{ bill.id }}/"
+                class="inline-block mt-4 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm">
 
-Return
+                Return
 
-</a>
+            </a>
 
-</div>
+        </div>
 
-{% endfor %}
+        {% endfor %}
 
-</div>
+    </div>
 
 </div>
 

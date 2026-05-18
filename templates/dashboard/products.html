@@ -1,4 +1,4 @@
-{% extends "dashboard/base.html" %}
+{% extends "base.html" %}
 {% block content %}
 
 <h1 class="text-2xl font-bold mb-6 text-white">Stock</h1>
@@ -6,7 +6,7 @@
 {% if messages %}
 <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2">
     {% for message in messages %}
-        <div class="
+    <div class="
             px-6 py-3 rounded-xl shadow-lg text-white font-semibold
             animate-slide-in
             {% if message.tags == 'success' %}
@@ -17,8 +17,8 @@
                 bg-blue-500
             {% endif %}
         ">
-            {{ message }}
-        </div>
+        {{ message }}
+    </div>
     {% endfor %}
 </div>
 {% endif %}
@@ -27,61 +27,52 @@
 
 <div class="bg-slate-800 rounded-2xl mb-6 shadow-xl overflow-hidden">
 
-<!-- HEADER (CLICKABLE) -->
-<button onclick="toggleProductForm()"
-class="w-full flex justify-between items-center p-5 text-left">
+    <!-- HEADER (CLICKABLE) -->
+    <button onclick="toggleProductForm()" class="w-full flex justify-between items-center p-5 text-left">
 
-<h2 class="text-lg font-bold text-white">
-➕ Add Stocks
-</h2>
+        <h2 class="text-lg font-bold text-white">
+            ➕ Add Stocks
+        </h2>
 
-<span id="toggleIcon" class="text-white text-xl">
-▼
-</span>
+        <span id="toggleIcon" class="text-white text-xl">
+            ▼
+        </span>
 
-</button>
-
-<!-- COLLAPSIBLE BODY -->
-<div id="productFormWrapper" class="hidden px-5 pb-5">
-
-<form method="POST"
-class="grid grid-cols-1 md:grid-cols-6 gap-3 mt-4">
-
-    {% csrf_token %}
-
-    <input name="name" placeholder="Product Name" required
-    class="p-3 rounded-xl bg-slate-700 text-white md:col-span-2">
-
-    <input name="hsn" placeholder="HSN"
-    class="p-3 rounded-xl bg-slate-700 text-white">
-
-    <input name="price" type="number" step="0.01" required
-    placeholder="Price"
-    class="p-3 rounded-xl bg-slate-700 text-white">
-
-    <input name="gst" type="number" step="0.01"
-    placeholder="GST %"
-    class="p-3 rounded-xl bg-slate-700 text-white">
-
-    <input name="stock" type="number"
-    placeholder="Stock"
-    class="p-3 rounded-xl bg-slate-700 text-white">
-
-    <button type="submit"
-    class="bg-green-500 hover:bg-green-400 font-bold rounded-xl px-4 py-3">
-    <i class="fa-solid fa-plus"></i> Add
     </button>
-<a href="{% url 'bulk_upload' %}" 
-   class="bg-blue-500 hover:bg-blue-400 font-bold rounded-xl px-4 py-3">
-   <i class="fa-solid fa-layer-group"></i> Bulk Upload
-</a>
-<a href="{% url 'stock_receive' %}"
-   class="bg-purple-600 hover:bg-purple-400 font-bold rounded-xl px-4 py-3">
-   <i class="fa-solid fa-qrcode"></i> Stock Scanner
-</a>
-</form>
 
-</div>
+    <!-- COLLAPSIBLE BODY -->
+    <div id="productFormWrapper" class="hidden px-5 pb-5">
+
+        <form method="POST" class="grid grid-cols-1 md:grid-cols-6 gap-3 mt-4">
+
+            {% csrf_token %}
+
+            <input name="name" placeholder="Product Name" required
+                class="p-3 rounded-xl bg-slate-700 text-white md:col-span-2">
+
+            <input name="hsn" placeholder="HSN" class="p-3 rounded-xl bg-slate-700 text-white">
+
+            <input name="price" type="number" step="0.01" required placeholder="Price"
+                class="p-3 rounded-xl bg-slate-700 text-white">
+
+            <input name="gst" type="number" step="0.01" placeholder="GST %"
+                class="p-3 rounded-xl bg-slate-700 text-white">
+
+            <input name="stock" type="number" placeholder="Stock" class="p-3 rounded-xl bg-slate-700 text-white">
+
+            <button type="submit" class="bg-green-500 hover:bg-green-400 font-bold rounded-xl px-4 py-3">
+                <i class="fa-solid fa-plus"></i> Add
+            </button>
+            <a href="{% url 'bulk_upload' %}" class="bg-blue-500 hover:bg-blue-400 font-bold rounded-xl px-4 py-3">
+                <i class="fa-solid fa-layer-group"></i> Bulk Upload
+            </a>
+            <a href="{% url 'stock_receive' %}"
+                class="bg-purple-600 hover:bg-purple-400 font-bold rounded-xl px-4 py-3">
+                <i class="fa-solid fa-qrcode"></i> Stock Scanner
+            </a>
+        </form>
+
+    </div>
 
 </div>
 
@@ -90,46 +81,45 @@ class="grid grid-cols-1 md:grid-cols-6 gap-3 mt-4">
 
 <div class="hidden md:block bg-slate-800 p-4 rounded-2xl shadow-xl overflow-x-auto">
 
-<table class="w-full text-sm min-w-[700px] text-white">
+    <table class="w-full text-sm min-w-[700px] text-white">
 
-<thead class="border-b border-gray-600 text-left">
-<tr>
-<th>Name</th>
-<th>HSN</th>
-<th>Price</th>
-<th>GST</th>
-<th>Stock</th>
-</tr>
-</thead>
+        <thead class="border-b border-gray-600 text-left">
+            <tr>
+                <th>Name</th>
+                <th>HSN</th>
+                <th>Price</th>
+                <th>GST</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
 
-<tbody>
-{% for p in products %}
-<tr class="border-b border-gray-700 hover:bg-slate-700">
+        <tbody>
+            {% for p in products %}
+            <tr class="border-b border-gray-700 hover:bg-slate-700">
 
-<td class="font-semibold">{{ p.name }}</td>
-<td>{{ p.hsn }}</td>
-<td>₹ {{ p.price }}</td>
-<td>{{ p.gst }}%</td>
+                <td class="font-semibold">{{ p.name }}</td>
+                <td>{{ p.hsn }}</td>
+                <td>₹ {{ p.price }}</td>
+                <td>{{ p.gst }}%</td>
 
-<td>
-    {% if p.stock <= 5 %}
-        <span class="text-red-400 font-bold">{{ p.stock }}</span>
-    {% else %}
-        {{ p.stock }}
-    {% endif %}
-</td>
+                <td>
+                    {% if p.stock <= 5 %} <span class="text-red-400 font-bold">{{ p.stock }}</span>
+                        {% else %}
+                        {{ p.stock }}
+                        {% endif %}
+                </td>
 
-</tr>
-{% empty %}
-<tr>
-<td colspan="5" class="text-center py-6 text-gray-400">
-No products available.
-</td>
-</tr>
-{% endfor %}
-</tbody>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center py-6 text-gray-400">
+                    No products available.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
 
-</table>
+    </table>
 
 </div>
 
@@ -138,74 +128,73 @@ No products available.
 
 <div class="md:hidden space-y-4">
 
-{% for p in products %}
+    {% for p in products %}
 
-<div class="bg-slate-800 p-4 rounded-2xl shadow-lg text-white">
+    <div class="bg-slate-800 p-4 rounded-2xl shadow-lg text-white">
 
-<div class="flex justify-between items-center mb-2">
-    <div class="font-bold text-lg">{{ p.name }}</div>
-    <div class="font-bold text-green-400">
-        ₹ {{ p.price }}
+        <div class="flex justify-between items-center mb-2">
+            <div class="font-bold text-lg">{{ p.name }}</div>
+            <div class="font-bold text-green-400">
+                ₹ {{ p.price }}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-sm">
+
+            <div>HSN:</div>
+            <div class="text-right">{{ p.hsn }}</div>
+
+            <div>GST:</div>
+            <div class="text-right">{{ p.gst }}%</div>
+
+            <div>Stock:</div>
+            <div class="text-right">
+                {% if p.stock <= 5 %} <span class="text-red-400 font-bold">{{ p.stock }}</span>
+                    {% else %}
+                    {{ p.stock }}
+                    {% endif %}
+            </div>
+
+        </div>
+
     </div>
-</div>
 
-<div class="grid grid-cols-2 gap-2 text-sm">
-
-<div>HSN:</div>
-<div class="text-right">{{ p.hsn }}</div>
-
-<div>GST:</div>
-<div class="text-right">{{ p.gst }}%</div>
-
-<div>Stock:</div>
-<div class="text-right">
-    {% if p.stock <= 5 %}
-        <span class="text-red-400 font-bold">{{ p.stock }}</span>
-    {% else %}
-        {{ p.stock }}
-    {% endif %}
-</div>
-
-</div>
-
-</div>
-
-{% empty %}
-<div class="text-center text-gray-400 py-6">
-No products available.
-</div>
-{% endfor %}
+    {% empty %}
+    <div class="text-center text-gray-400 py-6">
+        No products available.
+    </div>
+    {% endfor %}
 
 </div>
 <script>
-function toggleProductForm() {
+    function toggleProductForm() {
 
-    let wrapper = document.getElementById("productFormWrapper");
-    let icon = document.getElementById("toggleIcon");
+        let wrapper = document.getElementById("productFormWrapper");
+        let icon = document.getElementById("toggleIcon");
 
-    if(wrapper.classList.contains("hidden")){
-        wrapper.classList.remove("hidden");
-        icon.innerText = "▲";
-    } else {
-        wrapper.classList.add("hidden");
-        icon.innerText = "▼";
+        if (wrapper.classList.contains("hidden")) {
+            wrapper.classList.remove("hidden");
+            icon.innerText = "▲";
+        } else {
+            wrapper.classList.add("hidden");
+            icon.innerText = "▼";
+        }
     }
-}
-document.addEventListener("DOMContentLoaded", function () {
-    const toasts = document.querySelectorAll("#toast-container > div");
+    document.addEventListener("DOMContentLoaded", function () {
+        const toasts = document.querySelectorAll("#toast-container > div");
 
-    toasts.forEach((toast, index) => {
-        setTimeout(() => {
-            toast.style.transition = "opacity 0.5s ease, transform 0.5s ease";
-            toast.style.opacity = "0";
-            toast.style.transform = "translateX(100%)";
-
+        toasts.forEach((toast, index) => {
             setTimeout(() => {
-                toast.remove();
-            }, 500);
+                toast.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+                toast.style.opacity = "0";
+                toast.style.transform = "translateX(100%)";
 
-        }, 3000 + (index * 500)); // stagger if multiple
+                setTimeout(() => {
+                    toast.remove();
+                }, 500);
+
+            }, 3000 + (index * 500)); // stagger if multiple
+        });
     });
-});
 </script>
 {% endblock %}

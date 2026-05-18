@@ -1,222 +1,209 @@
-{% extends "dashboard/base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 
 <div class="max-w-7xl mx-auto">
 
-<h1 onclick="toggleCustomerForm()"
-class="text-xl md:text-2xl font-bold mb-4 cursor-pointer flex justify-between items-center">
+        <h1 onclick="toggleCustomerForm()"
+                class="text-xl md:text-2xl font-bold mb-4 cursor-pointer flex justify-between items-center">
 
-        <i class="fa-solid fa-users text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
- Customers (Debtors)
+                <i class="fa-solid fa-users text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+                Customers (Debtors)
 
-<span id="toggleIcon">+</span>
+                <span id="toggleIcon">+</span>
 
-</h1>
+        </h1>
 
 
-<!-- ADD CUSTOMER -->
+        <!-- ADD CUSTOMER -->
 
-<div id="customerForm"
-class="hidden bg-slate-800 p-4 rounded-2xl mb-6">
+        <div id="customerForm" class="hidden bg-slate-800 p-4 rounded-2xl mb-6">
 
-<form method="POST"
-class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <form method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-3">
 
-{% csrf_token %}
+                        {% csrf_token %}
 
-<input name="name"
-placeholder="Customer Name"
-class="p-2 rounded bg-slate-700">
+                        <input name="name" placeholder="Customer Name" class="p-2 rounded bg-slate-700">
 
-<input name="phone"
-placeholder="Phone"
-class="p-2 rounded bg-slate-700">
+                        <input name="phone" placeholder="Phone" class="p-2 rounded bg-slate-700">
 
-<input name="gst"
-placeholder="GST Number"
-class="p-2 rounded bg-slate-700">
+                        <input name="gst" placeholder="GST Number" class="p-2 rounded bg-slate-700">
 
-<input name="address"
-placeholder="Address"
-class="p-2 rounded bg-slate-700 md:col-span-3">
+                        <input name="address" placeholder="Address" class="p-2 rounded bg-slate-700 md:col-span-3">
 
-<button
-class="bg-green-500 hover:bg-green-600 p-2 rounded font-bold md:col-span-3">
-<i class="fa-solid fa-user-plus text-white-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i> ADD CUSTOMER
-</button>
+                        <button class="bg-green-500 hover:bg-green-600 p-2 rounded font-bold md:col-span-3">
+                                <i
+                                        class="fa-solid fa-user-plus text-white-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+                                ADD CUSTOMER
+                        </button>
 
-</form>
+                </form>
 
-</div>
+        </div>
 
 
-<!-- ================= CUSTOMER LIST ================= -->
+        <!-- ================= CUSTOMER LIST ================= -->
 
-<div class="bg-slate-800 p-4 rounded-2xl">
+        <div class="bg-slate-800 p-4 rounded-2xl">
 
-<!-- DESKTOP TABLE -->
+                <!-- DESKTOP TABLE -->
 
-<div class="hidden md:block overflow-x-auto">
+                <div class="hidden md:block overflow-x-auto">
 
-<table class="w-full text-sm text-white">
+                        <table class="w-full text-sm text-white">
 
-<thead>
+                                <thead>
 
-<tr class="text-left border-b border-gray-600">
+                                        <tr class="text-left border-b border-gray-600">
 
-<th>Name</th>
-<th>Phone</th>
-<th>GST</th>
-<th>Address</th>
+                                                <th>Name</th>
+                                                <th>Phone</th>
+                                                <th>GST</th>
+                                                <th>Address</th>
 
-</tr>
+                                        </tr>
 
-</thead>
+                                </thead>
 
-<tbody>
+                                <tbody>
 
-{% for c in customers %}
+                                        {% for c in customers %}
 
-<tr onclick="loadDebtor({{ c.id }})"
-class="cursor-pointer hover:bg-slate-700 border-t border-gray-700">
+                                        <tr onclick="loadDebtor({{ c.id }})"
+                                                class="cursor-pointer hover:bg-slate-700 border-t border-gray-700">
 
-<td>{{ c.name }}</td>
-<td>{{ c.phone }}</td>
-<td>{{ c.gst }}</td>
-<td>{{ c.address }}</td>
+                                                <td>{{ c.name }}</td>
+                                                <td>{{ c.phone }}</td>
+                                                <td>{{ c.gst }}</td>
+                                                <td>{{ c.address }}</td>
 
-</tr>
+                                        </tr>
 
-{% endfor %}
+                                        {% endfor %}
 
-</tbody>
+                                </tbody>
 
-</table>
+                        </table>
 
-</div>
+                </div>
 
 
-<!-- MOBILE CARD VIEW -->
+                <!-- MOBILE CARD VIEW -->
 
-<div class="md:hidden space-y-4">
+                <div class="md:hidden space-y-4">
 
-{% for c in customers %}
+                        {% for c in customers %}
 
-<div onclick="loadDebtor({{ c.id }})"
-class="bg-slate-700 rounded-2xl p-4 cursor-pointer">
+                        <div onclick="loadDebtor({{ c.id }})" class="bg-slate-700 rounded-2xl p-4 cursor-pointer">
 
-<div class="flex justify-between">
+                                <div class="flex justify-between">
 
-<h2 class="font-bold text-lg">
-{{ c.name }}
-</h2>
+                                        <h2 class="font-bold text-lg">
+                                                {{ c.name }}
+                                        </h2>
 
-</div>
+                                </div>
 
-<div class="text-sm text-gray-300 mt-2">
+                                <div class="text-sm text-gray-300 mt-2">
 
-<div class="flex justify-between">
-<span>Phone</span>
-<span>{{ c.phone }}</span>
-</div>
+                                        <div class="flex justify-between">
+                                                <span>Phone</span>
+                                                <span>{{ c.phone }}</span>
+                                        </div>
 
-<div class="flex justify-between">
-<span>GST</span>
-<span>{{ c.gst }}</span>
-</div>
+                                        <div class="flex justify-between">
+                                                <span>GST</span>
+                                                <span>{{ c.gst }}</span>
+                                        </div>
 
-<div class="flex justify-between">
-<span>Address</span>
-<span>{{ c.address }}</span>
-</div>
+                                        <div class="flex justify-between">
+                                                <span>Address</span>
+                                                <span>{{ c.address }}</span>
+                                        </div>
 
-</div>
+                                </div>
 
-</div>
+                        </div>
 
-{% endfor %}
+                        {% endfor %}
 
-</div>
+                </div>
 
-</div>
+        </div>
 
 
-<!-- ================= DEBTOR DETAILS ================= -->
+        <!-- ================= DEBTOR DETAILS ================= -->
 
-<div id="debtorDetail"
-class="mt-6 hidden bg-slate-800 p-4 rounded-2xl">
+        <div id="debtorDetail" class="mt-6 hidden bg-slate-800 p-4 rounded-2xl">
 
-<h2 id="debtorName"
-class="text-lg md:text-xl font-bold mb-2"></h2>
+                <h2 id="debtorName" class="text-lg md:text-xl font-bold mb-2"></h2>
 
-<h3 class="mb-4 text-red-400 font-semibold">
+                <h3 class="mb-4 text-red-400 font-semibold">
 
-Total Outstanding Balance :
-₹ <span id="debtorBalance">0</span>
+                        Total Outstanding Balance :
+                        ₹ <span id="debtorBalance">0</span>
 
-</h3>
+                </h3>
 
 
-<!-- DESKTOP BILL TABLE -->
+                <!-- DESKTOP BILL TABLE -->
 
-<div class="hidden md:block overflow-x-auto">
+                <div class="hidden md:block overflow-x-auto">
 
-<table class="w-full text-sm text-white">
+                        <table class="w-full text-sm text-white">
 
-<thead>
+                                <thead>
 
-<tr class="border-b border-gray-600">
+                                        <tr class="border-b border-gray-600">
 
-<th>Bill</th>
-<th>Total</th>
-<th>Paid</th>
-<th>Balance</th>
-<th>View Bill</th>
+                                                <th>Bill</th>
+                                                <th>Total</th>
+                                                <th>Paid</th>
+                                                <th>Balance</th>
+                                                <th>View Bill</th>
 
-</tr>
+                                        </tr>
 
-</thead>
+                                </thead>
 
-<tbody id="debtorBills"></tbody>
+                                <tbody id="debtorBills"></tbody>
 
-</table>
+                        </table>
 
-</div>
+                </div>
 
 
-<!-- MOBILE BILL CARDS -->
+                <!-- MOBILE BILL CARDS -->
 
-<div id="debtorBillsMobile"
-class="md:hidden space-y-3"></div>
+                <div id="debtorBillsMobile" class="md:hidden space-y-3"></div>
 
-</div>
+        </div>
 
 </div>
 
 
 <script>
 
-function loadDebtor(id){
+        function loadDebtor(id) {
 
-fetch("/debtor/"+id+"/")
+                fetch("/debtor/" + id + "/")
 
-.then(res => res.json())
+                        .then(res => res.json())
 
-.then(data => {
+                        .then(data => {
 
-document.getElementById("debtorDetail").classList.remove("hidden")
+                                document.getElementById("debtorDetail").classList.remove("hidden")
 
-document.getElementById("debtorName").innerText = data.customer
+                                document.getElementById("debtorName").innerText = data.customer
 
-document.getElementById("debtorBalance").innerText = data.balance ?? 0
+                                document.getElementById("debtorBalance").innerText = data.balance ?? 0
 
-let tableHTML = ""
-let mobileHTML = ""
+                                let tableHTML = ""
+                                let mobileHTML = ""
 
-data.sales.forEach(bill => {
+                                data.sales.forEach(bill => {
 
-tableHTML += `
+                                        tableHTML += `
 <tr class="border-t border-gray-600">
 <td>${bill.invoice}</td>
 <td>${bill.total}</td>
@@ -232,7 +219,7 @@ class="bg-blue-500 px-2 py-1 rounded text-xs">
 </tr>
 `
 
-mobileHTML += `
+                                        mobileHTML += `
 <div class="bg-slate-700 p-4 rounded-2xl">
 
 <div class="flex justify-between">
@@ -270,30 +257,30 @@ View Bill
 </div>
 `
 
-})
+                                })
 
-document.getElementById("debtorBills").innerHTML = tableHTML
-document.getElementById("debtorBillsMobile").innerHTML = mobileHTML
+                                document.getElementById("debtorBills").innerHTML = tableHTML
+                                document.getElementById("debtorBillsMobile").innerHTML = mobileHTML
 
-})
+                        })
 
-}
+        }
 
 
-function toggleCustomerForm(){
+        function toggleCustomerForm() {
 
-let form = document.getElementById("customerForm")
-let icon = document.getElementById("toggleIcon")
+                let form = document.getElementById("customerForm")
+                let icon = document.getElementById("toggleIcon")
 
-form.classList.toggle("hidden")
+                form.classList.toggle("hidden")
 
-if(form.classList.contains("hidden")){
-icon.innerText = "+"
-}else{
-icon.innerText = "-"
-}
+                if (form.classList.contains("hidden")) {
+                        icon.innerText = "+"
+                } else {
+                        icon.innerText = "-"
+                }
 
-}
+        }
 
 </script>
 

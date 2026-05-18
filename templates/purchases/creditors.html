@@ -1,0 +1,498 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-3 sm:px-4">
+
+    <div id="creditorListSection">
+<!-- HEADER -->
+<h1 id="creditorHeader" onclick="toggleCustomerForm()"
+class="text-xl sm:text-2xl font-bold mb-4 cursor-pointer flex justify-between items-center
+
+text-white tracking-wide
+
+p-3 rounded-xl
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_6px_6px_18px_rgba(0,0,0,0.7)]
+
+border border-white/5">
+
+    <span class="flex items-center gap-2">
+        <i class="fa-solid fa-users text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+        Supplier (Creditors)
+    </span>
+    <span id="toggleIcon" class="text-lg">+</span>
+
+</h1>
+
+
+<!-- ADD SUPPLIER -->
+<div id="customerForm"
+class="hidden p-4 mb-6 rounded-3xl
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_8px_8px_22px_rgba(0,0,0,0.8)]
+
+border border-white/10">
+
+<form method="POST" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+
+{% csrf_token %}
+
+<input name="name" placeholder="Supplier Name"
+class="p-3 rounded-xl bg-slate-700 text-white w-full
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+border border-white/5 outline-none">
+
+<input name="phone" placeholder="Phone"
+class="p-3 rounded-xl bg-slate-700 text-white w-full
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+border border-white/5 outline-none">
+
+<input name="gst" placeholder="GST Number"
+class="p-3 rounded-xl bg-slate-700 text-white w-full
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+border border-white/5 outline-none">
+
+<input name="address" placeholder="Address"
+class="p-3 rounded-xl bg-slate-700 text-white w-full sm:col-span-2 md:col-span-3
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.08),_4px_4px_12px_rgba(0,0,0,0.7)]
+
+border border-white/5 outline-none">
+
+<button class="relative overflow-hidden
+
+bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
+
+text-black font-bold tracking-wide
+
+shadow-[inset_3px_3px_10px_rgba(255,255,255,0.6),_8px_8px_22px_rgba(0,0,0,0.4)]
+
+p-3 rounded-xl sm:col-span-2 md:col-span-3
+
+hover:scale-[1.02]
+
+transition-all duration-200">
+
+    <span class="flex items-center justify-center gap-2">
+        <i class="fa-solid fa-user-plus"></i>
+        ADD SUPPLIER
+    </span>
+
+</button>
+
+</form>
+
+</div>
+
+
+<div class="relative">
+
+    <!-- ICON -->
+    <i class="fa-solid fa-magnifying-glass 
+    absolute left-4 top-1/2 -translate-y-1/2 
+    text-yellow-400 
+    z-10 
+    drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+
+    <!-- SEARCH INPUT -->
+    <input 
+        type="text" 
+        id="supplierSearch"
+        placeholder="Search by Name, Phone, GST, Address..."
+        
+        class="w-full pl-11 pr-4 py-3 rounded-2xl
+            
+        bg-white/5 backdrop-blur-lg 
+        border border-white/10
+            
+        text-white placeholder-gray-400
+            
+        shadow-[0_8px_25px_rgba(0,0,0,0.6),inset_0_2px_6px_rgba(255,255,255,0.1)]
+            
+        focus:outline-none 
+        focus:ring-2 focus:ring-yellow-400
+        focus:shadow-[0_0_20px_rgba(250,204,21,0.4)]
+            
+        transition-all duration-200 mt-2"
+    >
+
+</div>
+<!-- DESKTOP TABLE -->
+<div class="hidden md:block
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+rounded-3xl mt-5
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_10px_10px_30px_rgba(0,0,0,0.8)]
+
+border border-white/10">
+
+<div class="overflow-x-auto">
+<div class="max-h-[400px] overflow-y-auto">
+
+<table class="w-full text-sm text-white min-w-[600px]">
+
+<thead class="sticky top-0 bg-black/30 backdrop-blur-md z-10">
+<tr class="text-left border-b border-white/10">
+<th class="p-3">Name</th>
+<th class="p-3">Phone</th>
+<th class="p-3">GST</th>
+<th class="p-3">Address</th>
+</tr>
+</thead>
+
+<tbody class="divide-y divide-white/5">
+
+{% for c in suppliers %}
+
+<tr onclick="loadCreditor({{ c.id }})"
+class="cursor-pointer transition-all duration-200
+
+hover:bg-white/5 hover:scale-[1.01]">
+
+<td class="p-3 font-semibold">{{ c.name }}</td>
+<td class="p-3 text-gray-300">{{ c.phone }}</td>
+<td class="p-3 text-gray-300">{{ c.gst }}</td>
+<td class="p-3 truncate max-w-[200px] text-gray-400">{{ c.address }}</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+</div>
+
+</div>
+
+
+<!-- MOBILE CARDS -->
+<div class="md:hidden space-y-3 mt-5">
+
+{% for c in suppliers %}
+
+<div onclick="loadCreditor({{ c.id }})"
+
+class="p-4 rounded-3xl
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_6px_6px_18px_rgba(0,0,0,0.8)]
+
+border border-white/10
+
+active:scale-95 transition cursor-pointer">
+
+<h2 class="font-bold text-base text-white">{{ c.name }}</h2>
+
+<p class="text-gray-400 text-sm mt-1">{{ c.phone }}</p>
+
+<p class="text-gray-300 text-sm mt-1">GST: {{ c.gst }}</p>
+
+<p class="text-gray-400 text-xs mt-1 line-clamp-2">{{ c.address }}</p>
+
+</div>
+
+{% endfor %}
+
+</div>
+</div>
+<!-- SUPPLIER DETAILS -->
+<div id="creditorDetail"
+
+class="mt-6 hidden p-4 rounded-3xl
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_10px_10px_28px_rgba(0,0,0,0.8)]
+
+border border-white/10">
+<button onclick="goBackToList()"
+class="flex items-center justify-center
+
+        w-10 h-10
+
+        rounded-xl
+
+        bg-gradient-to-br from-slate-700 to-slate-900
+
+        shadow-[inset_2px_2px_5px_rgba(255,255,255,0.1),_6px_6px_15px_rgba(0,0,0,0.8)]
+
+        border border-white/10
+
+        cursor-pointer
+
+        transition-all duration-200
+
+        hover:scale-110 hover:shadow-[0_0_15px_rgba(250,204,21,0.6)]
+
+        active:scale-90">
+<i class="fa-solid fa-arrow-left text-white text-sm"></i>
+</button>
+
+<h2 id="creditorName"
+class="text-lg sm:text-xl font-bold mb-2 text-white tracking-wide"></h2>
+
+<h3 class="mb-4 text-red-400 font-semibold text-sm sm:text-base
+
+drop-shadow-[0_0_6px_rgba(255,0,0,0.6)]">
+
+Total Outstanding Balance : ₹ <span id="debtorBalance">0</span>
+
+</h3>
+
+
+<!-- BILL TABLE -->
+<div class="hidden md:block">
+    
+    <div class="overflow-x-auto">
+        <div class="max-h-[260px] overflow-y-auto">
+            
+            <table class="w-full text-sm text-white min-w-[500px]">
+                
+                <thead class="sticky top-0 bg-black/30">
+                    <tr class="border-b border-white/10">
+                        <th class="p-2">Bill</th>
+                        <th class="p-2">Total</th>
+                        <th class="p-2">Paid</th>
+                        <th class="p-2">Balance</th>
+                        <th class="p-2">View</th>
+                    </tr>
+                </thead>
+                
+                <tbody id="debtorBills"></tbody>
+                
+            </table>
+            
+        </div>
+    </div>
+    
+</div>
+
+
+<!-- MOBILE -->
+<div id="mobileBills" class="md:hidden space-y-3"></div>
+
+</div>
+</div>
+
+</div>
+
+
+<script>
+
+function loadCreditor(id){
+
+    // 🔥 HIDE LIST UI
+    document.getElementById("creditorListSection").style.display = "none";
+
+    fetch("/creditor/"+id+"/")
+    .then(res => res.json())
+    .then(data => {
+
+        // 🔥 SHOW DETAIL
+        document.getElementById("creditorDetail").classList.remove("hidden");
+
+        document.getElementById("creditorName").innerText = data.supplier;
+        document.getElementById("debtorBalance").innerText = data.balance;
+
+        let tableHTML = "";
+        let cardHTML = "";
+
+        // 🔥 LOOP
+        data.purchase.forEach(bill => {
+
+            tableHTML += `
+
+<tr class="transition-all duration-200
+hover:bg-white/5 hover:scale-[1.01]">
+
+<td class="p-2 font-semibold text-white">${bill.invoice}</td>
+
+<td class="p-2 text-blue-400 font-bold
+drop-shadow-[0_0_6px_rgba(59,130,246,0.6)]">
+₹ ${bill.total}
+</td>
+
+<td class="p-2 text-green-400 font-semibold">
+₹ ${bill.paid}
+</td>
+
+<td class="p-2 text-red-400 font-semibold
+drop-shadow-[0_0_6px_rgba(255,0,0,0.6)]">
+₹ ${bill.balance}
+</td>
+
+<td class="p-2">
+
+<a href="/purchase/preview/${bill.id}/"
+target="_blank"
+
+class="w-8 h-8 flex items-center justify-center rounded-lg
+
+bg-gradient-to-br from-blue-500 to-blue-600
+
+shadow-[inset_2px_2px_5px_rgba(255,255,255,0.3),_4px_4px_10px_rgba(0,0,0,0.6)]
+
+hover:scale-[1.1]
+hover:shadow-[0_0_10px_rgba(59,130,246,0.6)]
+
+transition-all duration-200">
+
+<i class="fa-solid fa-eye text-white text-xs"></i>
+
+</a>
+
+</td>
+
+</tr>
+
+`;
+
+            cardHTML += `
+
+<div class="p-4 rounded-2xl
+
+bg-gradient-to-br from-slate-800 to-slate-900
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_6px_6px_18px_rgba(0,0,0,0.8)]
+
+border border-white/10">
+
+<div class="flex justify-between items-center">
+
+<span class="font-bold text-white">
+${bill.invoice}
+</span>
+
+<span class="text-blue-400 font-bold
+drop-shadow-[0_0_6px_rgba(59,130,246,0.6)]">
+₹${bill.total}
+</span>
+
+</div>
+
+<div class="text-sm text-gray-300 mt-2">
+Paid: <span class="text-green-400 font-semibold">₹${bill.paid}</span>
+</div>
+
+<div class="text-sm text-red-400 font-semibold">
+Balance: ₹${bill.balance}
+</div>
+
+<a href="/purchase/preview/${bill.id}/"
+target="_blank"
+
+class="mt-3 inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg
+
+bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xs font-semibold
+
+shadow-[inset_2px_2px_5px_rgba(255,255,255,0.3),_4px_4px_12px_rgba(0,0,0,0.6)]
+
+hover:scale-[1.05]
+hover:shadow-[0_0_10px_rgba(59,130,246,0.6)]
+
+transition-all duration-200">
+
+<i class="fa-solid fa-eye"></i>
+View Bill
+
+</a>
+
+</div>
+
+`;
+
+        });
+
+        // 🔥 EMPTY CASE HANDLE (important)
+        if(data.purchase.length === 0){
+            tableHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-400">No pending bills</td></tr>`;
+            cardHTML = `<div class="text-center text-gray-400">No pending bills</div>`;
+        }
+
+        document.getElementById("debtorBills").innerHTML = tableHTML;
+        document.getElementById("mobileBills").innerHTML = cardHTML;
+
+    })
+    .catch(err => {
+        console.error("Error:", err);
+    });
+
+}
+
+
+function toggleCustomerForm(){
+
+let form = document.getElementById("customerForm")
+let icon = document.getElementById("toggleIcon")
+
+form.classList.toggle("hidden")
+
+if(form.classList.contains("hidden")){
+icon.innerText = "+"
+}else{
+icon.innerText = "-"
+}
+
+}
+document.getElementById("supplierSearch").addEventListener("input", function () {
+
+    let value = this.value.toLowerCase();
+
+    // ✅ DESKTOP TABLE
+    let rows = document.querySelectorAll("tbody tr");
+
+    rows.forEach(row => {
+
+        let name = row.children[0].innerText.toLowerCase();
+        let phone = row.children[1].innerText.toLowerCase();
+        let gst = row.children[2].innerText.toLowerCase();
+        let address = row.children[3].innerText.toLowerCase();
+
+        let match =
+            name.includes(value) ||
+            phone.includes(value) ||
+            gst.includes(value) ||
+            address.includes(value);
+
+        row.style.display = match ? "" : "none";
+    });
+
+
+    // ✅ MOBILE CARDS
+    let cards = document.querySelectorAll(".md\\:hidden > div");
+
+    cards.forEach(card => {
+
+        let text = card.innerText.toLowerCase();
+
+        card.style.display = text.includes(value) ? "" : "none";
+    });
+
+});
+function goBackToList(){
+
+    document.getElementById("creditorListSection").style.display = "";
+
+    document.getElementById("creditorDetail").classList.add("hidden");
+
+}
+</script>
+
+{% endblock %}

@@ -1,15 +1,15 @@
-{% extends "dashboard/base.html" %}
+{% extends "base.html" %}
 {% block content %}
 
 <div class="max-w-7xl mx-auto">
 
-<div class="sticky top-[50px] md:top-[10px] z-40
+    <div class="sticky top-[50px] md:top-[10px] z-40
 bg-slate-900/95 backdrop-blur-sm
 py-3 rounded-2xl">
 
-    <h1 class="text-2xl font-bold flex items-center gap-3 text-white">
+        <h1 class="text-2xl font-bold flex items-center gap-3 text-white">
 
-        <i class="fa-solid fa-file-invoice-dollar
+            <i class="fa-solid fa-file-invoice-dollar
         text-yellow-400
 
         drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]
@@ -17,222 +17,213 @@ py-3 rounded-2xl">
         [text-shadow:0_0_2px_rgba(250,204,21,0.8),
                      0_0_4px_rgba(250,204,21,0.6),
                      0_2px_3px_rgba(0,0,0,0.9)]">
-        </i>
+            </i>
 
-        Sales Invoices
+            Sales Invoices
 
-    </h1>
+        </h1>
 
-</div>
+    </div>
 
 
-<!-- DESKTOP TABLE -->
+    <!-- DESKTOP TABLE -->
 
-<div class="hidden md:block bg-slate-800 rounded-2xl p-4 shadow-xl overflow-x-auto">
+    <div class="hidden md:block bg-slate-800 rounded-2xl p-4 shadow-xl overflow-x-auto">
 
-<table class="w-full text-sm text-white">
+        <table class="w-full text-sm text-white">
 
-<thead class="border-b border-gray-600 text-left">
-<tr>
-<th>Invoice</th>
-<th>Date</th>
-<th>Customer</th>
-<th>Total</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
-</thead>
+            <thead class="border-b border-gray-600 text-left">
+                <tr>
+                    <th>Invoice</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
 
-<tbody>
+            <tbody>
 
-{% for bill in bills %}
+                {% for bill in bills %}
 
-<tr class="border-b border-gray-700 hover:bg-slate-700">
+                <tr class="border-b border-gray-700 hover:bg-slate-700">
 
-<td class="font-bold">
-{{ bill.invoice_no }}
-</td>
+                    <td class="font-bold">
+                        {{ bill.invoice_no }}
+                    </td>
 
-<td>
-{{ bill.date|date:"d M Y, h:i A" }}
-</td>
+                    <td>
+                        {{ bill.date|date:"d M Y, h:i A" }}
+                    </td>
 
-<td>
-{{ bill.customer.name }}
-</td>
+                    <td>
+                        {{ bill.customer.name }}
+                    </td>
 
-<td class="font-bold text-green-400">
-₹ {{ bill.total }}
-</td>
+                    <td class="font-bold text-green-400">
+                        ₹ {{ bill.total }}
+                    </td>
 
-<td>
+                    <td>
 
-{% if bill.status == "active" %}
-<span class="text-green-400 font-semibold">
-Active
-</span>
+                        {% if bill.status == "active" %}
+                        <span class="text-green-400 font-semibold">
+                            Active
+                        </span>
 
-{% elif bill.status == "returned" %}
-<span class="text-yellow-400 font-semibold">
-Returned
-</span>
+                        {% elif bill.status == "returned" %}
+                        <span class="text-yellow-400 font-semibold">
+                            Returned
+                        </span>
 
-{% else %}
-<span class="text-red-400 font-semibold">
-Cancelled
-</span>
+                        {% else %}
+                        <span class="text-red-400 font-semibold">
+                            Cancelled
+                        </span>
 
-{% endif %}
+                        {% endif %}
 
-</td>
+                    </td>
 
-<td class="flex gap-2">
+                    <td class="flex gap-2">
 
-<a href="/bill/preview/{{ bill.id }}/"
-target="_blank"
-class="bg-blue-500 px-2 py-1 rounded text-xs">
-👁
-</a>
+                        <a href="/bill/preview/{{ bill.id }}/" target="_blank"
+                            class="bg-blue-500 px-2 py-1 rounded text-xs">
+                            👁
+                        </a>
 
-{% if bill.status == "active" %}
+                        {% if bill.status == "active" %}
 
-<a href="/bill/edit/{{ bill.id }}/"
-class="bg-yellow-500 px-2 py-1 rounded text-xs">
-✏
-</a>
+                        <a href="/bill/edit/{{ bill.id }}/" class="bg-yellow-500 px-2 py-1 rounded text-xs">
+                            ✏
+                        </a>
 
-<a href="/bill/return/{{ bill.id }}/"
-class="bg-purple-500 px-2 py-1 rounded text-xs">
-🔄
-</a>
+                        <a href="/bill/return/{{ bill.id }}/" class="bg-purple-500 px-2 py-1 rounded text-xs">
+                            🔄
+                        </a>
 
-<a href="/bill/delete/{{ bill.id }}/"
-class="bg-red-500 px-2 py-1 rounded text-xs">
-🗑
-</a>
+                        <a href="/bill/delete/{{ bill.id }}/" class="bg-red-500 px-2 py-1 rounded text-xs">
+                            🗑
+                        </a>
 
-{% endif %}
+                        {% endif %}
 
-</td>
+                    </td>
 
-</tr>
+                </tr>
 
-{% empty %}
+                {% empty %}
 
-<tr>
-<td colspan="6" class="text-center py-6 text-gray-400">
-No sales invoices found
-</td>
-</tr>
+                <tr>
+                    <td colspan="6" class="text-center py-6 text-gray-400">
+                        No sales invoices found
+                    </td>
+                </tr>
 
-{% endfor %}
+                {% endfor %}
 
-</tbody>
+            </tbody>
 
-</table>
+        </table>
 
-</div>
+    </div>
 
 
-<!-- MOBILE CARD VIEW -->
+    <!-- MOBILE CARD VIEW -->
 
-<div class="md:hidden space-y-4 mt-2">
+    <div class="md:hidden space-y-4 mt-2">
 
-{% for bill in bills %}
+        {% for bill in bills %}
 
-<div class="bg-slate-800 rounded-3xl p-5 shadow-lg">
+        <div class="bg-slate-800 rounded-3xl p-5 shadow-lg">
 
-<div class="flex justify-between items-start">
+            <div class="flex justify-between items-start">
 
-<div>
+                <div>
 
-<h2 class="text-lg font-bold text-white">
-{{ bill.invoice_no }}
-</h2>
+                    <h2 class="text-lg font-bold text-white">
+                        {{ bill.invoice_no }}
+                    </h2>
 
-<p class="text-gray-400 text-sm">
-{{ bill.date|date:"d M Y, h:i A" }}
-</p>
+                    <p class="text-gray-400 text-sm">
+                        {{ bill.date|date:"d M Y, h:i A" }}
+                    </p>
 
-<p class="text-gray-300 mt-1">
-{{ bill.customer.name }}
-</p>
+                    <p class="text-gray-300 mt-1">
+                        {{ bill.customer.name }}
+                    </p>
 
-</div>
+                </div>
 
-<div class="text-green-400 text-lg font-bold">
-₹ {{ bill.total }}
-</div>
+                <div class="text-green-400 text-lg font-bold">
+                    ₹ {{ bill.total }}
+                </div>
 
-</div>
+            </div>
 
 
-<!-- STATUS -->
+            <!-- STATUS -->
 
-<div class="mt-3">
+            <div class="mt-3">
 
-{% if bill.status == "active" %}
-<span class="text-green-400 font-semibold text-sm">
-Active
-</span>
+                {% if bill.status == "active" %}
+                <span class="text-green-400 font-semibold text-sm">
+                    Active
+                </span>
 
-{% elif bill.status == "returned" %}
-<span class="text-yellow-400 font-semibold text-sm">
-Returned
-</span>
+                {% elif bill.status == "returned" %}
+                <span class="text-yellow-400 font-semibold text-sm">
+                    Returned
+                </span>
 
-{% else %}
-<span class="text-red-400 font-semibold text-sm">
-Cancelled
-</span>
+                {% else %}
+                <span class="text-red-400 font-semibold text-sm">
+                    Cancelled
+                </span>
 
-{% endif %}
+                {% endif %}
 
-</div>
+            </div>
 
 
-<!-- ACTION BUTTONS -->
+            <!-- ACTION BUTTONS -->
 
-<div class="flex gap-2 mt-4">
+            <div class="flex gap-2 mt-4">
 
-<a href="/bill/preview/{{ bill.id }}/"
-target="_blank"
-class="bg-blue-500 px-3 py-1 rounded text-xs">
-👁 View
-</a>
+                <a href="/bill/preview/{{ bill.id }}/" target="_blank" class="bg-blue-500 px-3 py-1 rounded text-xs">
+                    👁 View
+                </a>
 
-{% if bill.status == "active" %}
+                {% if bill.status == "active" %}
 
-<a href="/bill/edit/{{ bill.id }}/"
-class="bg-yellow-500 px-3 py-1 rounded text-xs">
-✏ Edit
-</a>
+                <a href="/bill/edit/{{ bill.id }}/" class="bg-yellow-500 px-3 py-1 rounded text-xs">
+                    ✏ Edit
+                </a>
 
-<a href="/bill/return/{{ bill.id }}/"
-class="bg-purple-500 px-3 py-1 rounded text-xs">
-🔄 Return
-</a>
+                <a href="/bill/return/{{ bill.id }}/" class="bg-purple-500 px-3 py-1 rounded text-xs">
+                    🔄 Return
+                </a>
 
-<a href="/bill/delete/{{ bill.id }}/"
-class="bg-red-500 px-3 py-1 rounded text-xs">
-🗑 Delete
-</a>
+                <a href="/bill/delete/{{ bill.id }}/" class="bg-red-500 px-3 py-1 rounded text-xs">
+                    🗑 Delete
+                </a>
 
-{% endif %}
+                {% endif %}
 
-</div>
+            </div>
 
-</div>
+        </div>
 
-{% empty %}
+        {% empty %}
 
-<div class="text-center text-gray-400">
-No sales invoices
-</div>
+        <div class="text-center text-gray-400">
+            No sales invoices
+        </div>
 
-{% endfor %}
+        {% endfor %}
 
-</div>
+    </div>
 
 </div>
 

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-3 md:p-6">
+
+  <!-- 🔥 HEADER -->
+  <h1 class=" sticky top-[50px] md:top-[10px] z-40
+bg-slate-900/95 backdrop-blur-sm
+py-3 rounded-2xl text-2xl font-bold mb-6 text-white tracking-wide rounded-2xl">
+    💰 Receivable Summary
+  </h1>
+
+  <!-- ================= DESKTOP TABLE ================= -->
+  <div class="hidden md:block overflow-x-auto rounded-2xl 
+  bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900
+  shadow-[inset_2px_2px_8px_rgba(255,255,255,0.05),_6px_6px_20px_rgba(0,0,0,0.6)]">
+
+    <table class="w-full text-sm text-white">
+      
+      <thead class="bg-slate-800/80 text-gray-300">
+        <tr>
+          <th class="p-4 text-left">Supplier</th>
+          <th class="p-4 text-left">Receivable</th>
+          <th class="p-4 text-left">Outstanding</th>
+          <th class="p-4 text-left">Net Balance</th>
+          <th class="p-4 text-left">Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for s in data %}
+        <tr class="border-b border-slate-700/50 hover:bg-slate-800/50 transition">
+
+          <td class="p-4 font-semibold">{{ s.name }}</td>
+
+          <td class="p-4 text-green-400 font-semibold">
+            ₹ {{ s.receivable }}
+          </td>
+
+          <td class="p-4 text-red-400 font-semibold">
+            ₹ {{ s.outstanding }}
+          </td>
+
+          <td class="p-4 font-bold
+            {% if s.net > 0 %}
+              text-green-400
+            {% elif s.net < 0 %}
+              text-red-400
+            {% else %}
+              text-gray-400
+            {% endif %}
+          ">
+            ₹ {{ s.net }}
+          </td>
+
+          <td class="p-4">
+            {% if s.net > 0 %}
+            <a href="/receive-payment/{{ s.id }}/"
+              class="bg-gradient-to-br from-green-400 to-green-600
+              px-4 py-1.5 rounded-xl text-white text-xs font-semibold
+              shadow-[2px_2px_6px_rgba(0,0,0,0.5),inset_1px_1px_3px_rgba(255,255,255,0.3)]
+              hover:scale-105 transition">
+              Receive
+            </a>
+            {% endif %}
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+
+    </table>
+  </div>
+
+  <!-- ================= MOBILE CARDS ================= -->
+  <div class="md:hidden space-y-4">
+
+    {% for s in data %}
+    <div class="p-4 rounded-2xl
+    bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900
+    shadow-[inset_2px_2px_6px_rgba(255,255,255,0.05),_6px_6px_16px_rgba(0,0,0,0.6)]
+    border border-slate-700/40">
+
+      <!-- Supplier -->
+      <div class="font-semibold text-lg mb-2">
+        {{ s.name }}
+      </div>
+
+      <!-- Grid -->
+      <div class="grid grid-cols-2 gap-3 text-sm">
+
+        <div>
+          <p class="text-gray-400 text-xs">Receivable</p>
+          <p class="text-green-400 font-semibold">₹ {{ s.receivable }}</p>
+        </div>
+
+        <div>
+          <p class="text-gray-400 text-xs">Outstanding</p>
+          <p class="text-red-400 font-semibold">₹ {{ s.outstanding }}</p>
+        </div>
+
+        <div>
+          <p class="text-gray-400 text-xs">Net</p>
+          <p class="font-bold
+            {% if s.net > 0 %}
+              text-green-400
+            {% elif s.net < 0 %}
+              text-red-400
+            {% else %}
+              text-gray-400
+            {% endif %}
+          ">
+            ₹ {{ s.net }}
+          </p>
+        </div>
+
+        <div class="flex items-end">
+          <a href="/receive-payment/{{ s.id }}/"
+            class="w-full text-center bg-gradient-to-br from-green-400 to-green-600
+            py-2 rounded-xl text-white text-xs font-semibold
+            shadow-[2px_2px_6px_rgba(0,0,0,0.5),inset_1px_1px_3px_rgba(255,255,255,0.3)]">
+            Receive
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+</div>
+
+{% endblock %}

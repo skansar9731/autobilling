@@ -55,24 +55,112 @@ class Supplier(models.Model):
 # =========================
 
 class Bill(models.Model):
+    @property
+    def status_display(self):
 
-    invoice_no = models.CharField(max_length=20, unique=True, blank=True)
+       mode = (self.payment_mode or "").lower()
 
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    # CASH
+       if mode == "cash":
+        return "CASH"
+
+    # BANK
+       if mode == "bank":
+         return "BANK"
+
+    # CREDIT CHECK
+       if mode == "credit":
+
+        if self.balance <= 0:
+            return "PAID"
+
+        elif self.paid_amount > 0:
+            return "PARTIAL"
+
+        else:
+            return "CREDIT"
+
+        return "CREDIT"
+       
+    PAYMENT_CHOICES = (
+        ("cash", "Cash"),
+        ("bank", "Bank"),
+        ("credit", "Credit"),
+    )
+
+    invoice_no = models.CharField(
+        max_length=20,
+        unique=True,
+        blank=True
+    )
+
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.CASCADE
+    )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    # PAYMENT MODE
+    payment_mode = models.CharField(
+        max_length=20,
+        choices=PAYMENT_CHOICES,
+        default="cash"
+    )
+
     date = models.DateTimeField(auto_now_add=True)
 
-    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    cgst = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    sgst = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    discount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    roundoff = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    subtotal = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    cgst = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    sgst = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    discount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    roundoff = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    total = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
 
     STATUS_CHOICES = (
         ("active", "Active"),
         ("returned", "Returned"),
         ("cancelled", "Cancelled"),
+
+        # PAYMENT STATUS
+        ("CASH", "Cash"),
+        ("BANK", "Bank"),
+        ("CREDIT", "Credit"),
+        ("PARTIAL", "Partial"),
+        ("PAID", "Paid"),
     )
 
     status = models.CharField(
@@ -81,25 +169,85 @@ class Bill(models.Model):
         default="active"
     )
 
+    # =====================================
+    # AUTO INVOICE NUMBER
+    # =====================================
+
     def save(self, *args, **kwargs):
 
         if not self.invoice_no:
 
             last_bill = Bill.objects.order_by("-id").first()
 
-            if last_bill:
-                last_number = int(last_bill.invoice_no.replace("INV", ""))
+            if (
+                last_bill and
+                last_bill.invoice_no and
+                last_bill.invoice_no.startswith("INV")
+            ):
+
+                try:
+
+                    last_number = int(
+                        last_bill.invoice_no.replace("INV", "")
+                    )
+
+                except:
+
+                    last_number = 0
+
                 new_number = last_number + 1
+
             else:
+
                 new_number = 1
 
-            self.invoice_no = f"INV{str(new_number).zfill(5)}"
+            self.invoice_no = (
+                f"INV{str(new_number).zfill(5)}"
+            )
 
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return self.invoice_no
+    # =====================================
+    # PAYMENT CALCULATIONS
+    # =====================================
 
+    @property
+    def paid_amount(self):
+
+        from apps.purchases.models import PaymentAllocation
+        from django.db.models import Sum
+        from decimal import Decimal
+        if self.payment_mode in ["cash", "bank"]:
+            return self.total
+
+        total = (
+            PaymentAllocation.objects
+            .filter(bill=self)
+            .aggregate(
+                total=Sum("amount")
+            )["total"]
+            or Decimal("0.00")
+        )
+        return total
+
+    @property
+    def balance(self):
+
+        # CASH / BANK = already paid
+        if self.payment_mode in ["cash", "bank"]:
+
+         return Decimal("0.00")
+
+        # CREDIT
+        return self.total - self.paid_amount
+
+    # =====================================
+    # STRING
+    # =====================================
+
+    def __str__(self):
+
+        return self.invoice_no
 
 # =========================
 # BILL ITEM MODEL
@@ -131,116 +279,7 @@ class BillItem(models.Model):
         return f"{self.product.name} ({self.qty})"
 
 
-# ======================
-# PURCHASE MODEL
-# ======================
 
-class Purchase(models.Model):
-    @property
-    def balance(self):
-        return self.total - self.paid_amount
-    payment_mode = models.CharField(
-    max_length=10,
-    choices=(
-        ("cash", "Cash"),
-        ("bank", "Bank"),
-        ("credit", "Credit"),
-    ),
-    default="cash"
-)
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
-    invoice_number = models.CharField(max_length=50)
-    date = models.DateTimeField(auto_now_add=True)
-
-    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    cgst = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    sgst = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    roundoff = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
-    def __str__(self):
-        return self.invoice_number
-    @property
-    def paid_amount(self):
-        return self.paymentallocation_set.aggregate(
-        total=Sum("amount")
-    )["total"] or 0
-
-    @property
-    def balance(self):
-         return self.total - self.paid_amount
-
-
-# ======================
-# PURCHASE ITEM MODEL
-# ======================
-
-class PurchaseItem(models.Model):
-
-    purchase = models.ForeignKey(Purchase, related_name="items", on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-
-    qty = models.IntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-
-    @property
-    def amount(self):
-        return self.qty * self.price
-
-    def __str__(self):
-        return f"{self.product.name} ({self.qty})"
-
-class SupplierPayment(models.Model):
-    supplier = models.ForeignKey("Supplier", on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateTimeField(auto_now_add=True)
-    note = models.TextField(blank=True)
-
-    def __str__(self):
-        return f"Payment to {self.supplier.name} - ₹{self.amount}"
-
-
-class PurchaseReturn(models.Model):
-    purchase = models.ForeignKey("Purchase", on_delete=models.CASCADE)
-    reason = models.TextField(blank=True)
-    date = models.DateTimeField(auto_now_add=True)
-    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
-    def __str__(self):
-        return f"Return - {self.purchase.invoice_number}"
-
-    # 🔥 AUTO TOTAL CALCULATION
-    def update_total(self):
-        total = 0
-        for item in self.items.all():
-            total += item.amount
-        self.total = total
-        self.save(update_fields=["total"])
-
-
-class PurchaseReturnItem(models.Model):
-    purchase_return = models.ForeignKey(
-        PurchaseReturn,
-        related_name="items",
-        on_delete=models.CASCADE
-    )
-    product = models.ForeignKey("Product", on_delete=models.CASCADE)
-    qty = models.IntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-
-    @property
-    def amount(self):
-        return float(self.qty) * float(self.price)
-
-    # 🔥 AUTO UPDATE RETURN TOTAL AFTER SAVE
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.purchase_return.update_total()
-
-    def delete(self, *args, **kwargs):
-        super().delete(*args, **kwargs)
-        self.purchase_return.update_total()
-    
 class ExpenseCategory(models.Model):
 
     name = models.CharField(max_length=100)
@@ -295,11 +334,7 @@ class Company(models.Model):
 
     def __str__(self):
         return self.name
-
-class PaymentAllocation(models.Model):
-    payment = models.ForeignKey("SupplierPayment", on_delete=models.CASCADE)
-    purchase = models.ForeignKey("Purchase", on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    
 
 
 

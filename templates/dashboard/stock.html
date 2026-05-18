@@ -1,4 +1,4 @@
-{% extends "dashboard/base.html" %}
+{% extends "base.html" %}
 {% block content %}
 
 <div class="sticky top-[50px] md:top-[10px] z-40
@@ -26,12 +26,7 @@ py-3 rounded-2xl">
 
     <div class="w-full md:w-1/3 relative">
 
-        <input 
-            type="text" 
-            id="stockSearch"
-            placeholder="Search product / barcode..."
-            
-            class="w-full pl-11 pr-4 py-3 rounded-2xl
+        <input type="text" id="stockSearch" placeholder="Search product / barcode..." class="w-full pl-11 pr-4 py-3 rounded-2xl
             
             bg-white/5 backdrop-blur-lg 
             border border-white/10
@@ -44,11 +39,11 @@ py-3 rounded-2xl">
             focus:ring-2 focus:ring-yellow-400
             focus:shadow-[0_0_20px_rgba(250,204,21,0.4)]
             
-            transition-all duration-200 mt-2"
-        >
+            transition-all duration-200 mt-2">
 
         <!-- ICON -->
-        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
+        <i
+            class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]"></i>
 
     </div>
 
@@ -95,11 +90,10 @@ py-3 rounded-2xl">
             <div>
                 <p class="text-gray-400">Stock</p>
                 <p>
-                    {% if p.stock < 5 %}
-                        <span class="text-red-400 font-bold">{{ p.stock }}</span>
-                    {% else %}
+                    {% if p.stock < 5 %} <span class="text-red-400 font-bold">{{ p.stock }}</span>
+                        {% else %}
                         {{ p.stock }}
-                    {% endif %}
+                        {% endif %}
                 </p>
             </div>
 
@@ -144,11 +138,10 @@ py-3 rounded-2xl">
                     <td>₹ {{ p.price }}</td>
 
                     <td>
-                        {% if p.stock < 5 %}
-                            <span class="text-red-400 font-bold">{{ p.stock }}</span>
-                        {% else %}
+                        {% if p.stock < 5 %} <span class="text-red-400 font-bold">{{ p.stock }}</span>
+                            {% else %}
                             {{ p.stock }}
-                        {% endif %}
+                            {% endif %}
                     </td>
 
                     <td>₹ {{ p.stock|floatformat:0 }}</td>
@@ -164,66 +157,66 @@ py-3 rounded-2xl">
 </div>
 <script>
 
-document.getElementById("stockSearch").addEventListener("keyup", function() {
+    document.getElementById("stockSearch").addEventListener("keyup", function () {
 
-    let search = this.value.toLowerCase()
+        let search = this.value.toLowerCase()
 
-    // Desktop rows
-    let rows = document.querySelectorAll("#stockTable tr")
+        // Desktop rows
+        let rows = document.querySelectorAll("#stockTable tr")
 
-    rows.forEach(row => {
-        let text = row.innerText.toLowerCase()
-        row.style.display = text.includes(search) ? "" : "none"
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase()
+            row.style.display = text.includes(search) ? "" : "none"
+        })
+
+        // Mobile cards
+        let cards = document.querySelectorAll(".stock-card")
+
+        cards.forEach(card => {
+            let text = card.innerText.toLowerCase()
+            card.style.display = text.includes(search) ? "" : "none"
+        })
+
     })
 
-    // Mobile cards
-    let cards = document.querySelectorAll(".stock-card")
+    let searchInput = document.getElementById("stockSearch")
+    let summary = document.getElementById("summaryCards")
 
-    cards.forEach(card => {
-        let text = card.innerText.toLowerCase()
-        card.style.display = text.includes(search) ? "" : "none"
+    searchInput.addEventListener("keyup", function () {
+
+        let search = this.value.toLowerCase()
+
+        // 👉 HIDE / SHOW SUMMARY
+        if (search.length > 0) {
+            summary.style.display = "none"
+        } else {
+            summary.style.display = "grid"
+        }
+
+        // Desktop rows
+        let rows = document.querySelectorAll("#stockTable tr")
+
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase()
+            row.style.display = text.includes(search) ? "" : "none"
+        })
+
+        // Mobile cards
+        let cards = document.querySelectorAll(".stock-card")
+
+        cards.forEach(card => {
+            let text = card.innerText.toLowerCase()
+            card.style.display = text.includes(search) ? "" : "none"
+        })
+
     })
 
-})
-
-let searchInput = document.getElementById("stockSearch")
-let summary = document.getElementById("summaryCards")
-
-searchInput.addEventListener("keyup", function() {
-
-    let search = this.value.toLowerCase()
-
-    // 👉 HIDE / SHOW SUMMARY
-    if (search.length > 0) {
-        summary.style.display = "none"
-    } else {
-        summary.style.display = "grid"
-    }
-
-    // Desktop rows
-    let rows = document.querySelectorAll("#stockTable tr")
-
-    rows.forEach(row => {
-        let text = row.innerText.toLowerCase()
-        row.style.display = text.includes(search) ? "" : "none"
+    // 👉 OPTIONAL: click pe bhi hide (instant feel)
+    searchInput.addEventListener("focus", function () {
+        if (this.value.length > 0) {
+            summary.style.display = "none"
+        }
     })
-
-    // Mobile cards
-    let cards = document.querySelectorAll(".stock-card")
-
-    cards.forEach(card => {
-        let text = card.innerText.toLowerCase()
-        card.style.display = text.includes(search) ? "" : "none"
-    })
-
-})
-
-// 👉 OPTIONAL: click pe bhi hide (instant feel)
-searchInput.addEventListener("focus", function(){
-    if(this.value.length > 0){
-        summary.style.display = "none"
-    }
-})
 
 </script>
 {% endblock %}

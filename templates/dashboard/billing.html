@@ -1,4 +1,4 @@
-{% extends "dashboard/base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 
@@ -57,16 +57,15 @@ transition hover:scale-[1.01]">
         </div>
         <div class="flex flex-col gap-4 mb-4">
 
-    <!-- TITLE -->
-    <h2 class="text-lg md:text-xl font-bold text-white">
-        Scan / Add Product
-    </h2>
+            <!-- TITLE -->
+            <h2 class="text-lg md:text-xl font-bold text-white">
+                Scan / Add Product
+            </h2>
 
-    <!-- BUTTONS -->
-    <div class="flex gap-3">
+            <!-- BUTTONS -->
+            <div class="flex gap-3">
 
-        <button onclick="startScanner()"
-class="flex-1 relative overflow-hidden
+                <button onclick="startScanner()" class="flex-1 relative overflow-hidden
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
 text-black font-bold
 
@@ -79,15 +78,14 @@ py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-2
 before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/30 before:to-transparent before:opacity-60
 ">
 
-<span class="relative z-10 flex items-center gap-2">
-    <i class="fa-solid fa-qrcode"></i>
-    SCAN
-</span>
+                    <span class="relative z-10 flex items-center gap-2">
+                        <i class="fa-solid fa-qrcode"></i>
+                        SCAN
+                    </span>
 
-</button>
+                </button>
 
-       <button onclick="addToCart()"
-class="flex-1 relative overflow-hidden
+                <button onclick="addToCart()" class="flex-1 relative overflow-hidden
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
 text-black font-bold
 
@@ -100,62 +98,58 @@ py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-2
 before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/30 before:to-transparent before:opacity-60
 ">
 
-<span class="relative z-10 flex items-center gap-2">
-    <i class="fa-solid fa-plus"></i>
-    ADD
-</span>
+                    <span class="relative z-10 flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i>
+                        ADD
+                    </span>
 
-</button>
+                </button>
 
-    </div>
+            </div>
 
-</div>
+        </div>
 
         <!-- Product Add Row -->
         <div class="flex flex-col md:flex-row gap-3 text-white items-stretch">
 
-    <!-- SEARCH INPUT -->
-    <div class="relative flex-1">
+            <!-- SEARCH INPUT -->
+            <div class="relative flex-1">
 
-        <input type="text" id="productSearch"
-            placeholder="Search product by name or barcode..."
-            autocomplete="off"
-            class="w-full h-12 px-4 rounded-xl bg-slate-700 text-white 
+                <input type="text" id="productSearch" placeholder="Search product by name or barcode..."
+                    autocomplete="off" class="w-full h-12 px-4 rounded-xl bg-slate-700 text-white 
             focus:outline-none focus:ring-2 focus:ring-blue-500">
 
-        <!-- DROPDOWN -->
-        <div id="productList"
-            class="absolute z-50 w-full bg-slate-800 border border-gray-600 
+                <!-- DROPDOWN -->
+                <div id="productList" class="absolute z-50 w-full bg-slate-800 border border-gray-600 
             rounded-xl mt-1 max-h-60 overflow-y-auto hidden shadow-2xl">
-        </div>
-    </div>
+                </div>
+            </div>
 
-    <!-- QTY -->
-    <div class="w-full md:w-24">
-        <input id="qty" type="number" min="1" value="1"
-            class="w-full h-12 px-3 rounded-xl bg-slate-700 text-white 
+            <!-- QTY -->
+            <div class="w-full md:w-24">
+                <input id="qty" type="number" min="1" value="1" class="w-full h-12 px-3 rounded-xl bg-slate-700 text-white 
             focus:outline-none focus:ring-2 focus:ring-green-500 text-left">
-    </div>
+            </div>
 
-</div>
+        </div>
 
-<!-- BELOW ROW (STOCK + CHECKLIST aligned properly) -->
-<div class="flex justify-between items-center mt-2 text-xs">
+        <!-- BELOW ROW (STOCK + CHECKLIST aligned properly) -->
+        <div class="flex justify-between items-center mt-2 text-xs">
 
-    <!-- STOCK -->
-    <div>
-        <span class="text-gray-400">Available Stock:</span>
-        <span id="availableStock" class="ml-1 font-bold text-green-400">-</span>
-    </div>
+            <!-- STOCK -->
+            <div>
+                <span class="text-gray-400">Available Stock:</span>
+                <span id="availableStock" class="ml-1 font-bold text-green-400">-</span>
+            </div>
 
-    <!-- CHECKLIST -->
-    <button onclick="openChecklist()"
-                    class="ml-auto text-yellow-400 hover:scale-110 transition text-sm sm:text-base">
-                    <!-- <i class="fas fa-expand"></i> --> 
-                    <i class="fa-solid fa-list-check"></i> <span class="font-bold">Checklist</span> 
-                </button>
+            <!-- CHECKLIST -->
+            <button onclick="openChecklist()"
+                class="ml-auto text-yellow-400 hover:scale-110 transition text-sm sm:text-base">
+                <!-- <i class="fas fa-expand"></i> -->
+                <i class="fa-solid fa-list-check"></i> <span class="font-bold">Checklist</span>
+            </button>
 
-</div>
+        </div>
 
         <!-- Cart Table -->
         <div class="mt-6 overflow-x-auto">
@@ -212,8 +206,7 @@ text-white">
             Total Balance : ₹ <span id="total">0</span>
         </div>
 
-        <button onclick="saveBill()"
-class="mt-4 w-full relative overflow-hidden
+        <button onclick="saveBill()" class="mt-4 w-full relative overflow-hidden
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
 text-black font-bold tracking-wide
 
@@ -226,12 +219,12 @@ p-4 rounded-2xl text-xl transition-all duration-200
 before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 before:to-transparent before:opacity-70
 ">
 
-<span class="relative z-10 flex items-center justify-center gap-3">
-    <span><i class="fa-solid fa-floppy-disk"></i></span>
-    SAVE BILL
-</span>
+            <span class="relative z-10 flex items-center justify-center gap-3">
+                <span><i class="fa-solid fa-floppy-disk"></i></span>
+                SAVE BILL
+            </span>
 
-</button>
+        </button>
 
     </div>
 </div>
@@ -277,51 +270,50 @@ before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 bef
     rounded-t-2xl md:rounded-2xl 
     p-2 flex flex-col">
 
-            <!-- HEADER -->
-            <div class="flex justify-between items-center mb-3 
+        <!-- HEADER -->
+        <div class="flex justify-between items-center mb-3 
         sticky top-0 z-20 
         bg-slate-900 py-2">
 
-                <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-list-check"></i> Products Check List</h2>
+            <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-list-check"></i> Products Check List</h2>
 
-                <div class="flex gap-3">
-                    <button onclick="showSummary()" class="text-yellow-400 text-xl">➡️</button>
-                    <button onclick="goBackToChecklist()" class="text-yellow-400 text-xl">⬅️</button>
-                    <button onclick="closeChecklist()" class="text-red-400">✖</button>
-                </div>
+            <div class="flex gap-3">
+                <button onclick="showSummary()" class="text-yellow-400 text-xl">➡️</button>
+                <button onclick="goBackToChecklist()" class="text-yellow-400 text-xl">⬅️</button>
+                <button onclick="closeChecklist()" class="text-red-400">✖</button>
+            </div>
+        </div>
+
+        <!-- SCROLL AREA -->
+        <div class="flex-1 overflow-y-auto pr-1">
+
+            <!-- STEP 1 -->
+            <div id="step1">
+                <div id="checklistItems" class="space-y-2"></div>
             </div>
 
-            <!-- SCROLL AREA -->
-            <div class="flex-1 overflow-y-auto pr-1">
+            <!-- STEP 2 -->
+            <div id="step2" class="hidden">
 
-                <!-- STEP 1 -->
-                <div id="step1">
-                    <div id="checklistItems" class="space-y-2"></div>
+                <div class="flex justify-between items-center mb-3">
+                    <!-- <button onclick="goBackToChecklist()" class="text-yellow-400 text-xl">⬅️</button> -->
+                    <h3 class="text-lg font-bold text-white">🧾 Summary</h3>
+                    <div></div>
                 </div>
 
-                <!-- STEP 2 -->
-                <div id="step2" class="hidden">
+                <div class="space-y-2 text-sm text-white">
+                    <div>CGST (9%) : ₹ <span id="s_cgst"></span></div>
+                    <div>SGST (9%) : ₹ <span id="s_sgst"></span></div>
+                    <div>Round Off : ₹ <span id="s_round"></span></div>
+                    <div>Subtotal : ₹ <span id="s_subtotal"></span></div>
+                    <div>Outstandings : ₹ <span id="s_outstanding"></span></div>
 
-                    <div class="flex justify-between items-center mb-3">
-                        <!-- <button onclick="goBackToChecklist()" class="text-yellow-400 text-xl">⬅️</button> -->
-                        <h3 class="text-lg font-bold text-white">🧾 Summary</h3>
-                        <div></div>
+                    <div class="font-bold text-lg mt-2">
+                        Total Balance : ₹ <span id="s_total"></span>
                     </div>
+                </div>
 
-                    <div class="space-y-2 text-sm text-white">
-                        <div>CGST (9%) : ₹ <span id="s_cgst"></span></div>
-                        <div>SGST (9%) : ₹ <span id="s_sgst"></span></div>
-                        <div>Round Off : ₹ <span id="s_round"></span></div>
-                        <div>Subtotal : ₹ <span id="s_subtotal"></span></div>
-                        <div>Outstandings : ₹ <span id="s_outstanding"></span></div>
-
-                        <div class="font-bold text-lg mt-2">
-                            Total Balance : ₹ <span id="s_total"></span>
-                        </div>
-                    </div>
-
-                  <button onclick="savePurchase()"
-class="mt-4 w-full relative overflow-hidden
+                <button onclick="savePurchase()" class="mt-4 w-full relative overflow-hidden
 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
 text-black font-bold tracking-wide
 
@@ -334,18 +326,18 @@ p-3 rounded-xl text-lg transition-all duration-200
 before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 before:to-transparent before:opacity-70
 ">
 
-<span class="relative z-10 flex items-center justify-center gap-2">
-    <i class="fa-solid fa-floppy-disk"></i>
-    SAVE Bill
-</span>
+                    <span class="relative z-10 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        SAVE Bill
+                    </span>
 
-</button>
-
-                </div>
+                </button>
 
             </div>
 
         </div>
+
+    </div>
 </div>
 <script src="https://unpkg.com/html5-qrcode"></script>
 
@@ -751,18 +743,18 @@ before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/40 bef
         return cookieValue;
     }
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", function() {
-    navigator.serviceWorker.register("/static/service-worker.js")
-      .then(function(registration) {
-        console.log("ServiceWorker registered");
-      })
-      .catch(function(err) {
-        console.log("ServiceWorker failed:", err);
-      });
-  });
-}
-   function openChecklist() {
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+            navigator.serviceWorker.register("/static/service-worker.js")
+                .then(function (registration) {
+                    console.log("ServiceWorker registered");
+                })
+                .catch(function (err) {
+                    console.log("ServiceWorker failed:", err);
+                });
+        });
+    }
+    function openChecklist() {
 
         document.getElementById("step1").classList.remove("hidden");
         document.getElementById("step2").classList.add("hidden");
@@ -843,31 +835,31 @@ if ("serviceWorker" in navigator) {
             parent.classList.remove("opacity-50", "line-through");
         }
     }
-  function showSummary() {
+    function showSummary() {
 
-    document.getElementById("step1").classList.add("hidden");
-    document.getElementById("step2").classList.remove("hidden");
+        document.getElementById("step1").classList.add("hidden");
+        document.getElementById("step2").classList.remove("hidden");
 
-    // 👉 COPY FROM REAL SUMMARY (RIGHT SIDE)
+        // 👉 COPY FROM REAL SUMMARY (RIGHT SIDE)
 
-    document.getElementById("s_cgst").innerText =
-        document.getElementById("cgst").innerText;
+        document.getElementById("s_cgst").innerText =
+            document.getElementById("cgst").innerText;
 
-    document.getElementById("s_sgst").innerText =
-        document.getElementById("sgst").innerText;
+        document.getElementById("s_sgst").innerText =
+            document.getElementById("sgst").innerText;
 
-    document.getElementById("s_round").innerText =
-        document.getElementById("roundOff").innerText;
+        document.getElementById("s_round").innerText =
+            document.getElementById("roundOff").innerText;
 
-    document.getElementById("s_subtotal").innerText =
-        document.getElementById("subtotal").innerText;
+        document.getElementById("s_subtotal").innerText =
+            document.getElementById("subtotal").innerText;
 
-    document.getElementById("s_outstanding").innerText =
-        document.getElementById("summaryOutstanding").innerText;
+        document.getElementById("s_outstanding").innerText =
+            document.getElementById("summaryOutstanding").innerText;
 
-    document.getElementById("s_total").innerText =
-        document.getElementById("total").innerText;
-}
+        document.getElementById("s_total").innerText =
+            document.getElementById("total").innerText;
+    }
     function goBackToChecklist() {
 
         let step1 = document.getElementById("step1");
@@ -878,7 +870,7 @@ if ("serviceWorker" in navigator) {
 
         step1.scrollTop = 0; // scroll reset
     }
-    
+
 </script>
 
 {% endblock %}

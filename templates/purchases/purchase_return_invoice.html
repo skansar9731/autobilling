@@ -1,0 +1,450 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="bg-white text-black p-4 print:p-0">
+
+<!-- 🔥 BUTTONS -->
+<div class="flex justify-between mb-4 print:hidden max-w-5xl mx-auto">
+    
+    <button onclick="window.print()" 
+    class="bg-gray-800 text-white px-4 py-2 rounded-lg">
+        🖨 Print
+    </button>
+
+    <button onclick="sendWhatsApp()" 
+    class="bg-green-500 text-white px-4 py-2 rounded-lg">
+        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+    </button>
+
+   <button onclick="goBack()" class="bg-red-500 text-white px-4 py-2 rounded-lg">
+    ❌ Close
+</button>
+
+</div>
+
+<div id="invoice" class="max-w-5xl mx-auto border border-black text-sm">
+
+    <!-- HEADER -->
+    <div class="text-center border-b border-black py-2 font-bold text-lg">
+        Debit Note
+    </div>
+
+   <!-- TOP SECTION -->
+<div class="grid grid-cols-2 border-b border-black">
+
+    <!-- LEFT -->
+    <div class="border-r border-black p-3 space-y-3">
+
+        <!-- COMPANY -->
+        <!-- COMPANY -->
+<div>
+
+    <h2 class="font-bold text-lg">
+        {{ company.name }}
+    </h2>
+
+    <p>
+        GSTIN:
+        {{ company.gst|default:"N/A" }}
+    </p>
+
+    <p>
+        {{ company.address|default:"Address not set" }}
+    </p>
+
+    <p>
+        {{ company.state|default:"State (IN)" }}
+    </p>
+
+    <p>
+        Phone:
+        📞 {{ company.mobile|default:"9823012992" }}
+    </p>
+
+</div>
+
+        <!-- CONSIGNEE -->
+        <div class="border-t pt-2">
+
+            <b>Consignee (Ship to)</b><br>
+
+            {% if mode == "sales" %}
+
+                {{ purchase.customer.name }}
+
+            {% else %}
+
+                {{ purchase.supplier.name }}
+
+            {% endif %}
+
+        </div>
+
+        <!-- BUYER -->
+        <div class="border-t pt-2">
+
+            <b>Buyer (Bill to)</b><br>
+
+            {% if mode == "sales" %}
+
+                {{ purchase.customer.name }}
+
+            {% else %}
+
+                {{ purchase.supplier.name }}
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="p-3 space-y-2">
+
+        <!-- RETURN NUMBER -->
+        <div class="flex justify-between border-b pb-1">
+
+            <span>Debit Note No.</span>
+
+            <span>
+                {{ return.id }}
+            </span>
+
+        </div>
+
+        <!-- DATE -->
+        <div class="flex justify-between border-b pb-1">
+
+            <span>Date</span>
+
+            <span>
+                {{ return.date }}
+            </span>
+
+        </div>
+
+        <!-- INVOICE -->
+        <div class="flex justify-between border-b pb-1">
+
+            <span>Invoice No.</span>
+
+            <span>
+
+                {% if mode == "sales" %}
+
+    {{ purchase.invoice_no }}
+
+{% else %}
+
+    {{ purchase.invoice_number }}
+
+{% endif %}
+
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+    <!-- TABLE -->
+    <table class="w-full border-collapse text-sm">
+
+        <thead>
+            <tr class="border-b border-black">
+                <th class="border-r border-black p-2">Sl</th>
+                <th class="border-r border-black p-2 text-left">Description</th>
+                <th class="border-r border-black p-2">Qty</th>
+                <th class="border-r border-black p-2">Rate</th>
+                <!-- <th class="border-r border-black p-2">Per</th> -->
+                <th class="p-2">Amount</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for item in return.items.all %}
+            <tr class="border-b border-black">
+
+                <td class="border-r border-black p-2 text-center">
+                    {{ forloop.counter }}
+                </td>
+
+                <td class="border-r border-black p-2">
+                    {{ item.product.name }}
+                </td>
+
+                <td class="border-r border-black p-2 text-center">
+                    {{ item.qty }}
+                </td>
+
+                <td class="border-r border-black p-2 text-right">
+                    ₹ {{ item.price }}
+                </td>
+
+                <!-- <td class="border-r border-black p-2 text-center">
+                    Nos
+                </td> -->
+
+                <!-- ✅ FIXED AMOUNT -->
+                <td class="p-2 text-right">
+                   ₹ {{ item.amount }}
+                </td>
+
+            </tr>
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <!-- TOTAL -->
+   <div class="border-t border-black p-3">
+
+    <div class="flex justify-between">
+        <span>Subtotal</span>
+        <span>₹ {{ return.subtotal|default:"0.00" }}</span>
+    </div>
+
+    <div class="flex justify-between">
+    <span>CGST (9%)</span>
+    <span>₹ {{ return.cgst|default:"0.00" }}</span>
+</div>
+
+<div class="flex justify-between">
+    <span>SGST (9%)</span>
+    <span>₹ {{ return.sgst|default:"0.00" }}</span>
+</div>
+
+    <div class="flex justify-between font-bold border-t mt-2 pt-2">
+        <span>Total</span>
+        <span>₹ {{ return.total|default:"0.00" }}</span>
+    </div>
+
+    <div class="mt-2 text-xs">
+        Amount in Words: ₹ {{ return.total|floatformat:0|default:"0" }} Only
+    </div>
+
+</div>
+
+    <!-- SIGN -->
+    <div class="flex justify-between border-t border-black p-3 mt-10">
+
+        <span>Receiver Signature</span>
+        <span>Authorized Signature</span>
+
+    </div>
+
+</div>
+<div id="toast" class="fixed top-5 right-5 space-y-3 z-50 hidden">
+
+    <div id="toastBox"
+    class="flex items-center gap-3 px-5 py-3 rounded-full text-black font-semibold
+
+    bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500
+
+    shadow-[inset_2px_2px_6px_rgba(255,255,255,0.6),_8px_8px_20px_rgba(0,0,0,0.5)]
+
+    transform translate-x-20 opacity-0
+
+    transition-all duration-500">
+
+        <!-- ICON -->
+        <div class="w-12 h-8 flex items-center justify-center rounded-full
+
+        bg-black/20
+
+        shadow-[inset_1px_1px_4px_rgba(255,255,255,0.4),_2px_2px_6px_rgba(0,0,0,0.5)]">
+
+           <div class="w-12 h-12 flex items-center justify-center rounded-full
+
+bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.6),_8px_8px_18px_rgba(0,0,0,0.5)]
+
+relative">
+
+    <!-- RECEIPT -->
+    <i class="fa-solid fa-receipt text-black text-base"></i>
+
+    <!-- RETURN OVERLAY -->
+    <div class="absolute -top-1 -right-1 w-5 h-5 rounded-full
+
+    bg-yellow-400 flex items-center justify-center
+
+    shadow-md">
+
+        <i class="fa-solid fa-rotate-left text-black text-[10px]"></i>
+
+    </div>
+
+</div>
+
+        </div>
+
+        <!-- TEXT -->
+        <span class="tracking-wide">
+            <span>
+    {% if mode == "sales" %}
+    Sales Return Saved Successfully
+{% else %}
+    Purchase Return Saved Successfully
+{% endif %}
+</span>
+        </span>
+
+    </div>
+
+</div>
+</div>
+
+<!-- 🔥 WHATSAPP SCRIPT -->
+<script>
+
+// 🔥 page load pe run hoga
+document.addEventListener("DOMContentLoaded", function () {
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("reset") === "1") {
+
+        // ✅ form reset
+        document.querySelector("form").reset();
+
+        // ✅ selected items clear
+        selected = {};
+        renderSelected();
+
+        // ✅ dropdown clear
+        document.getElementById("productDropdownList").innerHTML = "";
+
+        // ✅ clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+});
+
+let name = `
+{% if mode == "sales" %}
+{{ purchase.customer.name }}
+{% else %}
+{{ purchase.supplier.name }}
+{% endif %}
+`;
+let amount = "{{ return.total }}";
+
+function sendWhatsApp() {
+
+    let message = `📄 *Credit Note*
+
+👤 Party: ${name}
+🧾 Invoice:
+{% if mode == "sales" %}
+{{ purchase.invoice_no }}
+{% else %}
+{{ purchase.invoice_number }}
+{% endif %}
+💰 Amount: ₹${amount}
+
+🏢 {{ company.name }}
+GST: {{ company.gst }}
+📍 {{ company.address }}
+📞 {{ company.mobile }}
+
+🙏 Thank you for your business`;
+
+    let url = "https://wa.me/?text=" + encodeURIComponent(message);
+
+    window.open(url, "_blank");
+}
+
+// ✅ CLOSE FIX
+function closeWindow() {
+    window.open('', '_self');
+    window.close();
+}
+function goBack() {
+    window.location.href = "/debit-note/?reset=1";
+    
+}
+window.onload = function() {
+
+    let toast = document.getElementById("toast");
+    let box = document.getElementById("toastBox");
+
+    // 🔥 show toast
+    toast.classList.remove("hidden");
+
+    setTimeout(() => {
+        box.classList.remove("translate-x-20", "opacity-0");
+        box.classList.add("translate-x-0", "opacity-100");
+    }, 100);
+
+    // 🔥 auto hide after 3 sec
+    setTimeout(() => {
+        box.classList.add("translate-x-20", "opacity-0");
+
+        setTimeout(() => {
+            toast.classList.add("hidden");
+        }, 500);
+    }, 3000);
+
+    // 🔥 print open
+    // window.print();
+};
+</script>
+
+<!-- AUTO PRINT -->
+<!-- <script>
+window.onload = function(){
+    window.print();
+}
+</script> -->
+
+<style>
+@media print {
+    body {
+        background: white;
+    }
+}
+@media print {
+
+    /* ❌ hide everything */
+    body * {
+        visibility: hidden !important;
+    }
+
+    /* ✅ show only invoice */
+    #invoice, #invoice * {
+        visibility: visible !important;
+    }
+
+    #invoice {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+
+    /* ❌ hide nav, sidebar, header */
+    header, aside, nav, footer {
+        display: none !important;
+    }
+
+    /* ❌ hide buttons */
+    .print\:hidden {
+        display: none !important;
+    }
+
+    @media print {
+    #toast {
+        display: none !important;
+    }
+}
+}
+
+</style>
+
+{% endblock %}
