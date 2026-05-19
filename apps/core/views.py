@@ -836,15 +836,91 @@ def check_product_exists(request):
 @login_required
 def get_customer_balance(request):
 
+    from decimal import Decimal
+    from django.db.models import Sum
+
     customer_id = request.GET.get("customer_id")
 
     if not customer_id:
-        return JsonResponse({"balance": 0})
 
-    customer = Customer.objects.get(id=customer_id)
+        return JsonResponse({
+            "balance": 0
+        })
+
+    customer = Customer.objects.get(
+        id=customer_id
+    )
+
+    balance = Decimal("0.00")
+
+    bills = Bill.objects.filter(
+        customer=customer
+    )
+
+    for b in bills:
+
+        mode = (
+            b.payment_mode or ""
+        ).lower()
+
+        bill_total = Decimal(
+            b.total or 0
+        )
+
+        # =========================
+        # RETURN TOTAL
+        # =========================
+
+        return_amount = Decimal("0.00")
+
+        returns = PurchaseReturnItem.objects.filter(
+            purchase_return__bill=b
+        )
+
+        for r in returns:
+
+            line_total = (
+                Decimal(r.qty) *
+                Decimal(r.price)
+            )
+
+            gst = (
+                line_total *
+                Decimal("0.18")
+            )
+
+            return_amount += (
+                line_total + gst
+            )
+
+        # =========================
+        # CASH / BANK
+        # =========================
+
+        if mode in ["cash", "bank"]:
+
+            continue
+
+        # =========================
+        # CREDIT / PARTIAL
+        # =========================
+
+        paid = Decimal(
+            b.paid_amount or 0
+        )
+
+        remaining = (
+            bill_total -
+            paid -
+            return_amount
+        )
+
+        if remaining > 0:
+
+            balance += remaining
 
     return JsonResponse({
-        "balance": float(customer.balance)
+        "balance": float(balance)
     })
 
 
@@ -1159,18 +1235,50 @@ def gst_report(request):
 
 @login_required
 def stock_view(request):
+
     products = Product.objects.all().order_by("-id")
 
-    total_items = products.count()
-    total_qty = sum(p.stock for p in products)
-    total_value = sum(p.stock * p.price for p in products)
+    # =========================
+    # TOTALS
+    # =========================
 
-    return render(request, "dashboard/stock.html", {
-        "products": products,
-        "total_items": total_items,
-        "total_qty": total_qty,
-        "total_value": total_value
-    })
+    total_items = products.count()
+
+    total_qty = 0
+
+    total_value = 0
+
+    # =========================
+    # PRODUCT LOOP
+    # =========================
+
+    for p in products:
+
+        # SAFETY
+        stock = p.stock or 0
+        price = p.price or 0
+
+        # STOCK VALUE
+        p.stock_value = stock * price
+
+        # TOTALS
+        total_qty += stock
+
+        total_value += p.stock_value
+
+    return render(
+        request,
+        "dashboard/stock.html",
+        {
+            "products": products,
+
+            "total_items": total_items,
+
+            "total_qty": total_qty,
+
+            "total_value": total_value
+        }
+    )
 
 @login_required
 def bank_transaction(request):
@@ -1862,5 +1970,119 @@ def sales_return(request, mode="sales"):
         {
             "parties": customers,
             "mode": "sales"
+        }
+    )
+
+@login_required
+def home_dashboard(request):
+
+    from datetime import date
+    from django.db.models import Sum
+    from decimal import Decimal
+
+    today = date.today()
+
+    # TODAY
+
+    today_sales = Bill.objects.filter(
+        date__date=today
+    ).aggregate(
+        total=Sum("total")
+    )["total"] or 0
+
+    today_purchase = Purchase.objects.filter(
+        date__date=today
+    ).aggregate(
+        total=Sum("total")
+    )["total"] or 0
+
+    today_expense = Expense.objects.filter(
+        date=today
+    ).aggregate(
+        total=Sum("amount")
+    )["total"] or 0
+
+    today_profit = (
+        Decimal(today_sales)
+        - Decimal(today_purchase)
+        - Decimal(today_expense)
+    )
+
+    # MONTH
+
+    month_sales = Bill.objects.filter(
+        date__month=today.month
+    ).aggregate(
+        total=Sum("total")
+    )["total"] or 0
+
+    month_purchase = Purchase.objects.filter(
+        date__month=today.month
+    ).aggregate(
+        total=Sum("total")
+    )["total"] or 0
+
+    month_expense = Expense.objects.filter(
+        date__month=today.month
+    ).aggregate(
+        total=Sum("amount")
+    )["total"] or 0
+
+    month_profit = (
+        Decimal(month_sales)
+        - Decimal(month_purchase)
+        - Decimal(month_expense)
+    )
+
+    # RECEIVABLE
+
+    receivable = Bill.objects.filter(
+        payment_mode="credit"
+    ).aggregate(
+        total=Sum("total")
+    )["total"] or 0
+
+    # PAYABLE
+
+    payable = Purchase.objects.filter(
+        payment_mode="credit"
+    ).aggregate(
+        total=Sum("total")
+    )["total"] or 0
+
+    # STOCK
+
+    stock_value = 0
+
+    products = Product.objects.all()
+
+    for p in products:
+
+        stock_value += (
+            p.stock * p.price
+        )
+
+    return render(
+        request,
+        "dashboard/home.html",
+        {
+
+            "today_sales": round(today_sales, 2),
+            "today_purchase": round(today_purchase, 2),
+            "today_expense": round(today_expense, 2),
+            "today_profit": round(today_profit, 2),
+
+            "month_sales": round(month_sales, 2),
+            "month_purchase": round(month_purchase, 2),
+            "month_expense": round(month_expense, 2),
+            "month_profit": round(month_profit, 2),
+
+            "receivable": round(receivable, 2),
+            "payable": round(payable, 2),
+
+            "stock_value": round(stock_value, 2),
+
+            "total_products": Product.objects.count()
+
         }
     ) 

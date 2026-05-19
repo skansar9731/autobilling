@@ -116,7 +116,7 @@ urlpatterns = [
     path("bank/", core_views.bank_transaction),
 
     # ================= BULK =================
-    path("bulk-upload/", core_views.bulk_upload),
+    path("bulk-upload/", core_views.bulk_upload, name="bulk_upload"),
     path("bulk-purchase-upload/", purchase_views.bulk_purchase_upload),
 
     # ================= API =================
@@ -134,5 +134,7 @@ urlpatterns = [
     path("receipt/", core_views.receipt_voucher, name="receipt"),
     path("api/customer-invoices/<int:id>/",core_views.customer_invoices, name="customer_invoices"),
     path("return/print/<str:mode>/<int:id>/",purchase_views.return_print,name="return_print"),
+
+    path("home/",core_views.home_dashboard,name="home"),
 ]
 

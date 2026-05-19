@@ -65,6 +65,43 @@ transform -translate-x-full md:translate-x-0 transition duration-300 z-50">
 
 <ul class="space-y-2 text-sm">
 
+<!-- Home -->
+
+<li>
+<a href="/home/"
+class="block px-3 py-2 rounded-xl transition-all duration-300 relative overflow-hidden
+
+{% if '/home' in request.path %}
+
+bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600
+text-black font-semibold
+
+shadow-[inset_2px_2px_6px_rgba(255,255,255,0.5),_4px_4px_12px_rgba(0,0,0,0.3)]
+before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/30 before:to-transparent before:opacity-60
+scale-[1.02]
+
+{% else %}
+
+bg-gradient-to-br from-slate-800 to-slate-900 text-white
+
+shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.05),_4px_4px_12px_rgba(0,0,0,0.6)]
+
+hover:bg-gradient-to-br hover:from-yellow-300 hover:via-yellow-400 hover:to-amber-600
+hover:text-black
+hover:shadow-[inset_2px_2px_6px_rgba(255,255,255,0.3),_6px_6px_16px_rgba(0,0,0,0.7)]
+hover:scale-[1.02]
+
+{% endif %}
+">
+
+<span class="relative z-10 flex items-center gap-2">
+    
+    🏠 <span class="tracking-wide">Home</span>
+</span>
+
+</a>
+</li>
+
 <!-- DASHBOARD -->
 
 <li>
