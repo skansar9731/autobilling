@@ -133,7 +133,12 @@ py-3 rounded-2xl">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 
                 <h2 class="text-lg sm:text-xl font-bold text-white">
-                    Scan / Add Product
+                    
+                                      {% if mode == "sales" %}
+         <i class="fa-solid fa-qrcode"></i> Scan / Sale Product
+    {% else %}
+        <i class="fa-solid fa-qrcode"></i> Scan / Add Product
+    {% endif %}
                 </h2>
 
                 <!-- ACTION BUTTONS -->

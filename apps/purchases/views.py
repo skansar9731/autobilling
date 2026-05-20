@@ -527,7 +527,7 @@ def creditors(request):
 
 @login_required
 def receivables(request):
-
+    mode = "purchase" 
     suppliers = Supplier.objects.all()
     data = []
 
